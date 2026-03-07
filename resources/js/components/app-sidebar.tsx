@@ -80,13 +80,13 @@ const frontDeskSections: MenuSection[] = [
 
 function SidebarLogo() {
     return (
-        <div className="flex items-center gap-2 px-2 pt-1">
-            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-slate-50">
-                <AppLogoIcon className="h-7 w-7 text-[#2790b2]" />
+        <div className="flex items-center gap-3 px-3 py-1">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#147da2]">
+                <AppLogoIcon className="h-5 w-5 fill-white" />
             </div>
             <div>
-                <p className="text-lg font-bold leading-5 text-slate-900">Pathlog</p>
-                <p className="text-xs text-slate-500">Healthcare Management</p>
+                <p className="text-[15px] font-semibold leading-tight text-slate-800">Pathlog</p>
+                <p className="text-[11px] font-medium text-slate-400">Healthcare Management</p>
             </div>
         </div>
     );
@@ -106,34 +106,51 @@ function PermissionMenuSection({ section, permissions }: { section: MenuSection;
         return null;
     }
 
+    const isActive = visibleItems.some((item) => currentUrl.startsWith(item.matchPrefix));
+
     return (
-        <div className="space-y-2">
-            <div className="px-2">
-                <button type="button" onClick={() => setOpen((current) => !current)} className="flex w-full items-center justify-between rounded-xl bg-[#dfe9ef] px-3 py-2">
-                    <div className="flex items-center gap-2.5">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#b8d3e2] text-[#197ca1]">
-                            <SectionIcon className="h-4 w-4" />
-                        </div>
-                        <span className="text-sm font-medium text-slate-700">{section.title}</span>
-                    </div>
-                    <ChevronDown className="h-4 w-4 text-[#197ca1]" />
-                </button>
-            </div>
+        <div className="px-3">
+            <button
+                type="button"
+                onClick={() => setOpen((current) => !current)}
+                className={`flex w-full items-center justify-between rounded-md px-3 py-2 transition-colors ${
+                    isActive
+                        ? 'bg-[#eef6f9] text-[#147da2]'
+                        : 'text-slate-600 hover:bg-slate-50'
+                }`}
+            >
+                <div className="flex items-center gap-2.5">
+                    <SectionIcon className={`h-[18px] w-[18px] ${isActive ? 'text-[#147da2]' : 'text-slate-400'}`} />
+                    <span className="text-[13px] font-medium">{section.title}</span>
+                </div>
+                <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform ${
+                        open ? 'rotate-0' : '-rotate-90'
+                    } ${isActive ? 'text-[#147da2]' : 'text-slate-400'}`}
+                />
+            </button>
 
             {open && (
-                <div className="pl-9">
-                    <div className="border-l border-slate-200 pl-4">
-                        <ul className="space-y-2 text-sm text-slate-600">
-                            {visibleItems.map((item) => (
+                <div className="ml-4 mt-0.5 border-l border-slate-200 pl-4">
+                    <ul className="space-y-0.5 py-1">
+                        {visibleItems.map((item) => {
+                            const itemActive = currentUrl.startsWith(item.matchPrefix);
+                            return (
                                 <li key={item.href}>
-                                    <Link href={item.href} className="flex items-center gap-3 hover:text-[#197ca1]">
-                                        <span className="h-2 w-2 rounded-full bg-slate-300" />
+                                    <Link
+                                        href={item.href}
+                                        className={`block rounded-md px-2.5 py-1.5 text-[13px] transition-colors ${
+                                            itemActive
+                                                ? 'bg-[#147da2] font-medium text-white'
+                                                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                                        }`}
+                                    >
                                         {item.title}
                                     </Link>
                                 </li>
-                            ))}
-                        </ul>
-                    </div>
+                            );
+                        })}
+                    </ul>
                 </div>
             )}
         </div>
@@ -144,15 +161,20 @@ function SidebarUserFooter() {
     const { auth } = usePage().props as { auth: { user: User } };
 
     return (
-        <div className="flex items-center gap-2 border-t border-slate-200 bg-white px-2 py-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2f83a5] text-white">
+        <div className="flex items-center gap-3 border-t border-slate-100 px-4 py-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#147da2] text-white">
                 <UserRound className="h-4 w-4" />
             </div>
             <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-slate-800">{auth.user.name}</p>
-                <p className="truncate text-xs text-slate-500">{auth.user.email}</p>
+                <p className="truncate text-[13px] font-semibold text-slate-700">{auth.user.name}</p>
+                <p className="truncate text-[11px] text-slate-400">{auth.user.email}</p>
             </div>
-            <Link href={logout()} as="button" className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-100 text-rose-600">
+            <Link
+                href={logout()}
+                as="button"
+                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                title="Logout"
+            >
                 <LogOut className="h-4 w-4" />
             </Link>
         </div>
@@ -166,35 +188,34 @@ export function AppSidebar() {
     const canAccessFrontDesk = permissions.includes('front_desk.access') || frontDeskSections.some((section) => section.items.some((item) => permissions.includes(item.permission)));
 
     return (
-        <Sidebar collapsible="offcanvas" variant="sidebar" className="top-14 h-[calc(100svh-3.5rem)] border-r border-slate-200 bg-[#f6f8fa]">
-            <SidebarHeader className="border-b border-slate-200 pb-3">
+        <Sidebar collapsible="offcanvas" variant="sidebar" className="top-14 h-[calc(100svh-3.5rem)] border-r border-slate-100 bg-white">
+            <SidebarHeader className="border-b border-slate-100 pb-3">
                 <SidebarLogo />
-                <div className="mt-3 border-t border-slate-200 pt-3" />
                 {canAccessFrontDesk && (
-                    <div className="px-2">
-                        <div className="flex items-center gap-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#e1e9ee] text-[#197ca1]">
-                                <Building2 className="h-4 w-4" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-bold tracking-widest text-[#197ca1]">FRONT DESK</p>
-                                <div className="mt-1 h-[2px] w-14 bg-[#7fb3c9]" />
-                            </div>
+                    <div className="mt-2 px-3">
+                        <div className="flex items-center gap-2">
+                            <Building2 className="h-3.5 w-3.5 text-[#147da2]" />
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#147da2]">
+                                Front Desk
+                            </span>
                         </div>
                     </div>
                 )}
             </SidebarHeader>
 
-            <SidebarContent className="space-y-4 py-4">
+            <SidebarContent className="space-y-1 py-3">
                 {canAccessFrontDesk && frontDeskSections.map((section) => (
                     <PermissionMenuSection key={section.key} section={section} permissions={permissions} />
                 ))}
 
                 {canAccessAdmin && (
-                    <div className="px-2">
-                        <Link href="/admin/labs/features" className="flex items-center justify-between rounded-xl bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
+                    <div className="px-3">
+                        <Link
+                            href="/admin/labs/features"
+                            className="flex items-center justify-between rounded-md px-3 py-2 text-[13px] font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                        >
                             <span>Admin Feature Control</span>
-                            <ChevronRight className="h-4 w-4 text-slate-400" />
+                            <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
                         </Link>
                     </div>
                 )}

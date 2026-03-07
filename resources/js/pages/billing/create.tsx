@@ -5,7 +5,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
@@ -536,11 +535,11 @@ export default function BillingCreate({
                     </div>
                 )}
 
-                <form onSubmit={generateBarcode} className="space-y-5">
+                <form onSubmit={generateBarcode}>
                     {/* ─── Patient Info Row ─── */}
-                    <div className="grid gap-5 xl:grid-cols-2">
+                    <div className="grid xl:grid-cols-2">
                         {/* Patient Basic */}
-                        <div className="rounded-lg border border-slate-200 bg-white p-5">
+                        <div className="sawtooth bg-white border-t p-5 border-x border-b border-slate-200">
                             <h2 className="mb-1 text-base font-semibold text-slate-800">Patient Basic Information</h2>
                             <p className="mb-4 text-xs text-slate-400">Search existing or add new patient details</p>
 
@@ -645,7 +644,7 @@ export default function BillingCreate({
                         </div>
 
                         {/* Patient Additional */}
-                        <div className="rounded-lg border border-slate-200 bg-white p-5">
+                        <div className="sawtooth bg-white p-5 border-r border-t border-b border-slate-200">
                             <h2 className="mb-1 text-base font-semibold text-slate-800">Patient Additional Information</h2>
                             <p className="mb-4 text-xs text-slate-400">Address, identification & body metrics</p>
 
@@ -691,7 +690,7 @@ export default function BillingCreate({
                     </div>
 
                     {/* ─── Tests / Packages / Others ─── */}
-                    <div className="rounded-lg border border-slate-200 bg-white p-5">
+                    <div className="sawtooth bg-white p-5 border-x border-b border-slate-200">
                         <div className="mb-4 flex items-center gap-1">
                             {form.errors.test_ids && <span className="mr-2 text-xs font-medium text-rose-500">{form.errors.test_ids}</span>}
                             {(['tests', 'packages', 'others'] as const).map((t) => (
@@ -713,8 +712,8 @@ export default function BillingCreate({
                         {tab === 'tests' && (
                             <div className="grid gap-5 md:grid-cols-2">
                                 <div>
-                                    <div className="relative mb-3">
-                                        <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                                    <div className="relative mb-3 ">
+                                        <Search className="pointer-events-none absolute left-3  top-2.5 h-4 w-4 text-slate-400" />
                                         <input className={`${inputClasses} pl-9`} placeholder="Search tests…" value={testSearch} onChange={(e) => setTestSearch(e.target.value)} />
                                     </div>
                                     <div className="max-h-72 space-y-1 overflow-auto rounded-md border border-slate-200 p-2">
@@ -816,9 +815,9 @@ export default function BillingCreate({
                         )}
                     </div>
 
-                    {/* ─── Billing & Payment Card ─── */}
-                    <Card className="gap-0 overflow-hidden border-slate-200 py-0">
-                        <CardHeader className="border-b border-slate-200 bg-slate-50/50 px-5 py-3">
+                    {/* ─── Billing & Payment Section ─── */}
+                    <div className="sawtooth bg-white border-x border-b border-slate-200">
+                        <div className="border-b border-slate-100 bg-slate-50/50 px-5 py-3">
                             <div className="flex items-center gap-3 text-sm">
                                 <Badge className="bg-[#147da2] text-white">1</Badge>
                                 <span className="font-medium text-slate-700">Billing Info</span>
@@ -829,12 +828,12 @@ export default function BillingCreate({
                                 <Badge variant="outline">3</Badge>
                                 <span className="text-slate-400">Bill Generated</span>
                             </div>
-                        </CardHeader>
-                        <CardContent className="p-0">
+                        </div>
+                        <div className="p-0">
                             <div className="grid grid-cols-1 lg:grid-cols-2">
                                 {/* Left — Billing Info */}
                                 <div className="space-y-4 border-b border-slate-200 p-5 lg:border-b-0 lg:border-r">
-                                    <CardTitle className="text-base">Billing Information</CardTitle>
+                                    <h3 className="text-base font-semibold text-slate-800">Billing Information</h3>
 
                                     <div>
                                         <FieldLabel>Billing Time</FieldLabel>
@@ -926,7 +925,7 @@ export default function BillingCreate({
                                 {/* Right — Payment */}
                                 <div className="space-y-4 p-5">
                                     <div className="flex items-center gap-2">
-                                        <CardTitle className="text-base">Payment Information</CardTitle>
+                                        <h3 className="text-base font-semibold text-slate-800">Payment Information</h3>
                                         <Badge variant="secondary" className="text-xs">Complete billing first</Badge>
                                     </div>
 
@@ -998,8 +997,8 @@ export default function BillingCreate({
                                     </div>
                                 </div>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </form>
             </div>
 

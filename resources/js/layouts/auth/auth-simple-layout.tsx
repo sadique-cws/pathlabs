@@ -9,10 +9,10 @@ export default function AuthSimpleLayout({
     description,
 }: AuthLayoutProps) {
     return (
-        <div className="flex min-h-svh w-full items-stretch bg-white">
+        <div className="flex h-screen w-full overflow-hidden items-stretch bg-white">
             {/* Left Column: Form */}
-            <div className="flex flex-1 flex-col items-center justify-center p-6 md:p-12 lg:p-16">
-                <div className="w-full max-w-sm space-y-8">
+            <div className="flex flex-1 flex-col items-center justify-center p-4 md:p-8 lg:p-12 overflow-y-auto">
+                <div className="w-full max-w-sm space-y-6">
                     <div className="flex flex-col items-center gap-6 text-center">
                         <Link
                             href={home()}

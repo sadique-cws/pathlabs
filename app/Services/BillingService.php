@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\DB;
 
 class BillingService
 {
-    private const float SERVICE_CHARGE = 15.0;
+    private const SERVICE_CHARGE = 15.0;
 
     public function __construct(
         private BarcodeService $barcodeService,

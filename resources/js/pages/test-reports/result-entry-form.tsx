@@ -151,30 +151,74 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
                 </div>
 
                 <div className="grid gap-4 xl:grid-cols-[320px_1fr]">
-                    <div className="rounded-lg border border-slate-200 bg-white p-6">
-                        <h2 className="mb-4 border-b border-slate-100 pb-3 text-base font-semibold text-slate-800">Sample Information</h2>
-                        <div className="space-y-2 text-sm text-slate-700">
-                            <p><span className="font-medium text-slate-500">Bill Number:</span> {sample.bill_number}</p>
-                            <p><span className="font-medium text-slate-500">Test Name:</span> {sample.test_name}</p>
-                            <p><span className="font-medium text-slate-500">Department:</span> {sample.department}</p>
-                            <p><span className="font-medium text-slate-500">Patient:</span> {sample.patient_name}</p>
-                            <p><span className="font-medium text-slate-500">Gender / Age:</span> {sample.patient_gender} / {sample.patient_age}y</p>
-                            <p><span className="font-medium text-slate-500">Phone:</span> {sample.patient_phone}</p>
-                            <p><span className="font-medium text-slate-500">Barcode:</span> {sample.barcode}</p>
-                            <p><span className="font-medium text-slate-500">Bill Date:</span> {sample.bill_date}</p>
-                            <p><span className="font-medium text-slate-500">Sample Type:</span> {sample.sample_type}</p>
-                            <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${currentStatus.className}`}>
+                    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                            <h2 className="text-base font-semibold text-slate-800">Sample Information</h2>
+                            <span className={`inline-flex rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider ${currentStatus.className}`}>
                                 {currentStatus.label}
                             </span>
                         </div>
+                        
+                        <div className="flex flex-col gap-3 text-[13px]">
+                            <div className="grid grid-cols-[90px_1fr] items-start gap-3">
+                                <span className="text-slate-500">Patient</span>
+                                <div>
+                                    <p className="font-semibold text-slate-800">{sample.patient_name}</p>
+                                    <p className="mt-0.5 text-[11px] font-medium text-slate-500">{sample.patient_gender} • {sample.patient_age}y • {sample.patient_phone}</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-[90px_1fr] items-center gap-3 border-t border-slate-50 pt-3">
+                                <span className="text-slate-500">Bill No.</span>
+                                <span className="font-medium text-slate-800">{sample.bill_number}</span>
+                            </div>
+
+                            <div className="grid grid-cols-[90px_1fr] items-center gap-3 border-t border-slate-50 pt-3">
+                                <span className="text-slate-500">Bill Date</span>
+                                <span className="font-medium text-slate-800">{sample.bill_date}</span>
+                            </div>
+
+                            <div className="grid grid-cols-[90px_1fr] items-center gap-3 border-t border-slate-50 pt-3">
+                                <span className="text-slate-500">Test name</span>
+                                <span className="font-medium text-[#147da2]">{sample.test_name}</span>
+                            </div>
+
+                            <div className="grid grid-cols-[90px_1fr] items-center gap-3 border-t border-slate-50 pt-3">
+                                <span className="text-slate-500">Department</span>
+                                <span className="font-medium text-slate-800">{sample.department}</span>
+                            </div>
+
+                            <div className="grid grid-cols-[90px_1fr] items-center gap-3 border-t border-slate-50 pt-3">
+                                <span className="text-slate-500">Sample Type</span>
+                                <span className="font-medium text-slate-800">{sample.sample_type || 'None'}</span>
+                            </div>
+
+                            <div className="grid grid-cols-[90px_1fr] items-center gap-3 border-t border-slate-50 pt-3">
+                                <span className="text-slate-500">Barcode</span>
+                                {sample.barcode ? (
+                                    <span className="font-mono font-bold tracking-tight text-slate-700">{sample.barcode}</span>
+                                ) : (
+                                    <span className="text-slate-400">-</span>
+                                )}
+                            </div>
+                        </div>
 
                         {isCompleted && (
-                            <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-700">
-                                <p className="font-semibold">✅ Approved</p>
+                            <div className="mt-5 flex flex-col gap-1.5 rounded-lg border border-emerald-100 bg-emerald-50/50 p-3.5 text-xs text-emerald-800">
+                                <div className="flex items-center gap-1.5 font-semibold text-emerald-700">
+                                    <span className="flex h-4 w-4 border border-emerald-300 items-center justify-center rounded-full bg-emerald-200 text-[10px]">✓</span> 
+                                    Approved
+                                </div>
                                 {sample.approved_by_name && (
-                                    <p className="mt-1">Doctor: <span className="font-semibold">{sample.approved_by_name}</span></p>
+                                    <div className="mt-1 ml-5 flex items-center justify-between">
+                                        <span className="font-medium text-emerald-600/80">Doctor:</span>
+                                        <span className="font-semibold">{sample.approved_by_name}</span>
+                                    </div>
                                 )}
-                                <p className="mt-0.5">Date: {sample.approval_date}</p>
+                                <div className="ml-5 flex items-center justify-between">
+                                    <span className="font-medium text-emerald-600/80">Date:</span>
+                                    <span className="font-medium">{sample.approval_date}</span>
+                                </div>
                             </div>
                         )}
                     </div>

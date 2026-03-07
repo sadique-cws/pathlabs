@@ -32,16 +32,16 @@ export default function AppSidebarLayout({
                     
                     {breadcrumbs.length > 0 && (
                         <div className={cn(
-                            "sticky z-40 border-b bg-white shadow-sm transition-all duration-300 w-full",
+                            "sticky z-40 border-b bg-white/80 backdrop-blur-md transition-all duration-300 w-full",
                             scrolled ? "top-[48px]" : "top-[56px]"
                         )}>
-                            <div className="mx-auto flex h-12 items-center px-6 text-[13px] font-medium text-slate-800 tracking-tight">
+                            <div className="mx-auto flex h-10 sm:h-12 items-center px-4 sm:px-6 text-[11px] sm:text-[13px] font-medium text-slate-800 tracking-tight overflow-x-auto no-scrollbar whitespace-nowrap">
                                 <Breadcrumbs breadcrumbs={breadcrumbs} />
                             </div>
                         </div>
                     )}
                     
-                    <div className="flex-1 p-4">
+                    <div className="flex-1 p-2 sm:p-4 md:p-6 overflow-x-hidden">
                         {children}
                     </div>
                 </main>

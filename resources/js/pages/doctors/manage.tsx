@@ -45,31 +45,36 @@ export default function ManageDoctors({ doctors, stats }: Props) {
             <Head title="Lab Doctors List" />
 
             <div className="min-h-full bg-slate-50/80 p-0">
-                <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4">
+                <div className="mb-4 rounded-lg border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
                     <label className="relative block">
-                        <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search doctors by name, email, or phone..." className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" />
+                        <Search className="pointer-events-none absolute left-3 top-[11px] h-4 w-4 text-slate-400" />
+                        <input 
+                            value={search} 
+                            onChange={(e) => setSearch(e.target.value)} 
+                            placeholder="Search doctors by name, email, or phone..." 
+                            className="h-10 w-full rounded-md border border-slate-200 bg-slate-50/50 pl-10 pr-3 text-sm outline-none transition focus:bg-white focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 shadow-inner" 
+                        />
                     </label>
                 </div>
 
-                <div className="mb-4 grid gap-3 md:grid-cols-3">
-                    <div className="rounded-lg border border-slate-200 bg-white p-4">
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Total Doctors</p>
-                        <p className="mt-1 text-2xl font-semibold text-slate-800">{stats.total}</p>
+                <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    <div className="rounded-lg border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">Total Doctors</p>
+                        <p className="mt-1 text-xl sm:text-2xl font-bold text-slate-800">{stats.total}</p>
                     </div>
-                    <div className="rounded-lg border border-slate-200 bg-white p-4">
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Accepted</p>
-                        <p className="mt-1 text-2xl font-semibold text-slate-800">{stats.accepted}</p>
+                    <div className="rounded-lg border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">Accepted</p>
+                        <p className="mt-1 text-xl sm:text-2xl font-bold text-emerald-600">{stats.accepted}</p>
                     </div>
-                    <div className="rounded-lg border border-slate-200 bg-white p-4">
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">With Gifts</p>
-                        <p className="mt-1 text-2xl font-semibold text-slate-800">{stats.with_gifts}</p>
+                    <div className="rounded-lg border border-slate-200 bg-white p-3 sm:p-4 shadow-sm col-span-2 sm:col-span-1">
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">With Gifts</p>
+                        <p className="mt-1 text-xl sm:text-2xl font-bold text-[#147da2]">{stats.with_gifts}</p>
                     </div>
                 </div>
 
-                <div className="rounded-lg border border-slate-200 bg-white">
-                    <div className="overflow-x-auto">
-                        <table className="w-full min-w-[980px] text-left">
+                <div className="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-sm">
+                    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
+                        <table className="w-full min-w-[800px] text-left">
                             <thead className="border-b border-slate-200 bg-slate-50/70 text-sm font-semibold text-slate-700">
                                 <tr>
                                     <th className="px-3 py-3">Username</th>

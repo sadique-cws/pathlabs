@@ -601,7 +601,7 @@ export default function BillingCreate({
                                 {/* Title + Name */}
                                 <div className="md:col-span-2">
                                     <FieldLabel required>Patient Name</FieldLabel>
-                                    <div className="grid grid-cols-[100px_1fr] gap-2">
+                                    <div className="grid grid-cols-1 xs:grid-cols-[100px_1fr] gap-2">
                                         <SearchableSelect options={titleOptions} value={form.data.patient.title} onChange={(v) => form.setData('patient', { ...form.data.patient, title: v })} placeholder="Title" />
                                         <input className={`${inputClasses} ${form.errors['patient.name'] ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20' : ''}`} placeholder="Full name" value={form.data.patient.name} onChange={(e) => form.setData('patient', { ...form.data.patient, name: e.target.value })} />
                                     </div>
@@ -621,8 +621,10 @@ export default function BillingCreate({
                                 {/* DOB only */}
                                 <div className="md:col-span-2">
                                     <FieldLabel>Date of Birth</FieldLabel>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <SearchableSelect options={yearOptions} value={dobYear} onChange={setDobYear} placeholder="Year" />
+                                    <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
+                                        <div className="col-span-2 xs:col-span-1">
+                                            <SearchableSelect options={yearOptions} value={dobYear} onChange={setDobYear} placeholder="Year" />
+                                        </div>
                                         <SearchableSelect options={monthOptions} value={dobMonth} onChange={setDobMonth} placeholder="Month" />
                                         <SearchableSelect options={dayOptions} value={dobDay} onChange={setDobDay} placeholder="Day" />
                                     </div>
@@ -782,10 +784,10 @@ export default function BillingCreate({
 
                         {tab === 'others' && (
                             <div className="space-y-4">
-                                <div className="grid gap-3 md:grid-cols-[1fr_140px_auto]">
+                                <div className="grid gap-3 grid-cols-1 xs:grid-cols-[1fr_auto] md:grid-cols-[1fr_140px_auto]">
                                     <input className={inputClasses} placeholder="Charge name" value={newServiceName} onChange={(e) => setNewServiceName(e.target.value)} />
                                     <input type="number" min={0} step="0.01" className={inputClasses} placeholder="Amount" value={newServiceAmount} onChange={(e) => setNewServiceAmount(Number(e.target.value))} />
-                                    <button type="button" onClick={() => addCharge()} className="h-9 rounded-md bg-[#147da2] px-4 text-sm font-medium text-white transition hover:bg-[#106385]">+ Add</button>
+                                    <button type="button" onClick={() => addCharge()} className="h-9 w-full xs:w-auto rounded-md bg-[#147da2] px-4 text-sm font-medium text-white transition hover:bg-[#106385]">+ Add</button>
                                 </div>
                                 {serviceChargeMasters.length > 0 && (
                                     <div className="flex flex-wrap gap-2">
@@ -844,9 +846,9 @@ export default function BillingCreate({
 
                                     <div>
                                         <FieldLabel>Sample Collected From</FieldLabel>
-                                        <div className="grid grid-cols-[1fr_auto] gap-2">
+                                        <div className="grid grid-cols-1 xs:grid-cols-[1fr_auto] gap-2">
                                             <Input list="sample-sources" value={form.data.sample_collected_from} onChange={(e) => form.setData('sample_collected_from', e.target.value)} />
-                                            <Button type="button" variant="outline" size="sm" className="h-9" onClick={addSampleSource}>+ Add</Button>
+                                            <Button type="button" variant="outline" size="sm" className="h-9 w-full xs:w-auto" onClick={addSampleSource}>+ Add</Button>
                                             <datalist id="sample-sources">{sampleSources.map((source) => <option key={source} value={source} />)}</datalist>
                                         </div>
                                     </div>
@@ -858,9 +860,9 @@ export default function BillingCreate({
 
                                     <div>
                                         <FieldLabel>Service / Other Charges</FieldLabel>
-                                        <div className="grid grid-cols-[1fr_auto] gap-2">
+                                        <div className="grid grid-cols-1 xs:grid-cols-[1fr_auto] gap-2">
                                             <SearchableSelect options={serviceChargeOptions} value={selectedServiceMasterId} onChange={setSelectedServiceMasterId} placeholder="Select service charge" />
-                                            <Button type="button" variant="outline" size="sm" className="h-9" onClick={addSelectedServiceCharge}>+ Add</Button>
+                                            <Button type="button" variant="outline" size="sm" className="h-9 w-full xs:w-auto" onClick={addSelectedServiceCharge}>+ Add</Button>
                                         </div>
                                     </div>
 
@@ -888,7 +890,7 @@ export default function BillingCreate({
 
                                     <div>
                                         <FieldLabel>Doctor Discount</FieldLabel>
-                                        <div className="grid grid-cols-[1fr_140px] gap-2">
+                                        <div className="grid grid-cols-1 xs:grid-cols-[1fr_140px] gap-2">
                                             <Input type="number" min={0} step="0.01" value={form.data.doctor_discount} onChange={(e) => form.setData('doctor_discount', Number(e.target.value))} />
                                             <SearchableSelect options={discountTypeOptions} value={form.data.doctor_discount_type} onChange={(v) => form.setData('doctor_discount_type', v)} />
                                         </div>
@@ -896,7 +898,7 @@ export default function BillingCreate({
 
                                     <div>
                                         <FieldLabel>Center Discount</FieldLabel>
-                                        <div className="grid grid-cols-[1fr_140px] gap-2">
+                                        <div className="grid grid-cols-1 xs:grid-cols-[1fr_140px] gap-2">
                                             <Input type="number" min={0} step="0.01" value={form.data.center_discount} onChange={(e) => form.setData('center_discount', Number(e.target.value))} />
                                             <SearchableSelect options={discountTypeOptions} value={form.data.center_discount_type} onChange={(v) => form.setData('center_discount_type', v)} />
                                         </div>
@@ -935,9 +937,9 @@ export default function BillingCreate({
 
                                     <div>
                                         <FieldLabel>Payment Amount</FieldLabel>
-                                        <div className="grid grid-cols-[1fr_auto] gap-2">
+                                        <div className="grid grid-cols-1 xs:grid-cols-[1fr_auto] gap-2">
                                             <Input type="number" min={0} step="0.01" value={form.data.payment_amount} onChange={(e) => form.setData('payment_amount', Number(e.target.value))} />
-                                            <Button type="button" variant="secondary" size="sm" className="h-9" onClick={() => form.setData('payment_amount', billTotal)}>Full Payment</Button>
+                                            <Button type="button" variant="secondary" size="sm" className="h-9 w-full xs:w-auto" onClick={() => form.setData('payment_amount', billTotal)}>Full Payment</Button>
                                         </div>
                                     </div>
 
@@ -990,9 +992,9 @@ export default function BillingCreate({
                                         </label>
                                     </div>
 
-                                    <div className="flex flex-wrap justify-end gap-3 border-t border-slate-200 pt-4">
-                                        <Button type="submit" disabled={form.processing} className="bg-[#147da2] hover:bg-[#106385]">Generate Barcode</Button>
-                                        <Button type="button" variant="outline" onClick={completeBilling} disabled={completeForm.processing || !generatedBillId}>Complete Billing</Button>
+                                    <div className="flex flex-col xs:flex-row justify-end gap-3 border-t border-slate-200 pt-4">
+                                        <Button type="submit" disabled={form.processing} className="w-full xs:w-auto bg-[#147da2] hover:bg-[#106385]">Generate Barcode</Button>
+                                        <Button type="button" variant="outline" onClick={completeBilling} disabled={completeForm.processing || !generatedBillId} className="w-full xs:w-auto">Complete Billing</Button>
                                     </div>
                                 </div>
                             </div>

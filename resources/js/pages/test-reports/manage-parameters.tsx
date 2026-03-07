@@ -155,35 +155,37 @@ export default function ManageParameters({ parameters, tests, pagination, filter
                 </div>
 
                 <div className="rounded-lg border border-slate-200 bg-white">
-                    <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex flex-1 items-center gap-3">
-                            <div className="relative max-w-sm flex-1">
-                                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Search parameters or tests..."
-                                    className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
-                                    value={search}
-                                    onChange={handleSearchChange}
-                                />
+                    <div className="p-4 border-b border-slate-100 shadow-sm">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center w-full sm:w-auto">
+                                <div className="relative w-full sm:w-64">
+                                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search parameters or tests..."
+                                        className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 shadow-sm"
+                                        value={search}
+                                        onChange={handleSearchChange}
+                                    />
+                                </div>
+                                <select
+                                    className="h-9 w-full sm:w-48 rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 shadow-sm"
+                                    value={selectedTest}
+                                    onChange={handleTestChange}
+                                >
+                                    <option value="">All Tests</option>
+                                    {tests.map((test) => (
+                                        <option key={test.id} value={test.id}>
+                                            {test.name} ({test.code})
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
-                            <select
-                                className="h-9 w-48 rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
-                                value={selectedTest}
-                                onChange={handleTestChange}
-                            >
-                                <option value="">All Tests</option>
-                                {tests.map((test) => (
-                                    <option key={test.id} value={test.id}>
-                                        {test.name} ({test.code})
-                                    </option>
-                                ))}
-                            </select>
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm">
+                    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
+                        <table className="min-w-[800px] w-full text-left text-sm">
                             <thead className="border-b border-slate-200 bg-slate-50/80 uppercase tracking-wide text-slate-500">
                                 <tr>
                                     <th className="px-4 py-3 font-semibold">Test Name</th>

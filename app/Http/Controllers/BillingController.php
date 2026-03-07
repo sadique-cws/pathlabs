@@ -358,7 +358,7 @@ class BillingController extends Controller
     public function generateBarcode(StoreBillRequest $request, BillingService $billingService): RedirectResponse
     {
         $labId = (int) $request->attributes->get('lab_id');
-        $bill = $billingService->createBill($labId, $request->validated());
+        $bill = $billingService->createBill($labId, $request->validated(), $request->user());
 
         return to_route('lab.billing.create', ['bill_id' => $bill->id])
             ->with('success', "Barcodes generated for bill {$bill->bill_number}. Now complete billing.");

@@ -69,32 +69,34 @@ export default function ManageSamples({ samples, filters }: Props) {
 
             <div className="min-h-full bg-slate-50/80 p-0">
                 <div className="rounded-lg border border-slate-200 bg-white">
-                    <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 px-5 py-4">
-                        <div className="flex items-center gap-3 ml-auto">
-                            <select
-                                value={filters.date || ''}
-                                onChange={(e) => applyServerFilter('date', e.target.value)}
-                                className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
-                            >
-                                <option value="">All Dates</option>
-                                <option value="today">Today</option>
-                                <option value="yesterday">Yesterday</option>
-                            </select>
+                    <div className="p-4 border-b border-slate-100">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center w-full sm:w-auto">
+                                <select
+                                    value={filters.date || ''}
+                                    onChange={(e) => applyServerFilter('date', e.target.value)}
+                                    className="h-9 w-full sm:w-40 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                >
+                                    <option value="">All Dates</option>
+                                    <option value="today">Today</option>
+                                    <option value="yesterday">Yesterday</option>
+                                </select>
 
-                            <form onSubmit={handleSearch} className="relative">
-                                <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                                <input
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="Search barcode, bill, patient..."
-                                    className="h-9 w-64 rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 shadow-sm"
-                                />
-                            </form>
+                                <form onSubmit={handleSearch} className="relative w-full sm:w-64">
+                                    <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                                    <input
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        placeholder="Search barcode, bill..."
+                                        className="h-9 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 shadow-sm"
+                                    />
+                                </form>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
+                    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
+                        <table className="min-w-[1200px] w-full text-left text-sm">
                             <thead className="border-b border-slate-200 bg-slate-50/50 text-xs font-semibold uppercase tracking-wider text-slate-500">
                                 <tr>
                                     <th className="px-5 py-3">Sample Code</th>

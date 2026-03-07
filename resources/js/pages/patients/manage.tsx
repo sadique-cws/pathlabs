@@ -66,8 +66,8 @@ export default function ManagePatients({ patients }: Props) {
 
             <div className="min-h-full bg-slate-50/80 p-0">
                 <div className="rounded-lg border border-slate-200 bg-white">
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
-                        <label className="relative w-full max-w-md">
+                    <div className="flex flex-col gap-4 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <label className="relative w-full sm:max-w-md">
                             <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                             <input
                                 value={search}
@@ -75,18 +75,18 @@ export default function ManagePatients({ patients }: Props) {
                                     setSearch(event.target.value);
                                     setPage(1);
                                 }}
-                                placeholder="Search patients..."
-                                className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                placeholder="Search patients by name, phone, etc..."
+                                className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 shadow-sm"
                             />
                         </label>
 
-                        <Link href="/lab/patients/add" className="rounded-lg bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
+                        <Link href="/lab/patients/add" className="inline-flex items-center justify-center rounded-lg bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385] w-full sm:w-auto">
                             + Add Patient
                         </Link>
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="min-w-[1180px] w-full text-left">
+                    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
+                        <table className="min-w-[1000px] w-full text-left">
                             <thead className="border-b border-slate-200 bg-slate-50/70 text-xs font-semibold uppercase tracking-wide text-slate-500">
                                 <tr>
                                     <th className="px-3 py-3">ID</th>

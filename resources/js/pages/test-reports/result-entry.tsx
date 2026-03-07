@@ -80,69 +80,74 @@ export default function ResultEntry({ rows, stats, filters }: Props) {
             <div className="min-h-full bg-slate-50/80 p-0">
 
 
-                <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                    <div className="rounded-lg border border-slate-200 bg-white p-4">
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Pending</p>
-                        <p className="mt-1 text-2xl font-bold text-amber-600">{stats.pending}</p>
+                <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                    <div className="rounded-lg border border-slate-200 bg-white p-3 sm:p-4 shadow-sm transition-all hover:border-[#147da2]">
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">Pending</p>
+                        <p className="mt-1 text-xl sm:text-2xl font-bold text-amber-600">{stats.pending}</p>
                     </div>
-                    <div className="rounded-lg border border-slate-200 bg-white p-4">
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Collected</p>
-                        <p className="mt-1 text-2xl font-bold text-blue-600">{stats.collected}</p>
+                    <div className="rounded-lg border border-slate-200 bg-white p-3 sm:p-4 shadow-sm transition-all hover:border-[#147da2]">
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">Collected</p>
+                        <p className="mt-1 text-xl sm:text-2xl font-bold text-blue-600">{stats.collected}</p>
                     </div>
-                    <div className="rounded-lg border border-slate-200 bg-white p-4">
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">In Progress</p>
-                        <p className="mt-1 text-2xl font-bold text-sky-600">{stats.in_progress}</p>
+                    <div className="rounded-lg border border-slate-200 bg-white p-3 sm:p-4 shadow-sm transition-all hover:border-[#147da2]">
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">In Progress</p>
+                        <p className="mt-1 text-xl sm:text-2xl font-bold text-sky-600">{stats.in_progress}</p>
                     </div>
-                    <div className="rounded-lg border border-slate-200 bg-white p-4">
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Completed</p>
-                        <p className="mt-1 text-2xl font-bold text-emerald-600">{stats.completed}</p>
+                    <div className="rounded-lg border border-slate-200 bg-white p-3 sm:p-4 shadow-sm transition-all hover:border-[#147da2]">
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">Completed</p>
+                        <p className="mt-1 text-xl sm:text-2xl font-bold text-emerald-600">{stats.completed}</p>
                     </div>
-                    <div className="rounded-lg border border-slate-200 bg-white p-4">
-                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Total Samples</p>
-                        <p className="mt-1 text-2xl font-bold text-slate-800">{stats.total}</p>
+                    <div className="col-span-2 sm:col-span-1 rounded-lg border border-slate-200 bg-white p-3 sm:p-4 shadow-sm transition-all hover:border-[#147da2]">
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">Total Samples</p>
+                        <p className="mt-1 text-xl sm:text-2xl font-bold text-slate-800">{stats.total}</p>
                     </div>
                 </div>
 
-                <div className="mb-4 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 sm:flex-row sm:items-center">
-                    <form onSubmit={handleSearch} className="relative flex-1">
-                        <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                        <input
-                            className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
-                            placeholder="Press Enter to search Patient, Bill#, Barcode..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </form>
-                    <select
-                        className="h-9 w-40 rounded-md border border-slate-200 px-3 text-sm outline-none"
-                        value={filters.date}
-                        onChange={(e) => applyFilter('date', e.target.value)}
-                    >
-                        <option value="">All Dates</option>
-                        <option value="today">Today</option>
-                        <option value="yesterday">Yesterday</option>
-                    </select>
-                    <select
-                        className="h-9 w-40 rounded-md border border-slate-200 px-3 text-sm outline-none"
-                        value={filters.status}
-                        onChange={(e) => applyFilter('status', e.target.value)}
-                    >
-                        <option value="">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="collected">Collected</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="completed">Completed</option>
-                    </select>
-                    <select
-                        className="h-9 w-40 rounded-md border border-slate-200 px-3 text-sm outline-none"
-                        value={filters.department}
-                        onChange={(e) => applyFilter('department', e.target.value)}
-                    >
-                        <option value="">All Departments</option>
-                        <option value="pathology">Pathology</option>
-                        <option value="radiology">Radiology</option>
-                        <option value="microbiology">Microbiology</option>
-                    </select>
+                <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="flex flex-col gap-4">
+                        <form onSubmit={handleSearch} className="relative flex-1">
+                            <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                            <input
+                                className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/50 pl-10 pr-3 text-sm outline-none transition focus:border-[#147da2] focus:bg-white focus:ring-1 focus:ring-[#147da2]/20 shadow-inner"
+                                placeholder="Search by Patient, Bill#, Barcode..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </form>
+                        
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            <select
+                                className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm outline-none transition focus:border-[#147da2]"
+                                value={filters.date}
+                                onChange={(e) => applyFilter('date', e.target.value)}
+                            >
+                                <option value="">All Dates</option>
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                            </select>
+                            <select
+                                className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm outline-none transition focus:border-[#147da2]"
+                                value={filters.status}
+                                onChange={(e) => applyFilter('status', e.target.value)}
+                            >
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="collected">Collected</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                            <select
+                                className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm outline-none transition focus:border-[#147da2]"
+                                value={filters.department}
+                                onChange={(e) => applyFilter('department', e.target.value)}
+                            >
+                                <option value="">All Departments</option>
+                                <option value="pathology">Pathology</option>
+                                <option value="radiology">Radiology</option>
+                                <option value="microbiology">Microbiology</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">

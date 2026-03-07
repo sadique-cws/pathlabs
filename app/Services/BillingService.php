@@ -31,9 +31,9 @@ class BillingService
     /**
      * @param  array<string, mixed>  $payload
      */
-    public function createBill(int $labId, array $payload): Bill
+    public function createBill(int $labId, array $payload, \App\Models\User $user): Bill
     {
-        return DB::transaction(function () use ($labId, $payload): Bill {
+        return DB::transaction(function () use ($labId, $payload, $user): Bill {
             $tests = $this->fetchTests($labId, $payload['test_ids'] ?? []);
             $packages = $this->fetchPackages($labId, $payload['package_ids'] ?? []);
             $patient = $this->resolvePatient($labId, $payload);
@@ -99,9 +99,8 @@ class BillingService
 
             $this->persistSampleCollectionSource($labId, $payload['sample_collected_from'] ?? null);
 
-            $lab = Lab::query()->findOrFail($labId);
-            $labWallet = $this->walletService->ensureWallet($lab, $labId);
-            $this->walletService->debit($labWallet, $baseServiceCharge, $bill, 'Billing service charge deducted');
+            $userWallet = $this->walletService->ensureWallet($user, $labId);
+            $this->walletService->debit($userWallet, $baseServiceCharge, $bill, 'Billing service charge deducted');
 
             $commissionBase = round($netWithoutService, 2);
             $this->commissionService->creditDoctorCommission($bill, $commissionBase);

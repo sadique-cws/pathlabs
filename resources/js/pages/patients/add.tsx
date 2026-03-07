@@ -42,7 +42,7 @@ export default function AddPatient() {
                         <div className="space-y-4">
                             <div>
                                 <label className="mb-1 block text-sm font-semibold text-slate-700">Name *</label>
-                                <div className="grid grid-cols-[120px_1fr] gap-2">
+                                <div className="grid grid-cols-1 xs:grid-cols-[120px_1fr] gap-2">
                                     <select className="h-9 rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.title} onChange={(e) => form.setData('title', e.target.value)}>
                                         <option value="Mr.">Mr.</option>
                                         <option value="Mrs.">Mrs.</option>
@@ -72,7 +72,7 @@ export default function AddPatient() {
                                 <input className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" placeholder="Address" value={form.data.address} onChange={(e) => form.setData('address', e.target.value)} />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
                                 <div>
                                     <label className="mb-1 block text-sm font-semibold text-slate-700">PIN Code</label>
                                     <input className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" placeholder="PIN Code" value={form.data.pin_code} onChange={(e) => form.setData('pin_code', e.target.value)} />
@@ -119,9 +119,9 @@ export default function AddPatient() {
                             </div>
                         </div>
 
-                        <div className="col-span-full flex justify-end gap-3 border-t border-slate-200 pt-4">
-                            <button type="button" onClick={() => history.back()} className="rounded-md border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Cancel</button>
-                            <button type="submit" className="rounded-md bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]" disabled={form.processing}>Add Patient</button>
+                        <div className="col-span-full flex flex-col xs:flex-row justify-end gap-3 border-t border-slate-200 pt-4">
+                            <button type="button" onClick={() => history.back()} className="w-full xs:w-auto rounded-md border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Cancel</button>
+                            <button type="submit" className="w-full xs:w-auto rounded-md bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]" disabled={form.processing}>Add Patient</button>
                         </div>
                     </form>
                 </div>

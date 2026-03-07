@@ -44,35 +44,33 @@ export default function Dashboard({ totals, recentBills }: Props) {
             <Head title="Lab Analytics" />
 
             <div className="flex h-full flex-1 flex-col gap-5 bg-slate-50/80 p-4 md:p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-xl font-semibold text-slate-800">Lab Analytics</h1>
-                        <p className="mt-1 text-sm text-slate-500">Operational overview for your pathology and radiology billing unit.</p>
-                    </div>
+                <div className="flex items-center justify-end">
                     <Link
                         href="/lab/billing/create"
-                        className="rounded-lg bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]"
+                        className="w-full sm:w-auto text-center rounded-lg bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]"
                     >
                         + Create Bill
                     </Link>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     {cards.map((card) => {
                         const value = totals[card.key];
 
                         return (
                             <div
                                 key={card.key}
-                                className="rounded-lg border border-slate-200 bg-white p-5"
+                                className="rounded-lg border border-slate-200 bg-white p-4 sm:p-5 shadow-sm transition-all hover:border-[#147da2]"
                             >
                                 <div className="flex items-center justify-between">
-                                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{card.title}</p>
-                                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${card.bg} ${card.color}`}>
-                                        <card.icon className="h-4 w-4" />
+                                    <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">{card.title}</p>
+                                    <div className={`flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg ${card.bg} ${card.color}`}>
+                                        <card.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                     </div>
                                 </div>
-                                <p className="mt-3 text-2xl font-semibold text-slate-800">{card.key === 'tests' || card.key === 'due' ? `₹${value}` : value}</p>
+                                <p className="mt-2 sm:mt-3 text-lg sm:text-2xl font-bold text-slate-800 truncate">
+                                    {card.key === 'tests' || card.key === 'due' ? `₹${value}` : value}
+                                </p>
                             </div>
                         );
                     })}
@@ -86,8 +84,8 @@ export default function Dashboard({ totals, recentBills }: Props) {
                         </Link>
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full text-left text-sm">
+                    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
+                        <table className="min-w-[600px] sm:min-w-full text-left text-sm">
                             <thead className="text-xs uppercase text-slate-500">
                                 <tr>
                                     <th className="px-3 py-2">Bill No</th>

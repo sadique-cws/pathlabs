@@ -44,10 +44,10 @@ class HandleInertiaRequests extends Middleware
         $accessRoles = [];
         $isAdmin = false;
 
-        if ($user?->lab_id !== null) {
+        if ($user !== null) {
             $walletBalance = Wallet::query()
-                ->where('walletable_type', Lab::class)
-                ->where('walletable_id', $user->lab_id)
+                ->where('walletable_type', \App\Models\User::class)
+                ->where('walletable_id', $user->id)
                 ->value('balance');
         }
 
@@ -73,7 +73,7 @@ class HandleInertiaRequests extends Middleware
                 'is_admin' => $isAdmin,
             ],
             'flash' => [
-                'success' => fn (): ?string => $request->session()->get('success'),
+                'success' => fn(): ?string => $request->session()->get('success'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

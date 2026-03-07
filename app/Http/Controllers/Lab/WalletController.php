@@ -20,8 +20,8 @@ class WalletController extends Controller
         $wallet = Wallet::firstOrCreate(
             [
                 'lab_id' => $labId,
-                'walletable_type' => \App\Models\Lab::class,
-                'walletable_id' => $labId,
+                'walletable_type' => \App\Models\User::class,
+                'walletable_id' => $user->id,
             ],
             [
                 'balance' => 0,
@@ -52,7 +52,10 @@ class WalletController extends Controller
         ]);
 
         $labId = (int) $request->attributes->get('lab_id');
-        $wallet = Wallet::where('lab_id', $labId)->firstOrFail();
+        $user = $request->user();
+        $wallet = Wallet::where('walletable_type', \App\Models\User::class)
+            ->where('walletable_id', $user->id)
+            ->firstOrFail();
 
         $amount = $request->input('amount');
 

@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
+import { Button } from '@/components/ui/button';
 
 type BillEditData = {
     id: number;
@@ -35,6 +36,19 @@ type BillEditData = {
 type Props = {
     bill: BillEditData;
 };
+
+/* ─── Reusable tiny form-field label ─── */
+function FieldLabel({ children, htmlFor, required }: { children: React.ReactNode; htmlFor?: string; required?: boolean }) {
+    return (
+        <label htmlFor={htmlFor} className="mb-1 block text-xs font-medium tracking-wide text-slate-500 uppercase">
+            {children}
+            {required && <span className="ml-0.5 text-rose-500">*</span>}
+        </label>
+    );
+}
+
+const inputClasses =
+    'h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20';
 
 export default function EditBill({ bill }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -80,101 +94,101 @@ export default function EditBill({ bill }: Props) {
                         event.preventDefault();
                         form.put(`/lab/billing/${bill.id}`);
                     }}
-                    className="rounded-lg border border-slate-200 bg-white p-6"
+                    className="space-y-12"
                 >
-                    <h1 className="border-b border-slate-100 pb-4 text-lg font-semibold text-slate-800">Edit Bill & Patient Details</h1>
-
-                    <div className="mt-5 grid gap-5 lg:grid-cols-2">
-                        <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-5">
-                            <h2 className="mb-4 text-base font-semibold text-slate-800">Patient</h2>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Patient Name</label>
-                                    <input className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.patient.name} onChange={(e) => form.setData('patient', { ...form.data.patient, name: e.target.value })} placeholder="Patient Name" />
+                    <div className="grid grid-cols-1 xl:grid-cols-2">
+                        {/* Patient Basic Info */}
+                        <div className="sawtooth bg-white p-5 border-x border-b border-t border-slate-200">
+                            <h2 className="mb-1 text-base font-semibold text-slate-800">Patient Information</h2>
+                            <p className="mb-4 text-xs text-slate-400">Update patients basic & contact details</p>
+                            
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div className="md:col-span-2">
+                                    <FieldLabel required>Patient Name</FieldLabel>
+                                    <input className={inputClasses} value={form.data.patient.name} onChange={(e) => form.setData('patient', { ...form.data.patient, name: e.target.value })} placeholder="Full name" />
                                 </div>
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Phone Number</label>
-                                    <input className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.patient.phone} onChange={(e) => form.setData('patient', { ...form.data.patient, phone: e.target.value })} placeholder="Phone" />
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="mb-1 block text-sm font-medium text-slate-700">Gender</label>
-                                        <select className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.patient.gender} onChange={(e) => form.setData('patient', { ...form.data.patient, gender: e.target.value })}>
-                                            <option value="male">Male</option>
-                                            <option value="female">Female</option>
-                                            <option value="other">Other</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="mb-1 block text-sm font-medium text-slate-700">Age</label>
-                                        <input type="number" className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.patient.age_years} onChange={(e) => form.setData('patient', { ...form.data.patient, age_years: Number(e.target.value) })} placeholder="Age Years" />
-                                    </div>
-                                    <div>
-                                        <label className="mb-1 block text-sm font-medium text-slate-700">City</label>
-                                        <input className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.patient.city} onChange={(e) => form.setData('patient', { ...form.data.patient, city: e.target.value })} placeholder="City" />
-                                    </div>
-                                    <div>
-                                        <label className="mb-1 block text-sm font-medium text-slate-700">State</label>
-                                        <input className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.patient.state} onChange={(e) => form.setData('patient', { ...form.data.patient, state: e.target.value })} placeholder="State" />
-                                    </div>
+                                    <FieldLabel required>Phone Number</FieldLabel>
+                                    <input className={inputClasses} value={form.data.patient.phone} onChange={(e) => form.setData('patient', { ...form.data.patient, phone: e.target.value })} placeholder="10-digit number" />
                                 </div>
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Address</label>
-                                    <input className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.patient.address} onChange={(e) => form.setData('patient', { ...form.data.patient, address: e.target.value })} placeholder="Address" />
+                                    <FieldLabel>Gender</FieldLabel>
+                                    <select className={inputClasses} value={form.data.patient.gender} onChange={(e) => form.setData('patient', { ...form.data.patient, gender: e.target.value })}>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
                                 </div>
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">PIN Code</label>
-                                    <input className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.patient.pin_code} onChange={(e) => form.setData('patient', { ...form.data.patient, pin_code: e.target.value })} placeholder="Pin Code" />
+                                    <FieldLabel>Age (Years)</FieldLabel>
+                                    <input type="number" className={inputClasses} value={form.data.patient.age_years ?? ''} onChange={(e) => form.setData('patient', { ...form.data.patient, age_years: Number(e.target.value) })} placeholder="Age" />
+                                </div>
+                                <div>
+                                    <FieldLabel>City</FieldLabel>
+                                    <input className={inputClasses} value={form.data.patient.city} onChange={(e) => form.setData('patient', { ...form.data.patient, city: e.target.value })} placeholder="e.g. Jaipur" />
+                                </div>
+                                <div>
+                                    <FieldLabel>State</FieldLabel>
+                                    <input className={inputClasses} value={form.data.patient.state} onChange={(e) => form.setData('patient', { ...form.data.patient, state: e.target.value })} placeholder="e.g. Rajasthan" />
+                                </div>
+                                <div>
+                                    <FieldLabel>PIN Code</FieldLabel>
+                                    <input className={inputClasses} value={form.data.patient.pin_code} onChange={(e) => form.setData('patient', { ...form.data.patient, pin_code: e.target.value })} placeholder="6-digit code" />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <FieldLabel>Address</FieldLabel>
+                                    <input className={inputClasses} value={form.data.patient.address} onChange={(e) => form.setData('patient', { ...form.data.patient, address: e.target.value })} placeholder="Street address" />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-5">
-                            <h2 className="mb-4 text-base font-semibold text-slate-800">Bill Details</h2>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Billing Date & Time</label>
-                                    <input type="datetime-local" className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.billing_at} onChange={(e) => form.setData('billing_at', e.target.value)} />
+                        {/* Bill Specific Details */}
+                        <div className="sawtooth bg-white p-5 border-x border-b border-t border-slate-200 border-l-0">
+                            <h2 className="mb-1 text-base font-semibold text-slate-800">Bill Details</h2>
+                            <p className="mb-4 text-xs text-slate-400">Update billing metadata & additional parameters</p>
+                            
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div className="md:col-span-2">
+                                    <FieldLabel>Billing Date & Time</FieldLabel>
+                                    <input type="datetime-local" className={inputClasses} value={form.data.billing_at} onChange={(e) => form.setData('billing_at', e.target.value)} />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <FieldLabel>Sample Collected From</FieldLabel>
+                                    <input className={inputClasses} value={form.data.sample_collected_from} onChange={(e) => form.setData('sample_collected_from', e.target.value)} placeholder="Collector source" />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <FieldLabel>Insurance Details</FieldLabel>
+                                    <input className={inputClasses} value={form.data.insurance_details} onChange={(e) => form.setData('insurance_details', e.target.value)} placeholder="Policy info" />
                                 </div>
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Sample Collected From</label>
-                                    <input className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.sample_collected_from} onChange={(e) => form.setData('sample_collected_from', e.target.value)} placeholder="Sample Collected From" />
+                                    <FieldLabel>Doctor Discount</FieldLabel>
+                                    <input type="number" step="0.01" className={inputClasses} value={form.data.doctor_discount_amount} onChange={(e) => form.setData('doctor_discount_amount', Number(e.target.value))} />
                                 </div>
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Insurance Details</label>
-                                    <input className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.insurance_details} onChange={(e) => form.setData('insurance_details', e.target.value)} placeholder="Insurance Details" />
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="mb-1 block text-sm font-medium text-slate-700">Doctor Discount</label>
-                                        <input type="number" step="0.01" className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.doctor_discount_amount} onChange={(e) => form.setData('doctor_discount_amount', Number(e.target.value))} placeholder="0.00" />
-                                    </div>
-                                    <div>
-                                        <label className="mb-1 block text-sm font-medium text-slate-700">Center Discount</label>
-                                        <input type="number" step="0.01" className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.center_discount_amount} onChange={(e) => form.setData('center_discount_amount', Number(e.target.value))} placeholder="0.00" />
-                                    </div>
-                                    <div>
-                                        <label className="mb-1 block text-sm font-medium text-slate-700">Payment Amount</label>
-                                        <input type="number" step="0.01" className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.payment_amount} onChange={(e) => form.setData('payment_amount', Number(e.target.value))} placeholder="0.00" />
-                                    </div>
-                                    <div>
-                                        <label className="mb-1 block text-sm font-medium text-slate-700">Offer Package</label>
-                                        <input className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.offer} onChange={(e) => form.setData('offer', e.target.value)} placeholder="Offer" />
-                                    </div>
+                                    <FieldLabel>Center Discount</FieldLabel>
+                                    <input type="number" step="0.01" className={inputClasses} value={form.data.center_discount_amount} onChange={(e) => form.setData('center_discount_amount', Number(e.target.value))} />
                                 </div>
                                 <div>
-                                    <label className="mb-1 block text-sm font-medium text-slate-700">Notes & Remarks</label>
-                                    <textarea className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" rows={3} value={form.data.notes} onChange={(e) => form.setData('notes', e.target.value)} placeholder="Type notes here..." />
+                                    <FieldLabel>Payment Amount</FieldLabel>
+                                    <input type="number" step="0.01" className={inputClasses} value={form.data.payment_amount} onChange={(e) => form.setData('payment_amount', Number(e.target.value))} />
+                                </div>
+                                <div>
+                                    <FieldLabel>Offer Package</FieldLabel>
+                                    <input className={inputClasses} value={form.data.offer} onChange={(e) => form.setData('offer', e.target.value)} placeholder="Current offer" />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <FieldLabel>Notes & Remarks</FieldLabel>
+                                    <textarea className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" rows={2} value={form.data.notes} onChange={(e) => form.setData('notes', e.target.value)} placeholder="Any special notes..." />
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-5">
-                        <button type="button" onClick={() => history.back()} className="rounded-md border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Cancel</button>
-                        <button type="submit" className="rounded-md bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]" disabled={form.processing}>
+                    <div className="flex justify-end gap-3 px-6 pb-12">
+                        <Button type="button" variant="outline" onClick={() => history.back()}>Cancel</Button>
+                        <Button type="submit" className="bg-[#147da2] hover:bg-[#106385]" disabled={form.processing}>
                             Save Bill Changes
-                        </button>
+                        </Button>
                     </div>
                 </form>
             </div>

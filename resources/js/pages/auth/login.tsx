@@ -49,37 +49,40 @@ export default function Login({
     return (
         <AuthLayout
             title="Log in to your account"
-            description="Use your panel credentials or tap a quick-fill profile below"
+            description="Use your panel credentials to access your dashboard"
+            sidebar={
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                        <div className="h-1 w-6 rounded-full bg-[#147da2]" />
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Quick Fill Profiles</p>
+                    </div>
+                    <div className="grid gap-3">
+                        {panelQuickLogins.map((profile) => (
+                            <button
+                                key={profile.panel}
+                                type="button"
+                                onClick={() => fillCredentials(profile.email, profile.password)}
+                                className="group flex flex-col rounded-xl border border-slate-200 bg-white/80 p-4 text-left shadow-sm transition-all hover:border-[#147da2] hover:bg-white hover:shadow-md"
+                            >
+                                <div className="flex items-center justify-between mb-1">
+                                    <p className="text-sm font-bold text-slate-800 group-hover:text-[#147da2]">{profile.panel}</p>
+                                    <div className="rounded-md bg-cyan-50 px-2 py-0.5 text-[10px] font-medium text-cyan-700">
+                                        {profile.hint}
+                                    </div>
+                                </div>
+                                <p className="text-xs text-slate-500 truncate w-full">{profile.email}</p>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            }
         >
             <Head title="Log in" />
-
-            <div className="space-y-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
-                <div className="flex items-center gap-2">
-                    <div className="h-1 w-8 rounded-full bg-[#147da2]" />
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#147da2]">Quick Fill Profiles</p>
-                </div>
-                <div className="grid gap-2 sm:grid-cols-2">
-                    {panelQuickLogins.map((profile) => (
-                        <button
-                            key={profile.panel}
-                            type="button"
-                            onClick={() => fillCredentials(profile.email, profile.password)}
-                            className="group flex flex-col rounded-xl border border-white bg-white p-3 text-left shadow-sm transition-all hover:border-[#147da2]/50 hover:shadow-md hover:shadow-[#147da2]/5"
-                        >
-                            <p className="text-xs font-bold text-slate-800 group-hover:text-[#147da2]">{profile.panel}</p>
-                            <p className="text-[10px] text-slate-500 truncate w-full">{profile.email}</p>
-                            <div className="mt-2 inline-flex items-center rounded-md bg-cyan-50 px-2 py-0.5 text-[10px] font-medium text-cyan-700">
-                                {profile.hint}
-                            </div>
-                        </button>
-                    ))}
-                </div>
-            </div>
 
             <Form
                 {...store.form()}
                 resetOnSuccess={['password']}
-                className="flex flex-col gap-5"
+                className="flex flex-col gap-4"
             >
                 {({ processing, errors }) => (
                     <>
@@ -138,7 +141,7 @@ export default function Login({
 
                             <Button
                                 type="submit"
-                                className="h-11 w-full rounded-xl bg-[#147da2] text-sm font-bold shadow-lg shadow-[#147da2]/20 transition-all hover:bg-[#106385] hover:shadow-xl hover:shadow-[#147da2]/30 active:scale-[0.98]"
+                                className="h-10 w-full rounded-xl bg-[#147da2] text-sm font-bold transition-all hover:bg-[#106385] active:scale-[0.98]"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"

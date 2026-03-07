@@ -1,6 +1,13 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowRight, BarChart3, FlaskConical, ShieldCheck, WalletCards } from 'lucide-react';
+import { 
+    ArrowRight, 
+    FlaskConical, 
+    WalletCards, 
+    ShieldCheck, 
+    BarChart3
+} from 'lucide-react';
 import { dashboard, login } from '@/routes';
+import AppLogoIcon from '@/components/app-logo-icon';
 
 export default function Welcome() {
     const { auth } = usePage().props;
@@ -8,116 +15,117 @@ export default function Welcome() {
     const features = [
         {
             icon: FlaskConical,
-            title: 'End-to-End Billing Flow',
-            description: 'Test-wise, package-wise, referral, and collection center billing in one workflow.',
+            title: 'End-to-End Billing',
+            description: 'Streamlined test and package billing workflows.',
         },
         {
             icon: WalletCards,
-            title: 'Smart Wallet Engine',
-            description: 'Lab, doctor, and collection center wallet credit/debit entries with ledger trail.',
+            title: 'Wallet System',
+            description: 'Automated credit/debit trails for all users.',
         },
         {
             icon: ShieldCheck,
-            title: 'ACID-Safe Transactions',
-            description: 'Every bill is atomic with events for barcode, notifications, and reporting jobs.',
+            title: 'Secure Reports',
+            description: 'Encrypted reporting and audit trails.',
         },
         {
             icon: BarChart3,
-            title: 'Actionable Lab Analytics',
-            description: 'Revenue trends, bill operations, and patient throughput from one dashboard.',
+            title: 'Lab Analytics',
+            description: 'Real-time revenue and patient insights.',
         },
     ];
 
     return (
-        <>
-            <Head title="PathLabs Billing Software" />
+        <div className="min-h-screen bg-white text-slate-900">
+            <Head title="PathLabs - Diagnostic Cloud" />
 
-            <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#d8f3ff,_#f7fbff_45%,_#ffffff_70%)] text-slate-900">
-                <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-6">
-                    <div>
-                        <p className="text-2xl font-bold tracking-tight text-[#075985]">PathLabs</p>
-                        <p className="text-xs font-medium uppercase tracking-[0.25em] text-slate-500">Pathology + Radiology Billing Cloud</p>
+            {/* Simple Header */}
+            <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#147da2]">
+                        <AppLogoIcon className="size-5 fill-current text-white" />
                     </div>
+                    <div>
+                        <p className="text-xl font-bold tracking-tight text-slate-900">PathLabs</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#147da2]">Diagnostic Cloud</p>
+                    </div>
+                </div>
 
+                <div className="flex items-center gap-4">
                     {auth.user ? (
-                        <Link href={dashboard()} className="rounded-lg bg-[#0f87af] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0c7395]">
-                            Open Dashboard
+                        <Link href={dashboard()} className="rounded-lg bg-[#147da2] px-4 py-2 text-sm font-semibold text-white hover:bg-[#106385] transition-colors">
+                            Dashboard
                         </Link>
                     ) : (
-                        <Link href={login()} className="rounded-lg bg-[#0f87af] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0c7395]">
+                        <Link href={login()} className="rounded-lg bg-[#147da2] px-4 py-2 text-sm font-semibold text-white hover:bg-[#106385] transition-colors">
                             Login
                         </Link>
                     )}
-                </header>
+                </div>
+            </header>
 
-                <main className="mx-auto grid w-full max-w-7xl gap-8 px-6 pb-16 pt-6 lg:grid-cols-[1.1fr_0.9fr]">
-                    <section className="space-y-6">
-                        <span className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-700">
-                            Built for Labs, Centers, Doctors, Front Desk
+            <main className="mx-auto max-w-7xl px-6 py-16 lg:py-24">
+                <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
+                    <div>
+                        <span className="inline-flex rounded-md bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-600">
+                            Professional Lab Management
                         </span>
-
-                        <h1 className="max-w-2xl text-4xl font-bold leading-tight text-slate-900 md:text-5xl">
-                            Scale your pathology and radiology billing with confidence.
+                        <h1 className="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl">
+                            Modernize your <br />
+                            <span className="text-[#147da2]">Lab Operations</span>.
                         </h1>
-
-                        <p className="max-w-xl text-base leading-relaxed text-slate-600">
-                            Unified billing, wallets, commissions, sample barcode workflows, and panel-level operations in a single platform.
+                        <p className="mt-8 text-lg text-slate-500 max-w-lg leading-relaxed">
+                            A unified platform for diagnostic billing, wallet management, and laboratory reporting. 
+                            Built for accuracy, speed, and security.
                         </p>
-
-                        <div className="flex flex-wrap items-center gap-3">
+                        
+                        <div className="mt-10 flex flex-wrap items-center gap-4">
                             <Link
                                 href={auth.user ? dashboard() : login()}
-                                className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800"
+                                className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white hover:bg-slate-800 transition-colors shadow-sm"
                             >
-                                {auth.user ? 'Go to App' : 'Start with Demo Accounts'}
+                                {auth.user ? 'Go to Dashboard' : 'Get Started'}
                                 <ArrowRight className="h-4 w-4" />
                             </Link>
-                            <span className="text-sm text-slate-500">Live-ready multi-tenant architecture</span>
+                            <span className="text-sm font-medium text-slate-400">Trusted by modern diagnostic centers</span>
                         </div>
+                    </div>
 
-                        <div className="grid gap-4 pt-4 sm:grid-cols-2">
-                            {features.map((feature) => (
-                                <article key={feature.title} className="rounded-2xl border border-slate-200/70 bg-white/90 p-4 shadow-sm backdrop-blur">
-                                    <feature.icon className="h-5 w-5 text-[#0f87af]" />
-                                    <h2 className="mt-3 text-sm font-semibold text-slate-900">{feature.title}</h2>
-                                    <p className="mt-1 text-sm leading-relaxed text-slate-600">{feature.description}</p>
-                                </article>
-                            ))}
-                        </div>
-                    </section>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        {features.map((feature, idx) => (
+                            <div key={idx} className="rounded-2xl border border-slate-100 bg-slate-50/50 p-6 hover:border-slate-200 transition-colors">
+                                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-slate-100 shadow-sm">
+                                    <feature.icon className="h-5 w-5 text-[#147da2]" />
+                                </div>
+                                <h3 className="text-base font-bold text-slate-900">{feature.title}</h3>
+                                <p className="mt-1 text-sm text-slate-500 leading-relaxed">
+                                    {feature.description}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
 
-                    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xl shadow-cyan-100/50">
-                        <div className="mb-5 flex items-center justify-between">
-                            <h2 className="text-lg font-semibold text-slate-900">Operational Snapshot</h2>
-                            <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Cloud Active</span>
-                        </div>
-
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <div className="rounded-xl bg-[#0f87af] p-4 text-white">
-                                <p className="text-xs uppercase tracking-wide text-white/80">Avg Bill Time</p>
-                                <p className="mt-2 text-2xl font-bold">48s</p>
-                            </div>
-                            <div className="rounded-xl bg-slate-900 p-4 text-white">
-                                <p className="text-xs uppercase tracking-wide text-white/80">Sample Tracking</p>
-                                <p className="mt-2 text-2xl font-bold">100%</p>
-                            </div>
-                            <div className="rounded-xl bg-orange-500 p-4 text-white">
-                                <p className="text-xs uppercase tracking-wide text-white/80">Wallet Posting</p>
-                                <p className="mt-2 text-2xl font-bold">Realtime</p>
-                            </div>
-                            <div className="rounded-xl bg-emerald-600 p-4 text-white">
-                                <p className="text-xs uppercase tracking-wide text-white/80">Panel Roles</p>
-                                <p className="mt-2 text-2xl font-bold">5+</p>
-                            </div>
-                        </div>
-
-                        <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                            <p className="text-sm font-semibold text-slate-800">Includes ready demo credentials</p>
-                            <p className="mt-1 text-sm text-slate-600">Admin, Lab, Collection Center, Doctor, and Front Desk login shortcuts are available on the login page.</p>
-                        </div>
-                    </section>
-                </main>
-            </div>
-        </>
+                {/* Simple Stats Row */}
+                <div className="mt-24 grid grid-cols-2 gap-8 border-t border-slate-100 pt-12 text-center sm:grid-cols-4">
+                    <div className="space-y-1">
+                        <p className="text-3xl font-bold text-slate-900">48s</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Avg Billing Time</p>
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-3xl font-bold text-slate-900">100%</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Sample Tracking</p>
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-3xl font-bold text-slate-900">Realtime</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Wallet Sync</p>
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-3xl font-bold text-slate-900">99.9%</p>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Cloud Uptime</p>
+                    </div>
+                </div>
+            </main>
+        </div>
     );
 }

@@ -24,6 +24,7 @@ class Sample extends Model
         'result_payload',
         'result_remarks',
         'approval_date',
+        'approved_by',
         'collected_at',
     ];
 

@@ -17,11 +17,14 @@ class SaveSampleResultRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'action' => ['required', 'in:draft,approve'],
+            'action' => ['required', 'in:draft,approve,collect'],
             'approval_date' => ['nullable', 'date'],
             'technical_remarks' => ['nullable', 'string'],
             'parameters' => ['required', 'array'],
             'parameters.*.key' => ['required', 'string', 'max:100'],
+            'parameters.*.name' => ['nullable', 'string', 'max:255'],
+            'parameters.*.unit' => ['nullable', 'string', 'max:100'],
+            'parameters.*.normal_range' => ['nullable', 'string', 'max:255'],
             'parameters.*.value' => ['nullable', 'string', 'max:100'],
             'parameters.*.remarks' => ['nullable', 'string', 'max:255'],
         ];

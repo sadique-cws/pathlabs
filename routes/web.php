@@ -91,9 +91,6 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
             Route::get('test-methods', [TestReportController::class, 'testMethods'])
                 ->middleware('feature:reports.test_methods')
                 ->name('test-methods');
-            Route::get('sample-management', [TestReportController::class, 'sampleManagement'])
-                ->middleware('feature:reports.sample_management')
-                ->name('sample-management');
             Route::get('result-entry', [TestReportController::class, 'resultEntry'])
                 ->middleware('feature:reports.result_entry')
                 ->name('result-entry');
@@ -103,6 +100,9 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
             Route::put('result-entry/{sample}', [TestReportController::class, 'saveResultEntry'])
                 ->middleware('feature:reports.result_entry')
                 ->name('result-entry-update');
+            Route::get('result-entry/{sample}/print', [TestReportController::class, 'printReport'])
+                ->middleware('feature:reports.result_entry')
+                ->name('result-entry-print');
             Route::get('parameters', [TestParameterController::class, 'index'])
                 ->middleware('feature:clinical_master.manage_tests')
                 ->name('parameters');

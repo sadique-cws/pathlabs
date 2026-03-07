@@ -1,5 +1,6 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
-import { useMemo } from 'react';
+import { Head, useForm, usePage, Link } from '@inertiajs/react';
+import { useEffect, useMemo } from 'react';
+import { Printer } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
@@ -8,13 +9,17 @@ type SampleInfo = {
     barcode: string;
     bill_number: string;
     test_name: string;
-    category: string;
+    department: string;
     sample_type: string;
     patient_name: string;
+    patient_phone: string;
+    patient_gender: string;
+    patient_age: number;
     bill_date: string;
     status: string;
     technical_remarks: string;
     approval_date: string;
+    approved_by_name: string | null;
 };
 
 type ParameterRow = {
@@ -29,9 +34,17 @@ type ParameterRow = {
 type Props = {
     sample: SampleInfo;
     parameters: ParameterRow[];
+    userRole: 'doctor' | 'lab_tech';
 };
 
-export default function ResultEntryForm({ sample, parameters }: Props) {
+const statusLabels: Record<string, { label: string; className: string }> = {
+    pending: { label: 'Pending', className: 'bg-amber-100 text-amber-700' },
+    collected: { label: 'Collected', className: 'bg-blue-100 text-blue-700' },
+    in_progress: { label: 'In Progress', className: 'bg-sky-100 text-sky-700' },
+    completed: { label: 'Completed', className: 'bg-emerald-100 text-emerald-700' },
+};
+
+export default function ResultEntryForm({ sample, parameters, userRole }: Props) {
     const page = usePage();
     const flash = page.props.flash as { success?: string };
     const breadcrumbs: BreadcrumbItem[] = [
@@ -47,19 +60,20 @@ export default function ResultEntryForm({ sample, parameters }: Props) {
         parameters,
     });
 
-    const statusClass = useMemo(() => {
-        if (sample.status === 'Completed') {
-            return 'bg-emerald-100 text-emerald-700';
-        }
+    useEffect(() => {
+        form.setData({
+            action: 'draft',
+            approval_date: sample.approval_date,
+            technical_remarks: sample.technical_remarks,
+            parameters,
+        });
+    }, [sample.id]);
 
-        if (sample.status === 'In_progress' || sample.status === 'In Progress') {
-            return 'bg-sky-100 text-sky-700';
-        }
+    const currentStatus = statusLabels[sample.status] ?? statusLabels.pending;
+    const isCompleted = sample.status === 'completed';
+    const isDoctor = userRole === 'doctor';
 
-        return 'bg-amber-100 text-amber-700';
-    }, [sample.status]);
-
-    const submit = (action: 'draft' | 'approve'): void => {
+    const submit = (action: 'draft' | 'approve' | 'collect'): void => {
         form.setData('action', action);
         form.put(`/lab/test-reports/result-entry/${sample.id}`);
     };
@@ -78,15 +92,61 @@ export default function ResultEntryForm({ sample, parameters }: Props) {
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div>
                         <h1 className="text-xl font-semibold text-slate-800">Test Result Entry</h1>
-                        <p className="mt-1 text-sm text-slate-500">Parameter-based result entry</p>
+                        <p className="mt-1 text-sm text-slate-500">
+                            {sample.test_name} — <span className="font-medium text-[#147da2]">{sample.department}</span>
+                        </p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button type="button" onClick={() => submit('draft')} className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                            Save Draft
-                        </button>
-                        <button type="button" onClick={() => submit('approve')} className="rounded-md bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
-                            Approve & Complete
-                        </button>
+                        {/* Lab Tech: can Save Draft & Mark Collected */}
+                        {!isDoctor && !isCompleted && (
+                            <>
+                                {sample.status === 'pending' && (
+                                    <button
+                                        type="button"
+                                        onClick={() => submit('collect')}
+                                        className="rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+                                    >
+                                        Mark Collected
+                                    </button>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => submit('draft')}
+                                    className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                                >
+                                    Save Draft
+                                </button>
+                            </>
+                        )}
+                        {/* Doctor: can Approve */}
+                        {isDoctor && !isCompleted && (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={() => submit('draft')}
+                                    className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                                >
+                                    Save Draft
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => submit('approve')}
+                                    className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                                >
+                                    Approve & Complete
+                                </button>
+                            </>
+                        )}
+                        {/* Print Report (only when completed) */}
+                        {isCompleted && (
+                            <Link
+                                href={`/lab/test-reports/result-entry/${sample.id}/print`}
+                                className="flex items-center gap-1.5 rounded-md bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]"
+                            >
+                                <Printer className="h-4 w-4" />
+                                Print Report
+                            </Link>
+                        )}
                     </div>
                 </div>
 
@@ -96,15 +156,27 @@ export default function ResultEntryForm({ sample, parameters }: Props) {
                         <div className="space-y-2 text-sm text-slate-700">
                             <p><span className="font-medium text-slate-500">Bill Number:</span> {sample.bill_number}</p>
                             <p><span className="font-medium text-slate-500">Test Name:</span> {sample.test_name}</p>
-                            <p><span className="font-medium text-slate-500">Category:</span> {sample.category}</p>
+                            <p><span className="font-medium text-slate-500">Department:</span> {sample.department}</p>
                             <p><span className="font-medium text-slate-500">Patient:</span> {sample.patient_name}</p>
+                            <p><span className="font-medium text-slate-500">Gender / Age:</span> {sample.patient_gender} / {sample.patient_age}y</p>
+                            <p><span className="font-medium text-slate-500">Phone:</span> {sample.patient_phone}</p>
                             <p><span className="font-medium text-slate-500">Barcode:</span> {sample.barcode}</p>
                             <p><span className="font-medium text-slate-500">Bill Date:</span> {sample.bill_date}</p>
                             <p><span className="font-medium text-slate-500">Sample Type:</span> {sample.sample_type}</p>
-                            <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass}`}>
-                                {sample.status}
+                            <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${currentStatus.className}`}>
+                                {currentStatus.label}
                             </span>
                         </div>
+
+                        {isCompleted && (
+                            <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-700">
+                                <p className="font-semibold">✅ Approved</p>
+                                {sample.approved_by_name && (
+                                    <p className="mt-1">Doctor: <span className="font-semibold">{sample.approved_by_name}</span></p>
+                                )}
+                                <p className="mt-0.5">Date: {sample.approval_date}</p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="rounded-lg border border-slate-200 bg-white p-6">
@@ -121,26 +193,57 @@ export default function ResultEntryForm({ sample, parameters }: Props) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {form.data.parameters.map((row, index) => (
+                                    {form.data.parameters.map((row, index) => {
+                                        const rangeStatus = row.value && row.normal_range && row.normal_range !== '-' ? getRangeStatus(row.value, row.normal_range) : 'normal';
+                                        
+                                        return (
                                         <tr key={row.key} className="border-b border-slate-100 text-sm">
                                             <td className="px-2 py-2 text-slate-700">{row.name}</td>
                                             <td className="px-2 py-2">
+                                                <div className="relative">
+                                                    <input
+                                                        className={`h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500 ${rangeStatus !== 'normal' ? 'font-bold text-red-700 pr-8' : ''}`}
+                                                        value={row.value}
+                                                        disabled={isCompleted}
+                                                        onChange={(event) => {
+                                                            const next = [...form.data.parameters];
+                                                            next[index] = { ...next[index], value: event.target.value };
+                                                            form.setData('parameters', next);
+                                                        }}
+                                                    />
+                                                    {rangeStatus === 'high' && <span className="absolute right-2 top-2 text-xs font-bold text-red-600">(H)</span>}
+                                                    {rangeStatus === 'low' && <span className="absolute right-2 top-2 text-xs font-bold text-red-600">(L)</span>}
+                                                </div>
+                                            </td>
+                                            <td className="px-2 py-2">
                                                 <input
-                                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
-                                                    value={row.value}
+                                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
+                                                    value={row.unit}
+                                                    disabled={isCompleted}
                                                     onChange={(event) => {
                                                         const next = [...form.data.parameters];
-                                                        next[index] = { ...next[index], value: event.target.value };
+                                                        next[index] = { ...next[index], unit: event.target.value };
                                                         form.setData('parameters', next);
                                                     }}
                                                 />
                                             </td>
-                                            <td className="px-2 py-2 text-slate-600">{row.unit}</td>
-                                            <td className="px-2 py-2 text-slate-600">{row.normal_range}</td>
                                             <td className="px-2 py-2">
                                                 <input
-                                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
+                                                    value={row.normal_range}
+                                                    disabled={isCompleted}
+                                                    onChange={(event) => {
+                                                        const next = [...form.data.parameters];
+                                                        next[index] = { ...next[index], normal_range: event.target.value };
+                                                        form.setData('parameters', next);
+                                                    }}
+                                                />
+                                            </td>
+                                            <td className="px-2 py-2">
+                                                <input
+                                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
                                                     value={row.remarks}
+                                                    disabled={isCompleted}
                                                     onChange={(event) => {
                                                         const next = [...form.data.parameters];
                                                         next[index] = { ...next[index], remarks: event.target.value };
@@ -149,7 +252,8 @@ export default function ResultEntryForm({ sample, parameters }: Props) {
                                                 />
                                             </td>
                                         </tr>
-                                    ))}
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
@@ -159,8 +263,9 @@ export default function ResultEntryForm({ sample, parameters }: Props) {
                                 <label className="mb-1 block text-sm font-semibold text-slate-700">Technician Remarks</label>
                                 <textarea
                                     rows={3}
-                                    className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                    className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
                                     value={form.data.technical_remarks}
+                                    disabled={isCompleted}
                                     onChange={(event) => form.setData('technical_remarks', event.target.value)}
                                 />
                             </div>
@@ -168,10 +273,14 @@ export default function ResultEntryForm({ sample, parameters }: Props) {
                                 <label className="mb-1 block text-sm font-semibold text-slate-700">Approval Date</label>
                                 <input
                                     type="date"
-                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
                                     value={form.data.approval_date}
+                                    disabled={isCompleted || !isDoctor}
                                     onChange={(event) => form.setData('approval_date', event.target.value)}
                                 />
+                                {!isDoctor && !isCompleted && (
+                                    <p className="mt-1 text-xs text-slate-400">Only the approving doctor can set this date</p>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -179,4 +288,21 @@ export default function ResultEntryForm({ sample, parameters }: Props) {
             </div>
         </AppLayout>
     );
+}
+
+/**
+ * Parses "X - Y" ranges and checks if value falls outside, returns status.
+ */
+function getRangeStatus(value: string, normalRange: string): 'high' | 'low' | 'normal' {
+    const numVal = parseFloat(value);
+    if (isNaN(numVal)) return 'normal';
+
+    const match = normalRange.match(/^([\d.]+)\s*[-–]\s*([\d.]+)$/);
+    if (!match) return 'normal';
+
+    const low = parseFloat(match[1]);
+    const high = parseFloat(match[2]);
+    if (numVal < low) return 'low';
+    if (numVal > high) return 'high';
+    return 'normal';
 }

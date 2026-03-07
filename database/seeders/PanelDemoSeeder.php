@@ -62,18 +62,19 @@ class PanelDemoSeeder extends Seeder
         );
 
         $tests = collect([
-            ['code' => 'CBC', 'name' => 'Complete Blood Count (CBC)', 'price' => 350],
-            ['code' => 'LFT', 'name' => 'Liver Function Test', 'price' => 650],
-            ['code' => 'KFT', 'name' => 'Kidney Function Test', 'price' => 600],
-            ['code' => 'XRCH', 'name' => 'Chest X-Ray', 'price' => 900],
-            ['code' => 'THY', 'name' => 'Thyroid Panel', 'price' => 800],
-            ['code' => 'USAB', 'name' => 'Abdominal Ultrasound', 'price' => 1200],
+            ['code' => 'CBC', 'name' => 'Complete Blood Count (CBC)', 'price' => 350, 'department' => 'pathology', 'sample_type' => 'blood'],
+            ['code' => 'LFT', 'name' => 'Liver Function Test', 'price' => 650, 'department' => 'pathology', 'sample_type' => 'blood'],
+            ['code' => 'KFT', 'name' => 'Kidney Function Test', 'price' => 600, 'department' => 'pathology', 'sample_type' => 'blood'],
+            ['code' => 'XRCH', 'name' => 'Chest X-Ray', 'price' => 900, 'department' => 'radiology', 'sample_type' => 'imaging'],
+            ['code' => 'THY', 'name' => 'Thyroid Panel', 'price' => 800, 'department' => 'pathology', 'sample_type' => 'blood'],
+            ['code' => 'USAB', 'name' => 'Abdominal Ultrasound', 'price' => 1200, 'department' => 'radiology', 'sample_type' => 'imaging'],
         ])->map(function (array $testData) use ($lab): LabTest {
             return LabTest::query()->updateOrCreate(
                 ['lab_id' => $lab->id, 'code' => $testData['code']],
                 [
                     'name' => $testData['name'],
-                    'sample_type' => 'blood',
+                    'sample_type' => $testData['sample_type'],
+                    'department' => $testData['department'],
                     'price' => $testData['price'],
                     'referral_commission_value' => 10,
                     'referral_commission_type' => 'percent',
@@ -281,7 +282,8 @@ class PanelDemoSeeder extends Seeder
                 'reports.result_entry',
                 'reports.test_units',
                 'reports.test_methods',
-                'reports.sample_management'
+                'reports.sample_management',
+                'doctor_desk.records',
             ],
             'front_desk' => [
                 'dashboard.view',

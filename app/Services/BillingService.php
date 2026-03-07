@@ -45,8 +45,8 @@ class BillingService
             $baseServiceCharge = self::SERVICE_CHARGE;
             $finalServiceCharge = round($baseServiceCharge + $serviceOtherChargeAmount, 2);
 
-            $testTotal = round($tests->sum(fn (LabTest $test): float => (float) $test->price), 2);
-            $packageTotal = round($packages->sum(fn (TestPackage $package): float => (float) $package->price), 2);
+            $testTotal = round($tests->sum(fn(LabTest $test): float => (float) $test->price), 2);
+            $packageTotal = round($packages->sum(fn(TestPackage $package): float => (float) $package->price), 2);
             $grossTotal = round($testTotal + $packageTotal, 2);
             $baseDiscount = round((float) ($payload['discount_amount'] ?? 0), 2);
             $doctorDiscountType = (string) ($payload['doctor_discount_type'] ?? 'fixed');
@@ -319,19 +319,31 @@ class BillingService
         foreach ($expandedTests as $test) {
             $billItem = $directTestItems->get($test->id);
 
+            $sampleType = strtolower(trim((string) $test->sample_type));
+            $nonPhysicalSamples = ['none', 'imaging', 'radiology', 'x-ray', 'xray', 'ultrasound', 'mri', 'ct scan'];
+            $requiresPhysicalSample = $sampleType !== '' && !in_array($sampleType, $nonPhysicalSamples, true);
+
             for ($index = 0; $index < $sampleQuantity; $index++) {
+                $status = $requiresPhysicalSample ? 'pending' : 'collected';
+
                 $sample = Sample::query()->create([
                     'lab_id' => $bill->lab_id,
                     'bill_id' => $bill->id,
                     'bill_item_id' => $billItem?->id,
                     'test_id' => $test->id,
                     'barcode' => null,
-                    'status' => 'pending',
+                    'status' => $status,
                 ]);
 
-                $sample->update([
-                    'barcode' => $this->barcodeService->generate($bill->lab_id, $bill->id, $sample->id),
-                ]);
+                if ($requiresPhysicalSample) {
+                    $sample->update([
+                        'barcode' => $this->barcodeService->generate($bill->lab_id, $bill->id, $sample->id),
+                    ]);
+                } else {
+                    $sample->update([
+                        'collected_at' => now(),
+                    ]);
+                }
 
                 event(new SampleCreated($sample->fresh() ?? $sample));
             }
@@ -397,7 +409,7 @@ class BillingService
     private function resolveServiceOtherCharges(int $labId, array $payload): Collection
     {
         $charges = collect($payload['service_other_charges'] ?? [])
-            ->filter(fn (mixed $charge): bool => is_array($charge) && isset($charge['name']))
+            ->filter(fn(mixed $charge): bool => is_array($charge) && isset($charge['name']))
             ->map(function (array $charge) use ($labId): array {
                 $name = trim((string) $charge['name']);
                 $amount = round((float) ($charge['amount'] ?? 0), 2);
@@ -419,7 +431,7 @@ class BillingService
                     'amount' => $amount,
                 ];
             })
-            ->filter(fn (array $charge): bool => $charge['name'] !== '' && $charge['amount'] > 0)
+            ->filter(fn(array $charge): bool => $charge['name'] !== '' && $charge['amount'] > 0)
             ->values();
 
         return $charges;

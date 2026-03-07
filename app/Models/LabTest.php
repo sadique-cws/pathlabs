@@ -22,6 +22,7 @@ class LabTest extends Model
         'name',
         'code',
         'sample_type',
+        'department',
         'price',
         'referral_commission_value',
         'referral_commission_type',

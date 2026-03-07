@@ -69,60 +69,42 @@ class TestReportController extends Controller
         ]);
     }
 
-    public function sampleManagement(Request $request): Response
-    {
-        $labId = (int) $request->attributes->get('lab_id');
-
-        $samples = Sample::query()
-            ->where('lab_id', $labId)
-            ->with([
-                'bill:id,bill_number,billing_at,patient_id',
-                'bill.patient:id,name,phone',
-                'test:id,name,sample_type',
-            ])
-            ->latest('id')
-            ->limit(400)
-            ->get()
-            ->map(function (Sample $sample): array {
-                return [
-                    'id' => $sample->id,
-                    'sample_code' => $sample->barcode ?? '-',
-                    'bill_number' => $sample->bill?->bill_number ?? '-',
-                    'patient_name' => $sample->bill?->patient?->name ?? '-',
-                    'test_name' => $sample->test?->name ?? '-',
-                    'sample_type' => $sample->test?->sample_type !== null && $sample->test?->sample_type !== ''
-                        ? ucfirst($sample->test->sample_type)
-                        : 'None',
-                    'bill_date' => $sample->bill?->billing_at?->format('Y-m-d') ?? '-',
-                    'status' => ucfirst((string) $sample->status),
-                ];
-            })
-            ->values()
-            ->all();
-
-        return Inertia::render('test-reports/sample-management', [
-            'samples' => $samples,
-        ]);
-    }
-
     public function resultEntry(Request $request): Response
     {
         $labId = (int) $request->attributes->get('lab_id');
+        $statusFilter = $request->input('status', '');
+        $departmentFilter = $request->input('department', '');
 
-        $samples = Sample::query()
+        $query = Sample::query()
             ->where('lab_id', $labId)
             ->with([
                 'bill:id,bill_number,billing_at,patient_id',
                 'bill.patient:id,name,phone,gender,age_years',
-                'test:id,name,sample_type',
+                'test:id,name,sample_type,department',
             ])
             ->latest('id')
-            ->limit(400)
-            ->get();
+            ->limit(400);
 
-        $rows = $samples->map(function (Sample $sample): array {
-            $status = $sample->status === 'completed' ? 'Completed' : ($sample->status === 'approved' ? 'Approved' : 'Pending');
+        if ($statusFilter !== '') {
+            $query->where('status', $statusFilter);
+        }
 
+        if ($departmentFilter !== '') {
+            $query->whereHas('test', function ($q) use ($departmentFilter): void {
+                $q->where('department', $departmentFilter);
+            });
+        }
+
+        $samples = $query->get();
+
+        $statusMap = [
+            'pending' => 'Pending',
+            'collected' => 'Collected',
+            'in_progress' => 'In Progress',
+            'completed' => 'Completed',
+        ];
+
+        $rows = $samples->map(function (Sample $sample) use ($statusMap): array {
             return [
                 'id' => $sample->id,
                 'barcode' => $sample->barcode ?? '-',
@@ -132,11 +114,12 @@ class TestReportController extends Controller
                 'patient_gender' => $sample->bill?->patient?->gender ?? '-',
                 'patient_age' => $sample->bill?->patient?->age_years ?? 0,
                 'test_name' => $sample->test?->name ?? '-',
+                'department' => ucfirst((string) ($sample->test?->department ?? 'pathology')),
                 'sample_type' => $sample->test?->sample_type !== null && $sample->test?->sample_type !== ''
                     ? ucfirst($sample->test->sample_type)
                     : 'None',
                 'bill_date' => $sample->bill?->billing_at?->format('d/m/Y') ?? '-',
-                'status' => $status,
+                'status' => $statusMap[$sample->status] ?? ucfirst((string) $sample->status),
             ];
         })->values();
 
@@ -144,9 +127,14 @@ class TestReportController extends Controller
             'rows' => $rows->all(),
             'stats' => [
                 'pending' => $rows->where('status', 'Pending')->count(),
+                'collected' => $rows->where('status', 'Collected')->count(),
                 'in_progress' => $rows->where('status', 'In Progress')->count(),
                 'completed' => $rows->where('status', 'Completed')->count(),
                 'total' => $rows->count(),
+            ],
+            'filters' => [
+                'status' => $statusFilter,
+                'department' => $departmentFilter,
             ],
         ]);
     }
@@ -156,7 +144,7 @@ class TestReportController extends Controller
         $labId = (int) $request->attributes->get('lab_id');
         abort_if($sample->lab_id !== $labId, 404);
 
-        $sample->load(['bill:id,bill_number,billing_at,patient_id', 'bill.patient:id,name', 'test:id,name,sample_type', 'test.parameters']);
+        $sample->load(['bill:id,bill_number,billing_at,patient_id', 'bill.patient:id,name,phone,gender,age_years,dob', 'test:id,name,sample_type,department', 'test.parameters']);
 
         $dbParameters = $sample->test?->parameters;
 
@@ -175,10 +163,23 @@ class TestReportController extends Controller
 
             return [
                 ...$parameter,
+                'name' => is_array($saved) && isset($saved['name']) ? (string) $saved['name'] : $parameter['name'],
+                'unit' => is_array($saved) && isset($saved['unit']) ? (string) $saved['unit'] : $parameter['unit'],
+                'normal_range' => is_array($saved) && isset($saved['normal_range']) ? (string) $saved['normal_range'] : $parameter['normal_range'],
                 'value' => is_array($saved) ? (string) ($saved['value'] ?? '') : '',
                 'remarks' => is_array($saved) ? (string) ($saved['remarks'] ?? '') : '',
             ];
         })->all();
+
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $isDoctor = $user !== null && $user->hasRole('doctor');
+
+        $approvedByName = null;
+        if ($sample->approved_by) {
+            $approver = \App\Models\User::query()->find($sample->approved_by);
+            $approvedByName = $approver?->name;
+        }
 
         return Inertia::render('test-reports/result-entry-form', [
             'sample' => [
@@ -186,17 +187,22 @@ class TestReportController extends Controller
                 'barcode' => $sample->barcode ?? '-',
                 'bill_number' => $sample->bill?->bill_number ?? '-',
                 'test_name' => $sample->test?->name ?? '-',
-                'category' => 'Hematology',
+                'department' => ucfirst((string) ($sample->test?->department ?? 'pathology')),
                 'sample_type' => $sample->test?->sample_type !== null && $sample->test?->sample_type !== ''
                     ? ucfirst($sample->test->sample_type)
                     : 'None',
                 'patient_name' => $sample->bill?->patient?->name ?? '-',
+                'patient_phone' => $sample->bill?->patient?->phone ?? '-',
+                'patient_gender' => $sample->bill?->patient?->gender !== null && $sample->bill?->patient?->gender !== '' ? ucfirst((string) $sample->bill?->patient?->gender) : '-',
+                'patient_age' => $sample->bill?->patient?->age_years ?? 0,
                 'bill_date' => $sample->bill?->billing_at?->format('Y-m-d') ?? now()->format('Y-m-d'),
-                'status' => ucfirst((string) $sample->status),
+                'status' => $sample->status ?? 'pending',
                 'technical_remarks' => $sample->result_remarks ?? '',
                 'approval_date' => $sample->approval_date?->format('Y-m-d') ?? now()->format('Y-m-d'),
+                'approved_by_name' => $approvedByName,
             ],
             'parameters' => $parameters,
+            'userRole' => $isDoctor ? 'doctor' : 'lab_tech',
         ]);
     }
 
@@ -208,19 +214,102 @@ class TestReportController extends Controller
         $validated = $request->validated();
         $action = (string) $validated['action'];
 
-        $sample->update([
+        /** @var \App\Models\User|null $user */
+        $user = $request->user();
+
+        $updateData = [
             'result_payload' => $validated['parameters'],
             'result_remarks' => $validated['technical_remarks'] ?? null,
-            'approval_date' => $action === 'approve' ? ($validated['approval_date'] ?? now()->toDateString()) : null,
-            'status' => $action === 'approve' ? 'completed' : 'in_progress',
-        ]);
+        ];
 
-        $message = $action === 'approve'
-            ? 'Result approved and completed.'
-            : 'Result saved as draft.';
+        if ($action === 'approve') {
+            $updateData['approval_date'] = $validated['approval_date'] ?? now()->toDateString();
+            $updateData['approved_by'] = $user?->id;
+            $updateData['status'] = 'completed';
+        } elseif ($action === 'collect') {
+            $updateData['status'] = 'collected';
+            $updateData['collected_at'] = now();
+        } else {
+            // draft
+            $updateData['status'] = 'in_progress';
+        }
+
+        $sample->update($updateData);
+
+        $messages = [
+            'approve' => 'Result approved and completed.',
+            'collect' => 'Sample marked as collected.',
+            'draft' => 'Result saved as draft.',
+        ];
 
         return to_route('lab.test-reports.result-entry-detail', ['sample' => $sample->id])
-            ->with('success', $message);
+            ->with('success', $messages[$action] ?? 'Saved.');
+    }
+
+    public function printReport(Request $request, Sample $sample): Response
+    {
+        $labId = (int) $request->attributes->get('lab_id');
+        abort_if($sample->lab_id !== $labId, 404);
+
+        $sample->load([
+            'bill:id,bill_number,billing_at,patient_id',
+            'bill.patient:id,name,phone,gender,age_years,dob,address,city,state,pin_code',
+            'test:id,name,sample_type,department',
+            'test.parameters',
+        ]);
+
+        $dbParameters = $sample->test?->parameters;
+        $parameterTemplate = $dbParameters && $dbParameters->isNotEmpty()
+            ? $dbParameters->map(fn($p) => [
+                'key' => 'param_' . $p->id,
+                'name' => $p->name,
+                'unit' => $p->unit ?? '-',
+                'normal_range' => $p->normal_range ?? '-',
+            ])->all()
+            : $this->parameterTemplateForTest($sample->test?->name);
+
+        $savedValues = collect($sample->result_payload ?? [])->keyBy('key');
+        $parameters = collect($parameterTemplate)->map(function (array $parameter) use ($savedValues): array {
+            $saved = $savedValues->get($parameter['key']);
+            return [
+                ...$parameter,
+                'name' => is_array($saved) && isset($saved['name']) ? (string) $saved['name'] : $parameter['name'],
+                'unit' => is_array($saved) && isset($saved['unit']) ? (string) $saved['unit'] : $parameter['unit'],
+                'normal_range' => is_array($saved) && isset($saved['normal_range']) ? (string) $saved['normal_range'] : $parameter['normal_range'],
+                'value' => is_array($saved) ? (string) ($saved['value'] ?? '') : '',
+                'remarks' => is_array($saved) ? (string) ($saved['remarks'] ?? '') : '',
+            ];
+        })->all();
+
+        $approvedByName = null;
+        if ($sample->approved_by) {
+            $approver = \App\Models\User::query()->find($sample->approved_by);
+            $approvedByName = $approver?->name;
+        }
+
+        return Inertia::render('test-reports/print-report', [
+            'sample' => [
+                'id' => $sample->id,
+                'barcode' => $sample->barcode ?? '-',
+                'bill_number' => $sample->bill?->bill_number ?? '-',
+                'test_name' => $sample->test?->name ?? '-',
+                'department' => ucfirst((string) ($sample->test?->department ?? 'pathology')),
+                'sample_type' => $sample->test?->sample_type !== null && $sample->test?->sample_type !== ''
+                    ? ucfirst($sample->test->sample_type) : 'None',
+                'status' => $sample->status ?? 'pending',
+                'bill_date' => $sample->bill?->billing_at?->format('d M Y') ?? '-',
+                'approval_date' => $sample->approval_date?->format('d M Y') ?? '-',
+                'technical_remarks' => $sample->result_remarks ?? '',
+                'approved_by_name' => $approvedByName,
+            ],
+            'patient' => [
+                'name' => $sample->bill?->patient?->name ?? '-',
+                'phone' => $sample->bill?->patient?->phone ?? '-',
+                'gender' => $sample->bill?->patient?->gender !== null && $sample->bill?->patient?->gender !== '' ? ucfirst((string) $sample->bill?->patient?->gender) : '-',
+                'age' => $sample->bill?->patient?->age_years ?? 0,
+            ],
+            'parameters' => $parameters,
+        ]);
     }
 
     /**

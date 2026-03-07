@@ -85,7 +85,6 @@ const frontDeskSections: MenuSection[] = [
             { title: 'Test Units', href: '/lab/test-reports/test-units', permission: 'reports.test_units', matchPrefix: '/lab/test-reports/test-units' },
             { title: 'Test Methods', href: '/lab/test-reports/test-methods', permission: 'reports.test_methods', matchPrefix: '/lab/test-reports/test-methods' },
             { title: 'Test Parameters', href: '/lab/test-reports/parameters', permission: 'clinical_master.manage_tests', matchPrefix: '/lab/test-reports/parameters' },
-            { title: 'Sample Management', href: '/lab/test-reports/sample-management', permission: 'reports.sample_management', matchPrefix: '/lab/test-reports/sample-management' },
             { title: 'Report Formats', href: '/lab/coming-soon', permission: 'reports.report_formats', matchPrefix: '/lab/test-reports/report-formats' },
             { title: 'Result Entry', href: '/lab/test-reports/result-entry', permission: 'reports.result_entry', matchPrefix: '/lab/test-reports/result-entry' },
             { title: 'Job Sheets', href: '/lab/coming-soon', permission: 'reports.job_sheets', matchPrefix: '/lab/test-reports/job-sheets' },

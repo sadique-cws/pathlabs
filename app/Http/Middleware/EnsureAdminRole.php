@@ -17,7 +17,7 @@ class EnsureAdminRole
     {
         $user = $request->user();
 
-        if ($user === null || (! $user->hasRole('admin') && ! $user->hasRole('super_admin'))) {
+        if ($user === null || (! $user->hasRole('admin') && ! $user->hasRole('super_admin') && ! $user->hasRole('bde'))) {
             abort(403, 'You do not have admin access.');
         }
 

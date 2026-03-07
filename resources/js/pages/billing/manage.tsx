@@ -107,20 +107,20 @@ export default function ManageBills({ bills }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage Patient Bills" />
 
-            <div className="min-h-full bg-[#f4f7fb] p-4 md:p-6">
-                <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+                <div className="rounded-lg border border-slate-200 bg-white">
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
                         <h1 className="text-xl font-semibold text-slate-800">Manage Patient Bills</h1>
                         <div className="flex items-center gap-2">
-                            <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">
+                            <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                                 <Printer className="h-4 w-4" />
-                                Print
+                                Printer
                             </button>
-                            <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">
+                            <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                                 <FileSpreadsheet className="h-4 w-4" />
                                 Export
                             </button>
-                            <Link href="/lab/billing/create" className="rounded-lg bg-[#0f87af] px-3 py-2 text-sm font-semibold text-white hover:bg-[#0d7798]">
+                            <Link href="/lab/billing/create" className="rounded-lg bg-[#147da2] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
                                 + New Bill
                             </Link>
                         </div>
@@ -143,7 +143,7 @@ export default function ManageBills({ bills }: Props) {
                                                 <input
                                                     value={filters[column.key]}
                                                     onChange={(event) => setFilter(column.key, event.target.value)}
-                                                    className="w-full rounded-lg border border-slate-200 py-1.5 pl-7 pr-2 text-xs font-medium text-slate-700"
+                                                    className="w-full rounded-md border border-slate-200 py-1.5 pl-7 pr-2 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                                     placeholder={column.placeholder}
                                                 />
                                             </label>

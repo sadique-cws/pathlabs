@@ -64,13 +64,13 @@ export default function ManagePatients({ patients }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage Patients" />
 
-            <div className="min-h-full bg-[#f4f7fb] p-4 md:p-6">
+            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
                 <div className="mb-4">
-                    <h1 className="text-3xl font-semibold text-slate-800">Manage Patients</h1>
-                    <p className="mt-1 text-slate-600">Manage and monitor all registered patients in your system</p>
+                    <h1 className="text-xl font-semibold text-slate-800">Manage Patients</h1>
+                    <p className="mt-1 text-sm text-slate-500">Manage and monitor all registered patients in your system</p>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div className="rounded-lg border border-slate-200 bg-white">
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
                         <label className="relative w-full max-w-md">
                             <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
@@ -81,11 +81,11 @@ export default function ManagePatients({ patients }: Props) {
                                     setPage(1);
                                 }}
                                 placeholder="Search patients..."
-                                className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm"
+                                className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                             />
                         </label>
 
-                        <Link href="/lab/patients/add" className="rounded-lg bg-[#0f87af] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d7798]">
+                        <Link href="/lab/patients/add" className="rounded-lg bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
                             + Add Patient
                         </Link>
                     </div>
@@ -155,13 +155,13 @@ export default function ManagePatients({ patients }: Props) {
                         </div>
 
                         <div className="flex items-center gap-1">
-                            <button type="button" disabled={currentPage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))} className="rounded-md border border-slate-200 px-3 py-1.5 disabled:opacity-50">Previous</button>
+                            <button type="button" disabled={currentPage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))} className="rounded-md border border-slate-200 px-3 py-1.5 transition hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-50">Previous</button>
                             {Array.from({ length: Math.min(totalPages, 4) }, (_, index) => index + 1).map((pageNo) => (
-                                <button key={pageNo} type="button" onClick={() => setPage(pageNo)} className={`rounded-md border px-3 py-1.5 ${currentPage === pageNo ? 'border-[#0f87af] bg-[#0f87af] text-white' : 'border-slate-200'}`}>
+                                <button key={pageNo} type="button" onClick={() => setPage(pageNo)} className={`rounded-md border px-3 py-1.5 transition ${currentPage === pageNo ? 'border-[#147da2] bg-[#147da2] text-white font-medium' : 'border-slate-200 hover:bg-slate-50'}`}>
                                     {pageNo}
                                 </button>
                             ))}
-                            <button type="button" disabled={currentPage >= totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} className="rounded-md border border-slate-200 px-3 py-1.5 disabled:opacity-50">Next</button>
+                            <button type="button" disabled={currentPage >= totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} className="rounded-md border border-slate-200 px-3 py-1.5 transition hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-50">Next</button>
                         </div>
                     </div>
                 </div>

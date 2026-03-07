@@ -53,4 +53,9 @@ class LabTest extends Model
         return $this->belongsToMany(TestPackage::class, 'test_package_test', 'test_id', 'test_package_id')
             ->withTimestamps();
     }
+
+    public function parameters(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TestParameter::class, 'test_id');
+    }
 }

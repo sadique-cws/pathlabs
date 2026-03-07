@@ -68,31 +68,31 @@ export default function ResultEntryForm({ sample, parameters }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Test Result Entry" />
 
-            <div className="min-h-full bg-[#f4f7fb] p-4 md:p-6">
+            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
                 {flash?.success && (
-                    <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                    <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
                         {flash.success}
                     </div>
                 )}
 
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <h1 className="text-3xl font-semibold text-slate-800">Test Result Entry</h1>
-                        <p className="text-slate-500">Parameter-based result entry</p>
+                        <h1 className="text-xl font-semibold text-slate-800">Test Result Entry</h1>
+                        <p className="mt-1 text-sm text-slate-500">Parameter-based result entry</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <button type="button" onClick={() => submit('draft')} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700">
+                    <div className="flex items-center gap-3">
+                        <button type="button" onClick={() => submit('draft')} className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                             Save Draft
                         </button>
-                        <button type="button" onClick={() => submit('approve')} className="rounded-lg bg-[#0f87af] px-4 py-2 text-sm font-semibold text-white">
+                        <button type="button" onClick={() => submit('approve')} className="rounded-md bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
                             Approve & Complete
                         </button>
                     </div>
                 </div>
 
                 <div className="grid gap-4 xl:grid-cols-[320px_1fr]">
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
-                        <h2 className="mb-4 text-lg font-semibold text-slate-800">Sample Information</h2>
+                    <div className="rounded-lg border border-slate-200 bg-white p-6">
+                        <h2 className="mb-4 border-b border-slate-100 pb-3 text-base font-semibold text-slate-800">Sample Information</h2>
                         <div className="space-y-2 text-sm text-slate-700">
                             <p><span className="font-medium text-slate-500">Bill Number:</span> {sample.bill_number}</p>
                             <p><span className="font-medium text-slate-500">Test Name:</span> {sample.test_name}</p>
@@ -107,11 +107,11 @@ export default function ResultEntryForm({ sample, parameters }: Props) {
                         </div>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
-                        <h2 className="mb-4 text-lg font-semibold text-slate-800">Test Parameters & Results</h2>
+                    <div className="rounded-lg border border-slate-200 bg-white p-6">
+                        <h2 className="mb-4 border-b border-slate-100 pb-3 text-base font-semibold text-slate-800">Test Parameters & Results</h2>
                         <div className="overflow-x-auto">
                             <table className="w-full min-w-[760px] text-left">
-                                <thead className="border-b border-slate-200 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                <thead className="border-b border-slate-200 bg-slate-50/80 text-xs font-semibold uppercase tracking-wide text-slate-500">
                                     <tr>
                                         <th className="px-2 py-2">Parameter</th>
                                         <th className="px-2 py-2">Result</th>
@@ -126,7 +126,7 @@ export default function ResultEntryForm({ sample, parameters }: Props) {
                                             <td className="px-2 py-2 text-slate-700">{row.name}</td>
                                             <td className="px-2 py-2">
                                                 <input
-                                                    className="w-full rounded border border-slate-200 px-2 py-1.5"
+                                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                                     value={row.value}
                                                     onChange={(event) => {
                                                         const next = [...form.data.parameters];
@@ -139,7 +139,7 @@ export default function ResultEntryForm({ sample, parameters }: Props) {
                                             <td className="px-2 py-2 text-slate-600">{row.normal_range}</td>
                                             <td className="px-2 py-2">
                                                 <input
-                                                    className="w-full rounded border border-slate-200 px-2 py-1.5"
+                                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                                     value={row.remarks}
                                                     onChange={(event) => {
                                                         const next = [...form.data.parameters];
@@ -154,21 +154,21 @@ export default function ResultEntryForm({ sample, parameters }: Props) {
                             </table>
                         </div>
 
-                        <div className="mt-4 space-y-3">
+                        <div className="mt-6 grid gap-4 border-t border-slate-100 pt-5 md:grid-cols-2">
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-slate-700">Technician Remarks</label>
+                                <label className="mb-1 block text-sm font-semibold text-slate-700">Technician Remarks</label>
                                 <textarea
                                     rows={3}
-                                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                                    className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                     value={form.data.technical_remarks}
                                     onChange={(event) => form.setData('technical_remarks', event.target.value)}
                                 />
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-slate-700">Approval Date</label>
+                                <label className="mb-1 block text-sm font-semibold text-slate-700">Approval Date</label>
                                 <input
                                     type="date"
-                                    className="w-full max-w-[220px] rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                     value={form.data.approval_date}
                                     onChange={(event) => form.setData('approval_date', event.target.value)}
                                 />

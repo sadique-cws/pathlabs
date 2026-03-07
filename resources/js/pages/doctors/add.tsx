@@ -56,19 +56,19 @@ export default function AddDoctor({ existingDoctors }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Add Doctor" />
 
-            <div className="min-h-full bg-[#f4f7fb] p-4 md:p-6">
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <h1 className="text-3xl font-semibold text-slate-800">Add Doctor</h1>
-                    <p className="mt-1 text-slate-600">First search by name and mobile. If doctor not found, then create new.</p>
+            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+                <div className="rounded-lg border border-slate-200 bg-white p-6">
+                    <h1 className="border-b border-slate-100 pb-3 text-lg font-semibold text-slate-800">Add Doctor</h1>
+                    <p className="mt-3 text-sm text-slate-500">First search by name and mobile. If doctor not found, then create new.</p>
 
                     <div className="mt-4 grid gap-3 md:grid-cols-2">
                         <label className="relative">
                             <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                            <input value={searchName} onChange={(e) => setSearchName(e.target.value)} className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3" placeholder="Search by name..." />
+                            <input value={searchName} onChange={(e) => setSearchName(e.target.value)} className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" placeholder="Search by name..." />
                         </label>
                         <label className="relative">
                             <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                            <input value={searchPhone} onChange={(e) => setSearchPhone(e.target.value)} className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3" placeholder="Search by mobile..." />
+                            <input value={searchPhone} onChange={(e) => setSearchPhone(e.target.value)} className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" placeholder="Search by mobile..." />
                         </label>
                     </div>
 
@@ -95,23 +95,24 @@ export default function AddDoctor({ existingDoctors }: Props) {
                     )}
 
                     <form
-                        className="mt-5 grid gap-3 md:grid-cols-2"
+                        className="mt-6 grid gap-4 border-t border-slate-100 pt-5 md:grid-cols-2"
                         onSubmit={(event) => {
                             event.preventDefault();
                             form.post('/lab/doctors');
                         }}
                     >
-                        <input className="rounded-lg border border-slate-200 px-3 py-2" placeholder="Doctor Name" value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} />
-                        <input className="rounded-lg border border-slate-200 px-3 py-2" placeholder="Phone" value={form.data.phone} onChange={(e) => form.setData('phone', e.target.value)} />
-                        <input className="rounded-lg border border-slate-200 px-3 py-2 md:col-span-2" placeholder="Email" value={form.data.email} onChange={(e) => form.setData('email', e.target.value)} />
-                        <select className="rounded-lg border border-slate-200 px-3 py-2" value={form.data.commission_type} onChange={(e) => form.setData('commission_type', e.target.value)}>
+                        <input className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" placeholder="Doctor Name" value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} />
+                        <input className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" placeholder="Phone" value={form.data.phone} onChange={(e) => form.setData('phone', e.target.value)} />
+                        <input className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 md:col-span-2" placeholder="Email" value={form.data.email} onChange={(e) => form.setData('email', e.target.value)} />
+                        <select className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.commission_type} onChange={(e) => form.setData('commission_type', e.target.value)}>
                             <option value="percent">Percent</option>
                             <option value="fixed">Fixed</option>
                         </select>
-                        <input type="number" min={0} step="0.01" className="rounded-lg border border-slate-200 px-3 py-2" placeholder="Commission Value" value={form.data.commission_value} onChange={(e) => form.setData('commission_value', Number(e.target.value))} />
+                        <input type="number" min={0} step="0.01" className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" placeholder="Commission Value" value={form.data.commission_value} onChange={(e) => form.setData('commission_value', Number(e.target.value))} />
 
-                        <div className="md:col-span-2 flex justify-end">
-                            <button type="submit" className="rounded-lg bg-[#0f87af] px-4 py-2 text-sm font-semibold text-white">
+                        <div className="md:col-span-2 flex justify-end gap-3 border-t border-slate-100 pt-5">
+                            <button type="button" onClick={() => history.back()} className="rounded-md border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Cancel</button>
+                            <button type="submit" className="rounded-md bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
                                 Create Doctor
                             </button>
                         </div>

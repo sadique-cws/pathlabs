@@ -1,11 +1,12 @@
 import { Head, router } from '@inertiajs/react';
+import { ChevronDown, ChevronRight, Search, Shield, ShieldCheck, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import type { BreadcrumbItem } from '@/types';
 
 type RoleOption = {
@@ -43,16 +44,8 @@ type Props = {
     roles: RoleOption[];
 };
 
-type PermissionSection = {
-    key: string;
-    label: string;
-    permissions: PermissionOption[];
-};
-
-type PermissionGroupTree = Record<string, PermissionSection[]>;
-
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Admin Feature Control', href: '/admin/labs/features' },
+    { title: 'Permission Management', href: '/admin/labs/features' },
 ];
 
 const labelMap: Record<string, string> = {
@@ -67,45 +60,144 @@ const labelMap: Record<string, string> = {
     procurement: 'Procurement',
     dashboard: 'Dashboard',
     admin: 'Admin',
+    samples: 'Samples',
+    test_result: 'Test Results',
 };
 
 function toLabel(value: string): string {
     return labelMap[value] ?? value.replace(/[_.]+/g, ' ').replace(/\b\w/g, (s) => s.toUpperCase());
 }
 
-function groupPermissionsBySection(permissionGroups: Record<string, PermissionOption[]>): PermissionGroupTree {
-    return Object.fromEntries(
-        Object.entries(permissionGroups).map(([groupKey, permissions]) => {
-            const sections = permissions.reduce<Record<string, PermissionOption[]>>((carry, permission) => {
-                const sectionKey = permission.slug.split('.')[0];
-                if (carry[sectionKey] === undefined) {
-                    carry[sectionKey] = [];
-                }
+/* ─── Role presets ─── */
+const ROLE_PRESETS: Record<string, { label: string; description: string; slugs: string[] }> = {
+    front_desk: {
+        label: 'Front Desk Staff',
+        description: 'Billing, patient registration, sample management',
+        slugs: [
+            'dashboard.view', 'front_desk.access',
+            'billing.create', 'billing.view', 'billing.manage',
+            'patients.add', 'patients.view', 'patients.manage',
+            'samples.manage',
+        ],
+    },
+    lab_tech: {
+        label: 'Lab Technician',
+        description: 'Test results, sample management, reports',
+        slugs: [
+            'dashboard.view',
+            'test_result.entry', 'reports.result_entry',
+            'reports.test_units', 'reports.test_methods',
+            'reports.sample_management', 'samples.manage',
+        ],
+    },
+    doctor: {
+        label: 'Doctor / Pathologist',
+        description: 'View reports, approve results, manage patients',
+        slugs: [
+            'dashboard.view',
+            'patients.view', 'patients.manage',
+            'test_result.entry', 'reports.result_entry',
+            'reports.test_units', 'reports.test_methods',
+            'billing.view',
+        ],
+    },
+    full_access: {
+        label: 'Full Access',
+        description: 'All permissions enabled',
+        slugs: [], // special: selects all
+    },
+};
 
-                carry[sectionKey].push(permission);
-                return carry;
-            }, {});
-
-            const sectionRows = Object.entries(sections).map(([sectionKey, sectionPermissions]) => ({
-                key: sectionKey,
-                label: toLabel(sectionKey),
-                permissions: sectionPermissions,
-            }));
-
-            return [groupKey, sectionRows];
-        }),
-    );
-}
+type Tab = 'roles' | 'labs' | 'users';
 
 function toggleMany(current: string[], slugs: string[], checked: boolean): string[] {
     if (checked) {
         return Array.from(new Set([...current, ...slugs]));
     }
-
     return current.filter((item) => !slugs.includes(item));
 }
 
+/* ─── Collapsible Permission Group ─── */
+function PermissionGroup({
+    groupKey,
+    permissions,
+    selectedSlugs,
+    onToggle,
+    onToggleAll,
+}: {
+    groupKey: string;
+    permissions: PermissionOption[];
+    selectedSlugs: string[];
+    onToggle: (slug: string, checked: boolean) => void;
+    onToggleAll: (slugs: string[], checked: boolean) => void;
+}) {
+    const [expanded, setExpanded] = useState(false);
+    const allSlugs = permissions.map((p) => p.slug);
+    const selectedCount = allSlugs.filter((s) => selectedSlugs.includes(s)).length;
+    const allSelected = selectedCount === allSlugs.length && allSlugs.length > 0;
+    const someSelected = selectedCount > 0 && selectedCount < allSlugs.length;
+
+    return (
+        <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+            <button
+                type="button"
+                onClick={() => setExpanded(!expanded)}
+                className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50/80"
+            >
+                {expanded ? (
+                    <ChevronDown className="h-4 w-4 text-slate-400 shrink-0" />
+                ) : (
+                    <ChevronRight className="h-4 w-4 text-slate-400 shrink-0" />
+                )}
+                <div
+                    className="shrink-0"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <Checkbox
+                        checked={allSelected}
+                        className={someSelected ? 'data-[state=unchecked]:bg-[#147da2]/20 data-[state=unchecked]:border-[#147da2]' : ''}
+                        onCheckedChange={(checked) => onToggleAll(allSlugs, checked === true)}
+                    />
+                </div>
+                <span className="text-sm font-medium text-slate-700 flex-1">{toLabel(groupKey)}</span>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                    selectedCount === allSlugs.length
+                        ? 'bg-[#147da2]/10 text-[#147da2]'
+                        : selectedCount > 0
+                        ? 'bg-amber-50 text-amber-600'
+                        : 'bg-slate-100 text-slate-400'
+                }`}>
+                    {selectedCount}/{allSlugs.length}
+                </span>
+            </button>
+            {expanded && (
+                <div className="border-t border-slate-100 px-4 py-3">
+                    <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+                        {permissions.map((permission) => (
+                            <label
+                                key={permission.slug}
+                                className="flex items-center gap-2.5 rounded-md border border-slate-100 bg-slate-50/50 px-3 py-2 text-sm cursor-pointer transition hover:bg-slate-50"
+                            >
+                                <Checkbox
+                                    checked={selectedSlugs.includes(permission.slug)}
+                                    onCheckedChange={(checked) => onToggle(permission.slug, checked === true)}
+                                />
+                                <span className="text-slate-700">{permission.name}</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function AdminLabFeatures({ labs, permissionGroups, roles }: Props) {
+    const [activeTab, setActiveTab] = useState<Tab>('roles');
+    const [search, setSearch] = useState('');
+    const [selectedLabId, setSelectedLabId] = useState<number | null>(labs[0]?.id ?? null);
+    const [selectedRoleId, setSelectedRoleId] = useState<number | null>(roles[0]?.id ?? null);
+
     const [labPermissions, setLabPermissions] = useState<Record<number, string[]>>(
         Object.fromEntries(labs.map((lab) => [lab.id, lab.permissions])),
     );
@@ -116,241 +208,387 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
         Object.fromEntries(roles.map((role) => [role.id, role.permissions])),
     );
 
-    const permissionTree = useMemo(() => groupPermissionsBySection(permissionGroups), [permissionGroups]);
-    const groupEntries = useMemo(() => Object.entries(permissionTree), [permissionTree]);
+    const allPermissionSlugs = useMemo(
+        () => Object.values(permissionGroups).flat().map((p) => p.slug),
+        [permissionGroups],
+    );
 
-    const toggleLabPermission = (labId: number, permissionSlug: string, checked: boolean): void => {
-        setLabPermissions((current) => {
-            const currentValues = current[labId] ?? [];
-            const nextValues = checked
-                ? Array.from(new Set([...currentValues, permissionSlug]))
-                : currentValues.filter((value) => value !== permissionSlug);
+    const filteredGroups = useMemo(() => {
+        const q = search.toLowerCase().trim();
+        if (q === '') return permissionGroups;
+        const result: Record<string, PermissionOption[]> = {};
+        for (const [group, perms] of Object.entries(permissionGroups)) {
+            const filtered = perms.filter(
+                (p) => p.name.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q) || toLabel(group).toLowerCase().includes(q),
+            );
+            if (filtered.length > 0) result[group] = filtered;
+        }
+        return result;
+    }, [permissionGroups, search]);
 
-            return {
-                ...current,
-                [labId]: nextValues,
-            };
-        });
-    };
-
-    const toggleLabSection = (labId: number, permissionSlugs: string[], checked: boolean): void => {
-        setLabPermissions((current) => ({
-            ...current,
-            [labId]: toggleMany(current[labId] ?? [], permissionSlugs, checked),
+    /* ─── Role handlers ─── */
+    const toggleRolePermission = (roleId: number, slug: string, checked: boolean) => {
+        setRolePermissions((c) => ({
+            ...c,
+            [roleId]: checked
+                ? Array.from(new Set([...(c[roleId] ?? []), slug]))
+                : (c[roleId] ?? []).filter((s) => s !== slug),
         }));
     };
-
-    const toggleRolePermission = (roleId: number, permissionSlug: string, checked: boolean): void => {
-        setRolePermissions((current) => {
-            const currentValues = current[roleId] ?? [];
-            const nextValues = checked
-                ? Array.from(new Set([...currentValues, permissionSlug]))
-                : currentValues.filter((value) => value !== permissionSlug);
-
-            return {
-                ...current,
-                [roleId]: nextValues,
-            };
-        });
-    };
-
-    const toggleRoleSection = (roleId: number, permissionSlugs: string[], checked: boolean): void => {
-        setRolePermissions((current) => ({
-            ...current,
-            [roleId]: toggleMany(current[roleId] ?? [], permissionSlugs, checked),
+    const toggleRoleGroup = (roleId: number, slugs: string[], checked: boolean) => {
+        setRolePermissions((c) => ({
+            ...c,
+            [roleId]: toggleMany(c[roleId] ?? [], slugs, checked),
         }));
     };
-
-    const toggleUserRole = (userId: number, roleSlug: string, checked: boolean): void => {
-        setUserRoles((current) => {
-            const currentValues = current[userId] ?? [];
-            const nextValues = checked
-                ? Array.from(new Set([...currentValues, roleSlug]))
-                : currentValues.filter((value) => value !== roleSlug);
-
-            return {
-                ...current,
-                [userId]: nextValues,
-            };
-        });
+    const applyPreset = (roleId: number, presetKey: string) => {
+        const preset = ROLE_PRESETS[presetKey];
+        if (!preset) return;
+        if (presetKey === 'full_access') {
+            setRolePermissions((c) => ({ ...c, [roleId]: [...allPermissionSlugs] }));
+        } else {
+            setRolePermissions((c) => ({ ...c, [roleId]: [...preset.slugs] }));
+        }
     };
-
-    const saveLabPermissions = (lab: LabFeatureRow): void => {
-        router.put(`/admin/labs/${lab.id}/features`, {
-            permission_slugs: labPermissions[lab.id] ?? [],
-        });
-    };
-
-    const saveRolePermissions = (role: RoleOption): void => {
+    const saveRolePerms = (role: RoleOption) => {
         router.put(`/admin/roles/${role.id}/permissions`, {
             permission_slugs: rolePermissions[role.id] ?? [],
         });
     };
 
-    const saveUserRoles = (user: LabUser): void => {
+    /* ─── Lab handlers ─── */
+    const toggleLabPermission = (labId: number, slug: string, checked: boolean) => {
+        setLabPermissions((c) => ({
+            ...c,
+            [labId]: checked
+                ? Array.from(new Set([...(c[labId] ?? []), slug]))
+                : (c[labId] ?? []).filter((s) => s !== slug),
+        }));
+    };
+    const toggleLabGroup = (labId: number, slugs: string[], checked: boolean) => {
+        setLabPermissions((c) => ({
+            ...c,
+            [labId]: toggleMany(c[labId] ?? [], slugs, checked),
+        }));
+    };
+    const saveLabPerms = (lab: LabFeatureRow) => {
+        router.put(`/admin/labs/${lab.id}/features`, {
+            permission_slugs: labPermissions[lab.id] ?? [],
+        });
+    };
+
+    /* ─── User handlers ─── */
+    const toggleUserRole = (userId: number, roleSlug: string, checked: boolean) => {
+        setUserRoles((c) => ({
+            ...c,
+            [userId]: checked
+                ? Array.from(new Set([...(c[userId] ?? []), roleSlug]))
+                : (c[userId] ?? []).filter((s) => s !== roleSlug),
+        }));
+    };
+    const saveUserRoles2 = (user: LabUser) => {
         router.put(`/admin/users/${user.id}/roles`, {
             role_slugs: userRoles[user.id] ?? [],
         });
     };
 
+    const selectedRole = roles.find((r) => r.id === selectedRoleId);
+    const selectedLab = labs.find((l) => l.id === selectedLabId);
+
+    const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
+        { key: 'roles', label: 'Role Permissions', icon: <ShieldCheck className="h-4 w-4" /> },
+        { key: 'labs', label: 'Lab Features', icon: <Shield className="h-4 w-4" /> },
+        { key: 'users', label: 'User Roles', icon: <Users className="h-4 w-4" /> },
+    ];
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Admin Feature Control" />
+            <Head title="Permission Management" />
 
-            <div className="space-y-4 p-4 md:p-6">
-                <Card>
-                    <CardHeader className="border-b">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <CardTitle>Role Permission Templates</CardTitle>
-                                <p className="text-muted-foreground mt-1 text-sm">Role = group of permissions. Manage permissions once and reuse for users.</p>
+            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+                {/* Page header */}
+                <div className="mb-5">
+                    <h1 className="text-lg font-semibold text-slate-800">Permission Management</h1>
+                    <p className="mt-0.5 text-sm text-slate-500">Manage roles, lab features, and user access in one place</p>
+                </div>
+
+                {/* Tab bar */}
+                <div className="mb-5 flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
+                    {tabs.map((t) => (
+                        <button
+                            key={t.key}
+                            type="button"
+                            onClick={() => setActiveTab(t.key)}
+                            className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                                activeTab === t.key
+                                    ? 'bg-[#147da2] text-white'
+                                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                            }`}
+                        >
+                            {t.icon}
+                            {t.label}
+                        </button>
+                    ))}
+                </div>
+
+                {/* ═══════════ ROLE PERMISSIONS TAB ═══════════ */}
+                {activeTab === 'roles' && (
+                    <div className="grid gap-5 lg:grid-cols-[280px_1fr]">
+                        {/* Role list sidebar */}
+                        <div className="rounded-lg border border-slate-200 bg-white p-3">
+                            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Roles</p>
+                            <div className="space-y-1">
+                                {roles.map((role) => {
+                                    const permCount = (rolePermissions[role.id] ?? []).length;
+                                    return (
+                                        <button
+                                            key={role.id}
+                                            type="button"
+                                            onClick={() => setSelectedRoleId(role.id)}
+                                            className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm transition ${
+                                                selectedRoleId === role.id
+                                                    ? 'bg-[#147da2]/10 text-[#147da2] font-medium'
+                                                    : 'text-slate-700 hover:bg-slate-50'
+                                            }`}
+                                        >
+                                            <span>{role.name}</span>
+                                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                                                permCount > 0 ? 'bg-[#147da2]/10 text-[#147da2]' : 'bg-slate-100 text-slate-400'
+                                            }`}>
+                                                {permCount}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
                             </div>
-                            <Badge variant="outline">Role-wise Access</Badge>
                         </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4 pt-6">
-                        {roles.map((role) => (
-                            <div key={role.id} className="space-y-3 rounded-lg border p-4">
-                                <div className="flex items-center justify-between gap-3">
-                                    <div>
-                                        <h3 className="text-base font-semibold">{role.name}</h3>
-                                        <p className="text-muted-foreground text-xs">{role.slug}</p>
-                                    </div>
-                                    <Button type="button" onClick={() => saveRolePermissions(role)}>Save Role Permissions</Button>
-                                </div>
 
-                                {groupEntries.map(([groupKey, sections]) => (
-                                    <div key={`${role.id}-${groupKey}`} className="space-y-2 rounded-lg border p-3">
-                                        <h4 className="text-sm font-semibold uppercase">{toLabel(groupKey)}</h4>
-                                        {sections.map((section) => {
-                                            const sectionSlugs = section.permissions.map((permission) => permission.slug);
-                                            const selectedCount = sectionSlugs.filter((slug) => (rolePermissions[role.id] ?? []).includes(slug)).length;
-                                            const sectionChecked = selectedCount > 0 && selectedCount === sectionSlugs.length;
-
-                                            return (
-                                                <div key={`${role.id}-${groupKey}-${section.key}`} className="space-y-2 rounded-md border border-slate-200 p-3">
-                                                    <div className="flex items-center justify-between gap-3">
-                                                        <div className="flex items-center gap-2">
-                                                            <Checkbox
-                                                                checked={sectionChecked}
-                                                                onCheckedChange={(checked) => toggleRoleSection(role.id, sectionSlugs, checked === true)}
-                                                            />
-                                                            <span className="text-sm font-medium">{section.label}</span>
-                                                        </div>
-                                                        <span className="text-xs text-slate-500">{selectedCount}/{sectionSlugs.length}</span>
-                                                    </div>
-                                                    <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-                                                        {section.permissions.map((permission) => (
-                                                            <label key={`${role.id}-${permission.slug}`} className="flex items-center gap-2 rounded border border-slate-100 px-2 py-1.5">
-                                                                <Checkbox
-                                                                    checked={(rolePermissions[role.id] ?? []).includes(permission.slug)}
-                                                                    onCheckedChange={(checked) => toggleRolePermission(role.id, permission.slug, checked === true)}
-                                                                />
-                                                                <span className="text-sm">{permission.name}</span>
-                                                            </label>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                ))}
-                            </div>
-                        ))}
-                    </CardContent>
-                </Card>
-
-                {labs.map((lab) => (
-                    <Card key={lab.id}>
-                        <CardHeader className="border-b">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle>{lab.name}</CardTitle>
-                                    <p className="text-muted-foreground mt-1 text-sm">{lab.code}</p>
-                                </div>
-                                <Button type="button" onClick={() => saveLabPermissions(lab)}>Save Lab Features</Button>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-6 pt-6">
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-2">
-                                    <h3 className="text-sm font-semibold">Lab Feature Permissions</h3>
-                                    <Badge variant="outline">Group + Section + Action</Badge>
-                                </div>
-                                {groupEntries.map(([groupKey, sections]) => (
-                                    <div key={`${lab.id}-${groupKey}`} className="space-y-2 rounded-lg border p-3">
-                                        <h4 className="text-sm font-semibold uppercase">{toLabel(groupKey)}</h4>
-                                        {sections.map((section) => {
-                                            const sectionSlugs = section.permissions.map((permission) => permission.slug);
-                                            const selectedCount = sectionSlugs.filter((slug) => (labPermissions[lab.id] ?? []).includes(slug)).length;
-                                            const sectionChecked = selectedCount > 0 && selectedCount === sectionSlugs.length;
-
-                                            return (
-                                                <div key={`${lab.id}-${groupKey}-${section.key}`} className="space-y-2 rounded-md border border-slate-200 p-3">
-                                                    <div className="flex items-center justify-between gap-3">
-                                                        <div className="flex items-center gap-2">
-                                                            <Checkbox
-                                                                checked={sectionChecked}
-                                                                onCheckedChange={(checked) => toggleLabSection(lab.id, sectionSlugs, checked === true)}
-                                                            />
-                                                            <span className="text-sm font-medium">{section.label}</span>
-                                                        </div>
-                                                        <span className="text-xs text-slate-500">{selectedCount}/{sectionSlugs.length}</span>
-                                                    </div>
-                                                    <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-                                                        {section.permissions.map((permission) => (
-                                                            <label key={`${lab.id}-${permission.slug}`} className="flex items-center gap-2 rounded border border-slate-100 px-2 py-1.5">
-                                                                <Checkbox
-                                                                    checked={(labPermissions[lab.id] ?? []).includes(permission.slug)}
-                                                                    onCheckedChange={(checked) => toggleLabPermission(lab.id, permission.slug, checked === true)}
-                                                                />
-                                                                <span className="text-sm">{permission.name}</span>
-                                                            </label>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                ))}
-                            </div>
-
+                        {/* Role permission editor */}
+                        {selectedRole && (
                             <div className="space-y-4">
-                                <div className="flex items-center gap-2">
-                                    <h3 className="text-sm font-semibold">User Role Assignment ({lab.users.length})</h3>
-                                    <Badge variant="secondary">User-wise</Badge>
+                                {/* Header */}
+                                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-5 py-4">
+                                    <div>
+                                        <h2 className="text-base font-semibold text-slate-800">{selectedRole.name}</h2>
+                                        <p className="text-xs text-slate-400">{selectedRole.slug} · {(rolePermissions[selectedRole.id] ?? []).length} permissions assigned</p>
+                                    </div>
+                                    <Button type="button" className="bg-[#147da2] hover:bg-[#106385]" onClick={() => saveRolePerms(selectedRole)}>
+                                        Save Permissions
+                                    </Button>
                                 </div>
-                                <div className="space-y-3">
-                                    {lab.users.map((user) => (
-                                        <div key={user.id} className="rounded-lg border p-4">
-                                            <div className="mb-3 flex items-center justify-between gap-3">
-                                                <div>
-                                                    <p className="font-medium">{user.name}</p>
-                                                    <p className="text-muted-foreground text-sm">{user.email}</p>
-                                                </div>
-                                                <Button type="button" variant="outline" onClick={() => saveUserRoles(user)}>
-                                                    Save User Roles
-                                                </Button>
+
+                                {/* Quick presets */}
+                                <div className="rounded-lg border border-slate-200 bg-white p-4">
+                                    <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500">Quick Presets</p>
+                                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                                        {Object.entries(ROLE_PRESETS).map(([key, preset]) => (
+                                            <button
+                                                key={key}
+                                                type="button"
+                                                onClick={() => applyPreset(selectedRole.id, key)}
+                                                className="rounded-md border border-slate-200 px-3 py-2.5 text-left transition hover:border-[#147da2] hover:bg-[#147da2]/5"
+                                            >
+                                                <span className="block text-sm font-medium text-slate-700">{preset.label}</span>
+                                                <span className="block mt-0.5 text-xs text-slate-400">{preset.description}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Search */}
+                                <div className="relative">
+                                    <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                                    <input
+                                        className="h-9 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                        placeholder="Search permissions…"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                </div>
+
+                                {/* Permission groups */}
+                                <div className="space-y-2">
+                                    {Object.entries(filteredGroups).map(([groupKey, perms]) => (
+                                        <PermissionGroup
+                                            key={`${selectedRole.id}-${groupKey}`}
+                                            groupKey={groupKey}
+                                            permissions={perms}
+                                            selectedSlugs={rolePermissions[selectedRole.id] ?? []}
+                                            onToggle={(slug, checked) => toggleRolePermission(selectedRole.id, slug, checked)}
+                                            onToggleAll={(slugs, checked) => toggleRoleGroup(selectedRole.id, slugs, checked)}
+                                        />
+                                    ))}
+                                    {Object.keys(filteredGroups).length === 0 && (
+                                        <p className="py-8 text-center text-sm text-slate-400">No permissions match your search</p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* ═══════════ LAB FEATURES TAB ═══════════ */}
+                {activeTab === 'labs' && (
+                    <div className="grid gap-5 lg:grid-cols-[280px_1fr]">
+                        {/* Lab list sidebar */}
+                        <div className="rounded-lg border border-slate-200 bg-white p-3">
+                            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Labs</p>
+                            <div className="space-y-1">
+                                {labs.map((lab) => {
+                                    const permCount = (labPermissions[lab.id] ?? []).length;
+                                    return (
+                                        <button
+                                            key={lab.id}
+                                            type="button"
+                                            onClick={() => setSelectedLabId(lab.id)}
+                                            className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm transition ${
+                                                selectedLabId === lab.id
+                                                    ? 'bg-[#147da2]/10 text-[#147da2] font-medium'
+                                                    : 'text-slate-700 hover:bg-slate-50'
+                                            }`}
+                                        >
+                                            <div>
+                                                <span className="block">{lab.name}</span>
+                                                <span className="block text-xs text-slate-400">{lab.code}</span>
                                             </div>
-                                            <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-5">
-                                                {roles.map((role) => (
-                                                    <div key={`${user.id}-${role.slug}`} className="flex items-center gap-2">
-                                                        <Checkbox
-                                                            id={`${user.id}-${role.slug}`}
-                                                            checked={(userRoles[user.id] ?? []).includes(role.slug)}
-                                                            onCheckedChange={(checked) => toggleUserRole(user.id, role.slug, checked === true)}
-                                                        />
-                                                        <Label htmlFor={`${user.id}-${role.slug}`}>{role.name}</Label>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
+                                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                                                permCount > 0 ? 'bg-[#147da2]/10 text-[#147da2]' : 'bg-slate-100 text-slate-400'
+                                            }`}>
+                                                {permCount}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Lab permission editor */}
+                        {selectedLab && (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-5 py-4">
+                                    <div>
+                                        <h2 className="text-base font-semibold text-slate-800">{selectedLab.name}</h2>
+                                        <p className="text-xs text-slate-400">{selectedLab.code} · {(labPermissions[selectedLab.id] ?? []).length} features enabled</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                setLabPermissions((c) => ({ ...c, [selectedLab.id]: [...allPermissionSlugs] }));
+                                            }}
+                                        >
+                                            Enable All
+                                        </Button>
+                                        <Button type="button" className="bg-[#147da2] hover:bg-[#106385]" onClick={() => saveLabPerms(selectedLab)}>
+                                            Save Features
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                {/* Search */}
+                                <div className="relative">
+                                    <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                                    <input
+                                        className="h-9 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                        placeholder="Search features…"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    {Object.entries(filteredGroups).map(([groupKey, perms]) => (
+                                        <PermissionGroup
+                                            key={`${selectedLab.id}-${groupKey}`}
+                                            groupKey={groupKey}
+                                            permissions={perms}
+                                            selectedSlugs={labPermissions[selectedLab.id] ?? []}
+                                            onToggle={(slug, checked) => toggleLabPermission(selectedLab.id, slug, checked)}
+                                            onToggleAll={(slugs, checked) => toggleLabGroup(selectedLab.id, slugs, checked)}
+                                        />
                                     ))}
                                 </div>
                             </div>
-                        </CardContent>
-                    </Card>
-                ))}
+                        )}
+                    </div>
+                )}
+
+                {/* ═══════════ USER ROLES TAB ═══════════ */}
+                {activeTab === 'users' && (
+                    <div className="space-y-4">
+                        {/* Search users */}
+                        <div className="relative">
+                            <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                            <input
+                                className="h-9 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                placeholder="Search users by name or email…"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
+
+                        {labs.map((lab) => {
+                            const labUsers = lab.users.filter((u) => {
+                                const q = search.toLowerCase().trim();
+                                if (q === '') return true;
+                                return u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+                            });
+
+                            if (labUsers.length === 0) return null;
+
+                            return (
+                                <div key={lab.id} className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+                                    <div className="border-b border-slate-100 bg-slate-50/50 px-5 py-3">
+                                        <h3 className="text-sm font-semibold text-slate-700">{lab.name}</h3>
+                                        <p className="text-xs text-slate-400">{lab.code} · {labUsers.length} user{labUsers.length !== 1 ? 's' : ''}</p>
+                                    </div>
+                                    <div className="divide-y divide-slate-100">
+                                        {labUsers.map((user) => (
+                                            <div key={user.id} className="flex items-center justify-between gap-4 px-5 py-4">
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-medium text-slate-800 truncate">{user.name}</p>
+                                                    <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                                                </div>
+                                                <div className="flex items-center gap-4 shrink-0">
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {roles.map((role) => (
+                                                            <label
+                                                                key={`${user.id}-${role.slug}`}
+                                                                className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm cursor-pointer transition ${
+                                                                    (userRoles[user.id] ?? []).includes(role.slug)
+                                                                        ? 'border-[#147da2] bg-[#147da2]/5 text-[#147da2]'
+                                                                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                                                }`}
+                                                            >
+                                                                <Checkbox
+                                                                    id={`${user.id}-${role.slug}`}
+                                                                    checked={(userRoles[user.id] ?? []).includes(role.slug)}
+                                                                    onCheckedChange={(checked) => toggleUserRole(user.id, role.slug, checked === true)}
+                                                                />
+                                                                <span>{role.name}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="h-8 text-xs"
+                                                        onClick={() => saveUserRoles2(user)}
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
         </AppLayout>
     );

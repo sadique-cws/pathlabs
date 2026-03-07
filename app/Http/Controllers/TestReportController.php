@@ -14,11 +14,20 @@ class TestReportController extends Controller
     public function testUnits(): Response
     {
         $units = collect([
-            'mIU/mL', 'U/mL', 'ug/mL', 'IU/mL', '/uL', 'nmol/L', 'ng/dL', 'umol/L', 'min', 'sec',
+            'mIU/mL',
+            'U/mL',
+            'ug/mL',
+            'IU/mL',
+            '/uL',
+            'nmol/L',
+            'ng/dL',
+            'umol/L',
+            'min',
+            'sec',
         ])->values();
 
         return Inertia::render('test-reports/test-units', [
-            'units' => $units->map(fn (string $name, int $index): array => [
+            'units' => $units->map(fn(string $name, int $index): array => [
                 'id' => $index + 1,
                 'name' => $name,
                 'created_date' => now()->subDays($index)->format('d/m/Y'),
@@ -34,12 +43,20 @@ class TestReportController extends Controller
     public function testMethods(): Response
     {
         $methods = collect([
-            'Coagulation', 'Sedimentation', 'Ion Selective Electrode', 'None', 'Mass Spectrometry',
-            'Flow Cytometry', 'Chromatography', 'Electrophoresis', 'Nephelometry', 'Visual',
+            'Coagulation',
+            'Sedimentation',
+            'Ion Selective Electrode',
+            'None',
+            'Mass Spectrometry',
+            'Flow Cytometry',
+            'Chromatography',
+            'Electrophoresis',
+            'Nephelometry',
+            'Visual',
         ])->values();
 
         return Inertia::render('test-reports/test-methods', [
-            'methods' => $methods->map(fn (string $name, int $index): array => [
+            'methods' => $methods->map(fn(string $name, int $index): array => [
                 'id' => $index + 1,
                 'name' => $name,
                 'created_date' => now()->subDays($index)->format('d/m/Y'),
@@ -139,9 +156,19 @@ class TestReportController extends Controller
         $labId = (int) $request->attributes->get('lab_id');
         abort_if($sample->lab_id !== $labId, 404);
 
-        $sample->load(['bill:id,bill_number,billing_at,patient_id', 'bill.patient:id,name', 'test:id,name,sample_type']);
+        $sample->load(['bill:id,bill_number,billing_at,patient_id', 'bill.patient:id,name', 'test:id,name,sample_type', 'test.parameters']);
 
-        $parameterTemplate = $this->parameterTemplateForTest($sample->test?->name);
+        $dbParameters = $sample->test?->parameters;
+
+        $parameterTemplate = $dbParameters && $dbParameters->isNotEmpty()
+            ? $dbParameters->map(fn($p) => [
+                'key' => 'param_' . $p->id,
+                'name' => $p->name,
+                'unit' => $p->unit ?? '-',
+                'normal_range' => $p->normal_range ?? '-',
+            ])->all()
+            : $this->parameterTemplateForTest($sample->test?->name);
+
         $savedValues = collect($sample->result_payload ?? [])->keyBy('key');
         $parameters = collect($parameterTemplate)->map(function (array $parameter) use ($savedValues): array {
             $saved = $savedValues->get($parameter['key']);

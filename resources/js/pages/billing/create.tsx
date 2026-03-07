@@ -1,6 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { CalendarDays, Search } from 'lucide-react';
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { CalendarDays, ChevronDown, Search } from 'lucide-react';
+import { useDeferredValue, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
@@ -18,13 +18,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import type { BreadcrumbItem } from '@/types';
 
 type LabTest = { id: number; name: string; price: string };
@@ -68,6 +61,121 @@ type Props = {
 };
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'New Billing', href: '/lab/billing/create' }];
+
+/* ─── Reusable tiny form-field label ─── */
+function FieldLabel({ children, htmlFor, required }: { children: React.ReactNode; htmlFor?: string; required?: boolean }) {
+    return (
+        <label htmlFor={htmlFor} className="mb-1 block text-xs font-medium tracking-wide text-slate-500 uppercase">
+            {children}
+            {required && <span className="ml-0.5 text-rose-500">*</span>}
+        </label>
+    );
+}
+
+/* ─── Inline validation error ─── */
+function FieldError({ message }: { message?: string }) {
+    if (!message) return null;
+    return <p className="mt-1 text-xs text-rose-500">{message}</p>;
+}
+
+/* ─── Searchable Select (combobox) ─── */
+type SearchableSelectOption = { value: string; label: string };
+
+function SearchableSelect({
+    options,
+    value,
+    onChange,
+    placeholder = 'Select…',
+    className = '',
+}: {
+    options: SearchableSelectOption[];
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+    className?: string;
+}) {
+    const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState('');
+    const containerRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const filtered = useMemo(() => {
+        const q = search.toLowerCase().trim();
+        if (q === '') return options;
+        return options.filter((o) => o.label.toLowerCase().includes(q));
+    }, [options, search]);
+
+    const selectedLabel = options.find((o) => o.value === value)?.label ?? '';
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setOpen(false);
+                setSearch('');
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    return (
+        <div ref={containerRef} className={`relative ${className}`}>
+            <button
+                type="button"
+                onClick={() => {
+                    setOpen(!open);
+                    setSearch('');
+                    setTimeout(() => inputRef.current?.focus(), 0);
+                }}
+                className="flex h-9 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+            >
+                <span className={selectedLabel ? 'text-slate-700' : 'text-slate-400'}>
+                    {selectedLabel || placeholder}
+                </span>
+                <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+            </button>
+
+            {open && (
+                <div className="absolute inset-x-0 z-30 mt-1 rounded-md border border-slate-200 bg-white shadow-lg">
+                    <div className="border-b border-slate-100 p-1.5">
+                        <input
+                            ref={inputRef}
+                            className="h-8 w-full rounded border-0 bg-slate-50 px-2.5 text-sm outline-none placeholder:text-slate-400"
+                            placeholder="Type to search…"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+                    <div className="max-h-48 overflow-auto py-1">
+                        {filtered.length === 0 && (
+                            <div className="px-3 py-2 text-sm text-slate-400">No results</div>
+                        )}
+                        {filtered.map((opt) => (
+                            <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => {
+                                    onChange(opt.value);
+                                    setOpen(false);
+                                    setSearch('');
+                                }}
+                                className={`flex w-full items-center px-3 py-2 text-left text-sm transition hover:bg-slate-50 ${
+                                    opt.value === value ? 'bg-[#147da2]/5 font-medium text-[#147da2]' : 'text-slate-700'
+                                }`}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+/* ─── Consistent styling constants ─── */
+const inputClasses =
+    'h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20';
 
 export default function BillingCreate({
     tests,
@@ -185,6 +293,44 @@ export default function BillingCreate({
             age_days: String(Math.max(0, days)),
         });
     }, [dobYear, dobMonth, dobDay]);
+
+    /* Memoised option lists for SearchableSelect */
+    const titleOptions: SearchableSelectOption[] = [
+        { value: 'Mr.', label: 'Mr.' },
+        { value: 'Mrs.', label: 'Mrs.' },
+        { value: 'Ms.', label: 'Ms.' },
+        { value: 'Dr.', label: 'Dr.' },
+    ];
+    const genderOptions: SearchableSelectOption[] = [
+        { value: 'male', label: 'Male' },
+        { value: 'female', label: 'Female' },
+        { value: 'other', label: 'Other' },
+    ];
+    const yearOptions: SearchableSelectOption[] = useMemo(() => Array.from({ length: 120 }, (_, i) => { const y = String(new Date().getFullYear() - i); return { value: y, label: y }; }), []);
+    const monthOptions: SearchableSelectOption[] = useMemo(() => Array.from({ length: 12 }, (_, i) => { const m = String(i + 1).padStart(2, '0'); return { value: m, label: m }; }), []);
+    const dayOptions: SearchableSelectOption[] = useMemo(() => Array.from({ length: 31 }, (_, i) => { const d = String(i + 1).padStart(2, '0'); return { value: d, label: d }; }), []);
+    const doctorOptions: SearchableSelectOption[] = useMemo(() => [
+        { value: '__add_new__', label: '+ Add New Doctor' },
+        { value: '__none__', label: 'No Doctor' },
+        ...doctors.map((d) => ({ value: String(d.id), label: d.name })),
+    ], [doctors]);
+    const collectionCenterOptions: SearchableSelectOption[] = useMemo(() => [
+        { value: '', label: 'Select center' },
+        ...collectionCenters.map((c) => ({ value: String(c.id), label: c.name })),
+    ], [collectionCenters]);
+    const serviceChargeOptions: SearchableSelectOption[] = useMemo(() => [
+        { value: '', label: 'Select service charge' },
+        ...serviceChargeMasters.map((s) => ({ value: String(s.id), label: `${s.name} (₹${s.amount})` })),
+    ], [serviceChargeMasters]);
+    const offerOptions: SearchableSelectOption[] = [
+        { value: 'No Offer', label: 'No Offer' },
+        { value: 'Festival Offer', label: 'Festival Offer' },
+        { value: 'Corporate Offer', label: 'Corporate Offer' },
+    ];
+    const discountTypeOptions: SearchableSelectOption[] = [
+        { value: 'fixed', label: 'Fixed (₹)' },
+        { value: 'percent', label: 'Percent (%)' },
+    ];
 
     useEffect(() => {
         const onClickOutside = (event: MouseEvent): void => {
@@ -383,39 +529,51 @@ export default function BillingCreate({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Bill" />
 
-            <div className="min-h-full bg-[#f4f7fb] p-4 md:p-6">
-                {flash?.success && <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm font-medium text-emerald-700">{flash.success}</div>}
+            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+                {flash?.success && (
+                    <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                        {flash.success}
+                    </div>
+                )}
 
-                <form onSubmit={generateBarcode} className="space-y-4">
-                    <div className="grid gap-4 xl:grid-cols-2">
-                        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-                            <h2 className="mb-3 text-lg font-semibold text-slate-800">Patient Basic Information</h2>
+                <form onSubmit={generateBarcode} className="space-y-5">
+                    {/* ─── Patient Info Row ─── */}
+                    <div className="grid gap-5 xl:grid-cols-2">
+                        {/* Patient Basic */}
+                        <div className="rounded-lg border border-slate-200 bg-white p-5">
+                            <h2 className="mb-1 text-base font-semibold text-slate-800">Patient Basic Information</h2>
+                            <p className="mb-4 text-xs text-slate-400">Search existing or add new patient details</p>
 
-                            <div ref={patientSearchRef} className="mb-2">
-                                <input
-                                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                                    placeholder="Enter patient name or phone to search..."
-                                    value={patientSearch}
-                                    onFocus={() => setShowPatientSuggestions(patientSearch.trim() !== '')}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        setPatientSearch(value);
-                                        setShowPatientSuggestions(value.trim() !== '');
-                                        setSelectedPatientLabel(null);
-                                        form.setData('patient_id', '');
-                                    }}
-                                />
+                            {/* Patient search */}
+                            <div ref={patientSearchRef} className="relative mb-4">
+                                <FieldLabel>Search Patient</FieldLabel>
+                                <div className="relative">
+                                    <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                                    <input
+                                        className={`${inputClasses} pl-9`}
+                                        placeholder="Name or phone number…"
+                                        value={patientSearch}
+                                        onFocus={() => setShowPatientSuggestions(patientSearch.trim() !== '')}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            setPatientSearch(value);
+                                            setShowPatientSuggestions(value.trim() !== '');
+                                            setSelectedPatientLabel(null);
+                                            form.setData('patient_id', '');
+                                        }}
+                                    />
+                                </div>
 
                                 {showPatientSuggestions && patientSearch !== '' && (
-                                    <div className="mt-2 max-h-40 overflow-auto rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
+                                    <div className="absolute inset-x-0 z-20 mt-1 max-h-44 overflow-auto rounded-md border border-slate-200 bg-white py-1">
                                         {matchedPatients.map((patient) => (
-                                            <button type="button" key={patient.id} onClick={() => selectExistingPatient(patient)} className="flex w-full items-center justify-between rounded px-2 py-2 text-left text-sm hover:bg-slate-50">
-                                                <span>{patient.name}</span>
-                                                <span className="text-xs text-slate-500">{patient.phone}</span>
+                                            <button type="button" key={patient.id} onClick={() => selectExistingPatient(patient)} className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-slate-50">
+                                                <span className="font-medium text-slate-700">{patient.name}</span>
+                                                <span className="text-xs text-slate-400">{patient.phone}</span>
                                             </button>
                                         ))}
                                         {matchedPatients.length === 0 && (
-                                            <div className="px-2 py-2 text-sm text-slate-500">
+                                            <div className="px-3 py-2 text-sm text-slate-400">
                                                 No existing patient found.
                                             </div>
                                         )}
@@ -424,11 +582,11 @@ export default function BillingCreate({
                             </div>
 
                             {selectedPatientLabel !== null && (
-                                <div className="mb-3 flex items-center justify-between gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-                                    <span>Selected: {selectedPatientLabel}</span>
+                                <div className="mb-4 flex items-center justify-between rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                                    <span>Selected: <strong>{selectedPatientLabel}</strong></span>
                                     <button
                                         type="button"
-                                        className="rounded border border-emerald-300 px-2 py-0.5 text-xs font-medium"
+                                        className="rounded border border-emerald-300 px-2 py-0.5 text-xs font-medium hover:bg-emerald-100"
                                         onClick={() => {
                                             setSelectedPatientLabel(null);
                                             form.setData('patient_id', '');
@@ -439,165 +597,215 @@ export default function BillingCreate({
                                 </div>
                             )}
 
-                            <div className="grid gap-3 md:grid-cols-2">
-                                <div className="grid grid-cols-[110px_1fr] gap-2 md:col-span-2">
-                                    <select className="rounded-lg border border-slate-200 px-3 py-2" value={form.data.patient.title} onChange={(e) => form.setData('patient', { ...form.data.patient, title: e.target.value })}>
-                                        <option>Mr.</option>
-                                        <option>Mrs.</option>
-                                        <option>Ms.</option>
-                                        <option>Dr.</option>
-                                    </select>
-                                    <input className="rounded-lg border border-slate-200 px-3 py-2" placeholder="Patient name" value={form.data.patient.name} onChange={(e) => form.setData('patient', { ...form.data.patient, name: e.target.value })} />
+                            <div className="grid gap-4 md:grid-cols-2">
+                                {/* Title + Name */}
+                                <div className="md:col-span-2">
+                                    <FieldLabel required>Patient Name</FieldLabel>
+                                    <div className="grid grid-cols-[100px_1fr] gap-2">
+                                        <SearchableSelect options={titleOptions} value={form.data.patient.title} onChange={(v) => form.setData('patient', { ...form.data.patient, title: v })} placeholder="Title" />
+                                        <input className={`${inputClasses} ${form.errors['patient.name'] ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20' : ''}`} placeholder="Full name" value={form.data.patient.name} onChange={(e) => form.setData('patient', { ...form.data.patient, name: e.target.value })} />
+                                    </div>
+                                    <FieldError message={form.errors['patient.name']} />
                                 </div>
 
-                                <input className="rounded-lg border border-slate-200 px-3 py-2" placeholder="Phone number" value={form.data.patient.phone} onChange={(e) => form.setData('patient', { ...form.data.patient, phone: e.target.value })} />
-                                <select className="rounded-lg border border-slate-200 px-3 py-2" value={form.data.patient.gender} onChange={(e) => form.setData('patient', { ...form.data.patient, gender: e.target.value })}>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
+                                <div>
+                                    <FieldLabel required>Phone</FieldLabel>
+                                    <input className={`${inputClasses} ${form.errors['patient.phone'] ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20' : ''}`} placeholder="10‑digit number" value={form.data.patient.phone} onChange={(e) => form.setData('patient', { ...form.data.patient, phone: e.target.value })} />
+                                    <FieldError message={form.errors['patient.phone']} />
+                                </div>
+                                <div>
+                                    <FieldLabel>Gender</FieldLabel>
+                                    <SearchableSelect options={genderOptions} value={form.data.patient.gender} onChange={(v) => form.setData('patient', { ...form.data.patient, gender: v })} placeholder="Select gender" />
+                                </div>
 
+                                {/* DOB only */}
                                 <div className="md:col-span-2">
-                                    <p className="mb-1 text-sm text-slate-600">Date of Birth</p>
+                                    <FieldLabel>Date of Birth</FieldLabel>
                                     <div className="grid grid-cols-3 gap-2">
-                                        <select className="rounded-lg border border-slate-200 px-3 py-2" value={dobYear} onChange={(e) => setDobYear(e.target.value)}>
-                                            <option value="">Year</option>
-                                            {years.map((year) => <option key={year} value={year}>{year}</option>)}
-                                        </select>
-                                        <select className="rounded-lg border border-slate-200 px-3 py-2" value={dobMonth} onChange={(e) => setDobMonth(e.target.value)}>
-                                            <option value="">Month</option>
-                                            {months.map((month) => <option key={month} value={month}>{month}</option>)}
-                                        </select>
-                                        <select className="rounded-lg border border-slate-200 px-3 py-2" value={dobDay} onChange={(e) => setDobDay(e.target.value)}>
-                                            <option value="">Day</option>
-                                            {days.map((day) => <option key={day} value={day}>{day}</option>)}
-                                        </select>
+                                        <SearchableSelect options={yearOptions} value={dobYear} onChange={setDobYear} placeholder="Year" />
+                                        <SearchableSelect options={monthOptions} value={dobMonth} onChange={setDobMonth} placeholder="Month" />
+                                        <SearchableSelect options={dayOptions} value={dobDay} onChange={setDobDay} placeholder="Day" />
                                     </div>
                                 </div>
 
-                                <div className="md:col-span-2 grid grid-cols-3 gap-2">
-                                    <input className="rounded-lg border border-slate-200 px-2 py-2" placeholder="Age Years" value={form.data.patient.age_years} onChange={(e) => form.setData('patient', { ...form.data.patient, age_years: e.target.value })} />
-                                    <input className="rounded-lg border border-slate-200 px-2 py-2" placeholder="Age Months" value={form.data.patient.age_months} onChange={(e) => form.setData('patient', { ...form.data.patient, age_months: e.target.value })} />
-                                    <input className="rounded-lg border border-slate-200 px-2 py-2" placeholder="Age Days" value={form.data.patient.age_days} onChange={(e) => form.setData('patient', { ...form.data.patient, age_days: e.target.value })} />
+                                {/* Doctor */}
+                                <div className="md:col-span-2">
+                                    <FieldLabel>Referring Doctor</FieldLabel>
+                                    <SearchableSelect options={doctorOptions} value={form.data.doctor_id === '' ? '__none__' : form.data.doctor_id} onChange={onDoctorSelect} placeholder="Select doctor" />
                                 </div>
 
-                                <div className="space-y-2 md:col-span-2">
-                                    <Select value={form.data.doctor_id === '' ? '__none__' : form.data.doctor_id} onValueChange={onDoctorSelect}>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Search and select doctor" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="__add_new__">+ Add New Doctor</SelectItem>
-                                            <SelectItem value="__none__">No Doctor</SelectItem>
-                                            {doctors.map((doctor) => <SelectItem key={doctor.id} value={String(doctor.id)}>{doctor.name}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
+                                {/* Collection center */}
+                                <div className="md:col-span-2">
+                                    <FieldLabel>Collection Center</FieldLabel>
+                                    <SearchableSelect options={collectionCenterOptions} value={form.data.collection_center_id} onChange={(v) => form.setData('collection_center_id', v)} placeholder="Select center" />
                                 </div>
-
-                                <select className="md:col-span-2 rounded-lg border border-slate-200 px-3 py-2" value={form.data.collection_center_id} onChange={(e) => form.setData('collection_center_id', e.target.value)}>
-                                    <option value="">Collection center</option>
-                                    {collectionCenters.map((center) => <option key={center.id} value={center.id}>{center.name}</option>)}
-                                </select>
                             </div>
                         </div>
 
-                        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-                            <h2 className="mb-4 text-lg font-semibold text-slate-800">Patient Additional Information</h2>
-                            <div className="grid gap-3 md:grid-cols-2">
-                                <input className="rounded-lg border border-slate-200 px-3 py-2" placeholder="Pin code" value={form.data.patient.pin_code} onChange={(e) => form.setData('patient', { ...form.data.patient, pin_code: e.target.value })} />
-                                <input className="rounded-lg border border-slate-200 px-3 py-2" placeholder="State" value={form.data.patient.state} onChange={(e) => form.setData('patient', { ...form.data.patient, state: e.target.value })} />
-                                <input className="rounded-lg border border-slate-200 px-3 py-2" placeholder="City" value={form.data.patient.city} onChange={(e) => form.setData('patient', { ...form.data.patient, city: e.target.value })} />
-                                <input className="rounded-lg border border-slate-200 px-3 py-2" placeholder="Landmark" value={form.data.patient.landmark} onChange={(e) => form.setData('patient', { ...form.data.patient, landmark: e.target.value })} />
-                                <input className="md:col-span-2 rounded-lg border border-slate-200 px-3 py-2" placeholder="Address" value={form.data.patient.address} onChange={(e) => form.setData('patient', { ...form.data.patient, address: e.target.value })} />
-                                <input className="rounded-lg border border-slate-200 px-3 py-2" placeholder="Weight (kg)" value={form.data.patient.weight_kg} onChange={(e) => form.setData('patient', { ...form.data.patient, weight_kg: e.target.value })} />
-                                <input className="rounded-lg border border-slate-200 px-3 py-2" placeholder="Height (cm)" value={form.data.patient.height_cm} onChange={(e) => form.setData('patient', { ...form.data.patient, height_cm: e.target.value })} />
-                                <input className="rounded-lg border border-slate-200 px-3 py-2" placeholder="UHID / Govt ID" value={form.data.patient.uhid} onChange={(e) => form.setData('patient', { ...form.data.patient, uhid: e.target.value })} />
-                                <input className="rounded-lg border border-slate-200 px-3 py-2" placeholder="ID Type" value={form.data.patient.id_type} onChange={(e) => form.setData('patient', { ...form.data.patient, id_type: e.target.value })} />
+                        {/* Patient Additional */}
+                        <div className="rounded-lg border border-slate-200 bg-white p-5">
+                            <h2 className="mb-1 text-base font-semibold text-slate-800">Patient Additional Information</h2>
+                            <p className="mb-4 text-xs text-slate-400">Address, identification & body metrics</p>
+
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div>
+                                    <FieldLabel>Pin Code</FieldLabel>
+                                    <input className={inputClasses} placeholder="e.g. 110001" value={form.data.patient.pin_code} onChange={(e) => form.setData('patient', { ...form.data.patient, pin_code: e.target.value })} />
+                                </div>
+                                <div>
+                                    <FieldLabel>State</FieldLabel>
+                                    <input className={inputClasses} placeholder="e.g. Rajasthan" value={form.data.patient.state} onChange={(e) => form.setData('patient', { ...form.data.patient, state: e.target.value })} />
+                                </div>
+                                <div>
+                                    <FieldLabel>City</FieldLabel>
+                                    <input className={inputClasses} placeholder="e.g. Jaipur" value={form.data.patient.city} onChange={(e) => form.setData('patient', { ...form.data.patient, city: e.target.value })} />
+                                </div>
+                                <div>
+                                    <FieldLabel>Landmark</FieldLabel>
+                                    <input className={inputClasses} placeholder="Near…" value={form.data.patient.landmark} onChange={(e) => form.setData('patient', { ...form.data.patient, landmark: e.target.value })} />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <FieldLabel>Address</FieldLabel>
+                                    <input className={inputClasses} placeholder="Street address" value={form.data.patient.address} onChange={(e) => form.setData('patient', { ...form.data.patient, address: e.target.value })} />
+                                </div>
+                                <div>
+                                    <FieldLabel>Weight (kg)</FieldLabel>
+                                    <input className={inputClasses} placeholder="e.g. 65" value={form.data.patient.weight_kg} onChange={(e) => form.setData('patient', { ...form.data.patient, weight_kg: e.target.value })} />
+                                </div>
+                                <div>
+                                    <FieldLabel>Height (cm)</FieldLabel>
+                                    <input className={inputClasses} placeholder="e.g. 170" value={form.data.patient.height_cm} onChange={(e) => form.setData('patient', { ...form.data.patient, height_cm: e.target.value })} />
+                                </div>
+                                <div>
+                                    <FieldLabel>UHID / Govt ID</FieldLabel>
+                                    <input className={inputClasses} placeholder="ID number" value={form.data.patient.uhid} onChange={(e) => form.setData('patient', { ...form.data.patient, uhid: e.target.value })} />
+                                </div>
+                                <div>
+                                    <FieldLabel>ID Type</FieldLabel>
+                                    <input className={inputClasses} placeholder="ABHA / Aadhar" value={form.data.patient.id_type} onChange={(e) => form.setData('patient', { ...form.data.patient, id_type: e.target.value })} />
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-                        <div className="mb-3 flex items-center gap-2">
-                            <button type="button" onClick={() => setTab('tests')} className={`rounded px-3 py-2 text-sm font-semibold ${tab === 'tests' ? 'bg-[#0f87af] text-white' : 'bg-slate-100 text-slate-700'}`}>Tests</button>
-                            <button type="button" onClick={() => setTab('packages')} className={`rounded px-3 py-2 text-sm font-semibold ${tab === 'packages' ? 'bg-[#0f87af] text-white' : 'bg-slate-100 text-slate-700'}`}>Packages</button>
-                            <button type="button" onClick={() => setTab('others')} className={`rounded px-3 py-2 text-sm font-semibold ${tab === 'others' ? 'bg-[#0f87af] text-white' : 'bg-slate-100 text-slate-700'}`}>Others</button>
+                    {/* ─── Tests / Packages / Others ─── */}
+                    <div className="rounded-lg border border-slate-200 bg-white p-5">
+                        <div className="mb-4 flex items-center gap-1">
+                            {form.errors.test_ids && <span className="mr-2 text-xs font-medium text-rose-500">{form.errors.test_ids}</span>}
+                            {(['tests', 'packages', 'others'] as const).map((t) => (
+                                <button
+                                    key={t}
+                                    type="button"
+                                    onClick={() => setTab(t)}
+                                    className={`rounded-md px-4 py-2 text-sm font-medium capitalize transition-colors ${
+                                        tab === t
+                                            ? 'bg-[#147da2] text-white'
+                                            : 'bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+                                    }`}
+                                >
+                                    {t}{t === 'tests' ? <span className="ml-0.5 text-rose-500">*</span> : null}
+                                </button>
+                            ))}
                         </div>
 
                         {tab === 'tests' && (
-                            <div className="grid gap-4 md:grid-cols-2">
+                            <div className="grid gap-5 md:grid-cols-2">
                                 <div>
-                                    <label className="relative mb-2 block">
+                                    <div className="relative mb-3">
                                         <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                                        <input className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3" placeholder="Search tests" value={testSearch} onChange={(e) => setTestSearch(e.target.value)} />
-                                    </label>
-                                    <div className="max-h-72 space-y-2 overflow-auto rounded-lg border border-slate-200 p-2">
+                                        <input className={`${inputClasses} pl-9`} placeholder="Search tests…" value={testSearch} onChange={(e) => setTestSearch(e.target.value)} />
+                                    </div>
+                                    <div className="max-h-72 space-y-1 overflow-auto rounded-md border border-slate-200 p-2">
                                         {filteredTests.map((test) => (
-                                            <button key={test.id} type="button" onClick={() => addTest(test.id)} className="flex w-full items-center justify-between rounded border border-slate-200 px-3 py-2 text-left text-sm hover:bg-slate-50">
-                                                <span>{test.name}</span><span className="font-semibold">₹{test.price}</span>
+                                            <button key={test.id} type="button" onClick={() => addTest(test.id)} className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition hover:bg-slate-50">
+                                                <span className="text-slate-700">{test.name}</span>
+                                                <span className="font-semibold text-slate-500">₹{test.price}</span>
                                             </button>
                                         ))}
+                                        {filteredTests.length === 0 && (
+                                            <p className="py-4 text-center text-sm text-slate-400">No tests found</p>
+                                        )}
                                     </div>
                                 </div>
-                                <div className="max-h-80 overflow-auto rounded-lg border border-slate-200 p-2">
-                                    {selectedTests.map((test) => (
-                                        <div key={test.id} className="mb-2 rounded border border-slate-200 bg-slate-50 p-2">
-                                            <div className="flex items-center justify-between">
-                                                <p className="text-sm font-medium">{test.name}</p>
-                                                <button type="button" onClick={() => removeTest(test.id)} className="text-xs text-rose-600">Remove</button>
+                                <div>
+                                    <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500">Selected Tests ({selectedTests.length})</p>
+                                    <div className="max-h-80 space-y-1.5 overflow-auto rounded-md border border-slate-200 p-2">
+                                        {selectedTests.length === 0 && (
+                                            <p className="py-6 text-center text-sm text-slate-400">No tests selected yet</p>
+                                        )}
+                                        {selectedTests.map((test) => (
+                                            <div key={test.id} className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50 px-3 py-2">
+                                                <span className="text-sm font-medium text-slate-700">{test.name}</span>
+                                                <button type="button" onClick={() => removeTest(test.id)} className="text-xs font-medium text-rose-500 hover:text-rose-700">Remove</button>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         )}
 
                         {tab === 'packages' && (
-                            <div className="grid gap-4 md:grid-cols-2">
+                            <div className="grid gap-5 md:grid-cols-2">
                                 <div>
-                                    <label className="relative mb-2 block">
+                                    <div className="relative mb-3">
                                         <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                                        <input className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3" placeholder="Search packages" value={packageSearch} onChange={(e) => setPackageSearch(e.target.value)} />
-                                    </label>
-                                    <div className="max-h-72 space-y-2 overflow-auto rounded-lg border border-slate-200 p-2">
+                                        <input className={`${inputClasses} pl-9`} placeholder="Search packages…" value={packageSearch} onChange={(e) => setPackageSearch(e.target.value)} />
+                                    </div>
+                                    <div className="max-h-72 space-y-1 overflow-auto rounded-md border border-slate-200 p-2">
                                         {filteredPackages.map((pack) => (
-                                            <button key={pack.id} type="button" onClick={() => addPackage(pack.id)} className="flex w-full items-center justify-between rounded border border-slate-200 px-3 py-2 text-left text-sm hover:bg-slate-50">
-                                                <span>{pack.name}</span><span className="font-semibold">₹{pack.price}</span>
+                                            <button key={pack.id} type="button" onClick={() => addPackage(pack.id)} className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition hover:bg-slate-50">
+                                                <span className="text-slate-700">{pack.name}</span>
+                                                <span className="font-semibold text-slate-500">₹{pack.price}</span>
+                                            </button>
+                                        ))}
+                                        {filteredPackages.length === 0 && (
+                                            <p className="py-4 text-center text-sm text-slate-400">No packages found</p>
+                                        )}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500">Selected Packages ({selectedPackages.length})</p>
+                                    <div className="max-h-80 space-y-1.5 overflow-auto rounded-md border border-slate-200 p-2">
+                                        {selectedPackages.length === 0 && (
+                                            <p className="py-6 text-center text-sm text-slate-400">No packages selected yet</p>
+                                        )}
+                                        {selectedPackages.map((pack) => (
+                                            <button key={pack.id} type="button" onClick={() => form.setData('package_ids', form.data.package_ids.filter((id) => id !== pack.id))} className="flex w-full items-center justify-between rounded-md border border-slate-100 bg-slate-50 px-3 py-2 text-left text-sm">
+                                                <span className="font-medium text-slate-700">{pack.name}</span>
+                                                <span className="font-semibold text-slate-500">₹{pack.price}</span>
                                             </button>
                                         ))}
                                     </div>
-                                </div>
-                                <div className="max-h-80 overflow-auto rounded-lg border border-slate-200 p-2">
-                                    {selectedPackages.map((pack) => (
-                                        <button key={pack.id} type="button" onClick={() => form.setData('package_ids', form.data.package_ids.filter((id) => id !== pack.id))} className="mb-2 flex w-full items-center justify-between rounded border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm">
-                                            <span>{pack.name}</span><span className="font-semibold">₹{pack.price}</span>
-                                        </button>
-                                    ))}
                                 </div>
                             </div>
                         )}
 
                         {tab === 'others' && (
-                            <div className="space-y-3">
-                                <div className="grid gap-2 md:grid-cols-[1fr_140px_120px]">
-                                    <input className="rounded-lg border border-slate-200 px-3 py-2" placeholder="Service charge name" value={newServiceName} onChange={(e) => setNewServiceName(e.target.value)} />
-                                    <input type="number" min={0} step="0.01" className="rounded-lg border border-slate-200 px-3 py-2" placeholder="Amount" value={newServiceAmount} onChange={(e) => setNewServiceAmount(Number(e.target.value))} />
-                                    <button type="button" onClick={() => addCharge()} className="rounded-lg bg-[#0f87af] px-3 py-2 text-sm font-semibold text-white">+ Add</button>
+                            <div className="space-y-4">
+                                <div className="grid gap-3 md:grid-cols-[1fr_140px_auto]">
+                                    <input className={inputClasses} placeholder="Charge name" value={newServiceName} onChange={(e) => setNewServiceName(e.target.value)} />
+                                    <input type="number" min={0} step="0.01" className={inputClasses} placeholder="Amount" value={newServiceAmount} onChange={(e) => setNewServiceAmount(Number(e.target.value))} />
+                                    <button type="button" onClick={() => addCharge()} className="h-9 rounded-md bg-[#147da2] px-4 text-sm font-medium text-white transition hover:bg-[#106385]">+ Add</button>
                                 </div>
-                                <div className="flex flex-wrap gap-2">
-                                    {serviceChargeMasters.map((master) => (
-                                        <button key={master.id} type="button" onClick={() => addCharge(master.name, Number(master.amount))} className="rounded border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
-                                            {master.name} - ₹{master.amount}
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="rounded-lg border border-slate-200 p-2">
+                                {serviceChargeMasters.length > 0 && (
+                                    <div className="flex flex-wrap gap-2">
+                                        {serviceChargeMasters.map((master) => (
+                                            <button key={master.id} type="button" onClick={() => addCharge(master.name, Number(master.amount))} className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50">
+                                                {master.name} – ₹{master.amount}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                                <div className="rounded-md border border-slate-200 p-2">
+                                    {form.data.service_other_charges.length === 0 && (
+                                        <p className="py-4 text-center text-sm text-slate-400">No additional charges added</p>
+                                    )}
                                     {form.data.service_other_charges.map((charge, index) => (
-                                        <div key={`${charge.name}-${index}`} className="mb-2 flex items-center justify-between rounded bg-slate-50 px-3 py-2 text-sm">
-                                            <span>{charge.name}</span>
+                                        <div key={`${charge.name}-${index}`} className="mb-1 flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 text-sm">
+                                            <span className="text-slate-700">{charge.name}</span>
                                             <div className="flex items-center gap-3">
-                                                <span className="font-semibold">₹{charge.amount.toFixed(2)}</span>
-                                                <button type="button" className="text-rose-600" onClick={() => form.setData('service_other_charges', form.data.service_other_charges.filter((_, i) => i !== index))}>x</button>
+                                                <span className="font-semibold text-slate-600">₹{charge.amount.toFixed(2)}</span>
+                                                <button type="button" className="text-xs font-medium text-rose-500 hover:text-rose-700" onClick={() => form.setData('service_other_charges', form.data.service_other_charges.filter((_, i) => i !== index))}>×</button>
                                             </div>
                                         </div>
                                     ))}
@@ -606,69 +814,66 @@ export default function BillingCreate({
                         )}
                     </div>
 
-                    <Card className="gap-0 py-0">
-                        <CardHeader className="border-b px-4 py-3">
+                    {/* ─── Billing & Payment Card ─── */}
+                    <Card className="gap-0 overflow-hidden border-slate-200 py-0">
+                        <CardHeader className="border-b border-slate-200 bg-slate-50/50 px-5 py-3">
                             <div className="flex items-center gap-3 text-sm">
-                                <Badge>1</Badge>
-                                <span className="font-medium">Billing Info</span>
+                                <Badge className="bg-[#147da2] text-white">1</Badge>
+                                <span className="font-medium text-slate-700">Billing Info</span>
                                 <Separator className="mx-1 flex-1" />
                                 <Badge variant="outline">2</Badge>
-                                <span className="text-muted-foreground">Payment</span>
+                                <span className="text-slate-400">Payment</span>
                                 <Separator className="mx-1 flex-1" />
                                 <Badge variant="outline">3</Badge>
-                                <span className="text-muted-foreground">Bill Generated</span>
+                                <span className="text-slate-400">Bill Generated</span>
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
                             <div className="grid grid-cols-1 lg:grid-cols-2">
-                                <div className="space-y-4 border-b p-4 lg:border-r lg:border-b-0">
-                                    <CardTitle>Billing Information</CardTitle>
+                                {/* Left — Billing Info */}
+                                <div className="space-y-4 border-b border-slate-200 p-5 lg:border-b-0 lg:border-r">
+                                    <CardTitle className="text-base">Billing Information</CardTitle>
 
-                                    <div className="space-y-2">
-                                        <Label>Billing Time</Label>
+                                    <div>
+                                        <FieldLabel>Billing Time</FieldLabel>
                                         <div className="relative">
                                             <Input type="datetime-local" value={form.data.billing_at} onChange={(e) => form.setData('billing_at', e.target.value)} />
-                                            <CalendarDays className="text-muted-foreground pointer-events-none absolute right-3 top-2.5 h-4 w-4" />
+                                            <CalendarDays className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-slate-400" />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label>Sample Collected From</Label>
+                                    <div>
+                                        <FieldLabel>Sample Collected From</FieldLabel>
                                         <div className="grid grid-cols-[1fr_auto] gap-2">
                                             <Input list="sample-sources" value={form.data.sample_collected_from} onChange={(e) => form.setData('sample_collected_from', e.target.value)} />
-                                            <Button type="button" variant="outline" onClick={addSampleSource}>+ Add</Button>
+                                            <Button type="button" variant="outline" size="sm" className="h-9" onClick={addSampleSource}>+ Add</Button>
                                             <datalist id="sample-sources">{sampleSources.map((source) => <option key={source} value={source} />)}</datalist>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label>Insurance</Label>
-                                        <Input placeholder="Add insurance details" value={form.data.insurance_details} onChange={(e) => form.setData('insurance_details', e.target.value)} />
+                                    <div>
+                                        <FieldLabel>Insurance</FieldLabel>
+                                        <Input placeholder="Insurance details" value={form.data.insurance_details} onChange={(e) => form.setData('insurance_details', e.target.value)} />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label>Service/Other Charges</Label>
+                                    <div>
+                                        <FieldLabel>Service / Other Charges</FieldLabel>
                                         <div className="grid grid-cols-[1fr_auto] gap-2">
-                                            <select className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring h-9 rounded-md border px-3 py-1 text-sm shadow-xs focus-visible:ring-1 focus-visible:outline-none" value={selectedServiceMasterId} onChange={(e) => setSelectedServiceMasterId(e.target.value)}>
-                                                <option value="">Select service charge</option>
-                                                {serviceChargeMasters.map((item) => (
-                                                    <option key={item.id} value={String(item.id)}>{item.name} (₹{item.amount})</option>
-                                                ))}
-                                            </select>
-                                            <Button type="button" variant="outline" onClick={addSelectedServiceCharge}>+ Add</Button>
+                                            <SearchableSelect options={serviceChargeOptions} value={selectedServiceMasterId} onChange={setSelectedServiceMasterId} placeholder="Select service charge" />
+                                            <Button type="button" variant="outline" size="sm" className="h-9" onClick={addSelectedServiceCharge}>+ Add</Button>
                                         </div>
                                     </div>
 
                                     {form.data.service_other_charges.length > 0 && (
-                                        <div className="space-y-2">
-                                            <Label>Selected Charges</Label>
-                                            <div className="space-y-2 rounded-md border p-2">
+                                        <div>
+                                            <FieldLabel>Selected Charges</FieldLabel>
+                                            <div className="space-y-1.5 rounded-md border border-slate-200 p-2">
                                                 {form.data.service_other_charges.map((charge, index) => (
-                                                    <div key={`${charge.name}-${index}`} className="bg-muted flex items-center justify-between rounded-md px-3 py-2 text-sm">
-                                                        <span>{charge.name}</span>
+                                                    <div key={`${charge.name}-${index}`} className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 text-sm">
+                                                        <span className="text-slate-700">{charge.name}</span>
                                                         <div className="flex items-center gap-3">
-                                                            <span className="font-medium">₹{charge.amount.toFixed(2)}</span>
-                                                            <Button type="button" size="sm" variant="ghost" onClick={() => form.setData('service_other_charges', form.data.service_other_charges.filter((_, i) => i !== index))}>Remove</Button>
+                                                            <span className="font-medium text-slate-600">₹{charge.amount.toFixed(2)}</span>
+                                                            <Button type="button" size="sm" variant="ghost" className="h-auto px-1 py-0 text-xs text-rose-500 hover:text-rose-700" onClick={() => form.setData('service_other_charges', form.data.service_other_charges.filter((_, i) => i !== index))}>Remove</Button>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -676,60 +881,51 @@ export default function BillingCreate({
                                         </div>
                                     )}
 
-                                    <div className="space-y-2">
-                                        <Label>Offer</Label>
-                                        <select className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring h-9 w-full rounded-md border px-3 py-1 text-sm shadow-xs focus-visible:ring-1 focus-visible:outline-none" value={form.data.offer} onChange={(e) => form.setData('offer', e.target.value)}>
-                                            <option value="No Offer">No Offer</option>
-                                            <option value="Festival Offer">Festival Offer</option>
-                                            <option value="Corporate Offer">Corporate Offer</option>
-                                        </select>
+                                    <div>
+                                        <FieldLabel>Offer</FieldLabel>
+                                        <SearchableSelect options={offerOptions} value={form.data.offer} onChange={(v) => form.setData('offer', v)} placeholder="Select offer" />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label>Doctor Discount</Label>
-                                        <div className="grid grid-cols-[1fr_154px] gap-2">
+                                    <div>
+                                        <FieldLabel>Doctor Discount</FieldLabel>
+                                        <div className="grid grid-cols-[1fr_140px] gap-2">
                                             <Input type="number" min={0} step="0.01" value={form.data.doctor_discount} onChange={(e) => form.setData('doctor_discount', Number(e.target.value))} />
-                                            <select className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring h-9 rounded-md border px-3 py-1 text-sm shadow-xs focus-visible:ring-1 focus-visible:outline-none" value={form.data.doctor_discount_type} onChange={(e) => form.setData('doctor_discount_type', e.target.value)}>
-                                                <option value="fixed">Fixed (₹)</option>
-                                                <option value="percent">Percent (%)</option>
-                                            </select>
+                                            <SearchableSelect options={discountTypeOptions} value={form.data.doctor_discount_type} onChange={(v) => form.setData('doctor_discount_type', v)} />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label>Center Discount</Label>
-                                        <div className="grid grid-cols-[1fr_154px] gap-2">
+                                    <div>
+                                        <FieldLabel>Center Discount</FieldLabel>
+                                        <div className="grid grid-cols-[1fr_140px] gap-2">
                                             <Input type="number" min={0} step="0.01" value={form.data.center_discount} onChange={(e) => form.setData('center_discount', Number(e.target.value))} />
-                                            <select className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring h-9 rounded-md border px-3 py-1 text-sm shadow-xs focus-visible:ring-1 focus-visible:outline-none" value={form.data.center_discount_type} onChange={(e) => form.setData('center_discount_type', e.target.value)}>
-                                                <option value="fixed">Fixed (₹)</option>
-                                                <option value="percent">Percent (%)</option>
-                                            </select>
+                                            <SearchableSelect options={discountTypeOptions} value={form.data.center_discount_type} onChange={(v) => form.setData('center_discount_type', v)} />
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label>Comment / Clinical Notes</Label>
-                                        <textarea className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring min-h-20 w-full rounded-md border px-3 py-2 text-sm shadow-xs focus-visible:ring-1 focus-visible:outline-none" value={form.data.notes} onChange={(e) => form.setData('notes', e.target.value)} />
+                                    <div>
+                                        <FieldLabel>Comment / Clinical Notes</FieldLabel>
+                                        <textarea className="min-h-20 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.notes} onChange={(e) => form.setData('notes', e.target.value)} />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between">
-                                            <Label>Previous Reports</Label>
-                                            <Button type="button" size="sm" variant="outline">+ Add</Button>
+                                    <div>
+                                        <div className="mb-1 flex items-center justify-between">
+                                            <FieldLabel>Previous Reports</FieldLabel>
+                                            <Button type="button" size="sm" variant="outline" className="h-7 text-xs">+ Add</Button>
                                         </div>
                                         <Input value={form.data.previous_reports} onChange={(e) => form.setData('previous_reports', e.target.value)} />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label>Agent / Referrer</Label>
-                                        <Input placeholder="Search and select agent..." value={form.data.agent_referrer} onChange={(e) => form.setData('agent_referrer', e.target.value)} />
+                                    <div>
+                                        <FieldLabel>Agent / Referrer</FieldLabel>
+                                        <Input placeholder="Search and select agent…" value={form.data.agent_referrer} onChange={(e) => form.setData('agent_referrer', e.target.value)} />
                                     </div>
                                 </div>
 
-                                <div className="space-y-4 p-4">
+                                {/* Right — Payment */}
+                                <div className="space-y-4 p-5">
                                     <div className="flex items-center gap-2">
-                                        <CardTitle>Payment Information</CardTitle>
-                                        <Badge variant="secondary">Complete billing first</Badge>
+                                        <CardTitle className="text-base">Payment Information</CardTitle>
+                                        <Badge variant="secondary" className="text-xs">Complete billing first</Badge>
                                     </div>
 
                                     <Alert variant="destructive">
@@ -737,62 +933,66 @@ export default function BillingCreate({
                                         <AlertDescription>At least one test or package must be selected.</AlertDescription>
                                     </Alert>
 
-                                    <div className="space-y-2">
-                                        <Label>Payment Amount</Label>
+                                    <div>
+                                        <FieldLabel>Payment Amount</FieldLabel>
                                         <div className="grid grid-cols-[1fr_auto] gap-2">
                                             <Input type="number" min={0} step="0.01" value={form.data.payment_amount} onChange={(e) => form.setData('payment_amount', Number(e.target.value))} />
-                                            <Button type="button" variant="secondary" onClick={() => form.setData('payment_amount', billTotal)}>Full Payment</Button>
+                                            <Button type="button" variant="secondary" size="sm" className="h-9" onClick={() => form.setData('payment_amount', billTotal)}>Full Payment</Button>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2 text-sm">
-                                        <div className="flex justify-between border-b pb-2"><span>Test Total:</span><span className="font-medium">₹{testTotal.toFixed(2)}</span></div>
-                                        <div className="flex justify-between border-b pb-2"><span>Package Total:</span><span className="font-medium">₹{packageTotal.toFixed(2)}</span></div>
-                                        <div className="space-y-1 border-b pb-2">
-                                            <div className="font-medium">Service Charges:</div>
+                                    {/* Bill summary */}
+                                    <div className="space-y-2 rounded-md border border-slate-200 bg-slate-50/50 p-4 text-sm">
+                                        <div className="flex justify-between py-1"><span className="text-slate-500">Test Total</span><span className="font-medium text-slate-700">₹{testTotal.toFixed(2)}</span></div>
+                                        <div className="flex justify-between py-1"><span className="text-slate-500">Package Total</span><span className="font-medium text-slate-700">₹{packageTotal.toFixed(2)}</span></div>
+                                        <Separator />
+                                        <div className="space-y-1 py-1">
+                                            <div className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-400">Service Charges</div>
                                             {form.data.service_other_charges.map((charge, index) => (
-                                                <div key={`payment-charge-${index}`} className="text-muted-foreground flex justify-between">
-                                                    <span>• {charge.name}:</span>
+                                                <div key={`payment-charge-${index}`} className="flex justify-between text-slate-500">
+                                                    <span>• {charge.name}</span>
                                                     <span>₹{charge.amount.toFixed(2)}</span>
                                                 </div>
                                             ))}
-                                            <div className="text-muted-foreground flex justify-between">
-                                                <span>• E-service Charge (including GST):</span>
+                                            <div className="flex justify-between text-slate-500">
+                                                <span>• E-service Charge (incl. GST)</span>
                                                 <span>₹{Number(serviceCharge).toFixed(2)}</span>
                                             </div>
-                                            <div className="flex justify-between pt-1 font-medium">
-                                                <span>Total Service Charges:</span>
+                                            <div className="flex justify-between font-medium text-slate-700 pt-1">
+                                                <span>Total Service Charges</span>
                                                 <span>₹{totalServiceCharge.toFixed(2)}</span>
                                             </div>
                                         </div>
-                                        <div className="text-destructive flex justify-between border-b pb-2 font-medium"><span>Total Discount:</span><span>-₹{totalDiscount.toFixed(2)}</span></div>
-                                        <div className="text-destructive flex justify-between text-lg font-semibold"><span>Due:</span><span>₹{dueAmount.toFixed(2)}</span></div>
-                                        <div className="flex justify-between text-lg font-semibold"><span>Bill Total:</span><span>₹{billTotal.toFixed(2)}</span></div>
+                                        <Separator />
+                                        <div className="flex justify-between py-1 font-medium text-rose-600"><span>Total Discount</span><span>-₹{totalDiscount.toFixed(2)}</span></div>
+                                        <Separator />
+                                        <div className="flex justify-between py-1 text-base font-semibold text-rose-600"><span>Due</span><span>₹{dueAmount.toFixed(2)}</span></div>
+                                        <div className="flex justify-between py-1 text-base font-bold text-slate-800"><span>Bill Total</span><span>₹{billTotal.toFixed(2)}</span></div>
                                     </div>
 
-                                    <div className="max-w-xs space-y-2">
-                                        <Label>Barcode Qty (Bill Wise)</Label>
+                                    <div className="max-w-xs">
+                                        <FieldLabel>Barcode Qty (Bill Wise)</FieldLabel>
                                         <Input type="number" min={1} max={20} value={form.data.sample_quantity} onChange={(e) => form.setData('sample_quantity', Math.max(1, Math.min(20, Number(e.target.value) || 1)))} />
                                     </div>
 
-                                    <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-3">
-                                        <label className="inline-flex items-center gap-2 text-sm">
+                                    <div className="flex flex-wrap items-center gap-5 border-t border-slate-200 pt-4">
+                                        <label className="inline-flex items-center gap-2 text-sm text-slate-600">
                                             <Checkbox checked={form.data.urgent} onCheckedChange={(checked) => form.setData('urgent', checked === true)} />
                                             Urgent
                                         </label>
-                                        <label className="inline-flex items-center gap-2 text-sm">
+                                        <label className="inline-flex items-center gap-2 text-sm text-slate-600">
                                             <Checkbox checked={form.data.soft_copy_only} onCheckedChange={(checked) => form.setData('soft_copy_only', checked === true)} />
                                             Soft Copy Only
                                         </label>
-                                        <label className="inline-flex items-center gap-2 text-sm">
+                                        <label className="inline-flex items-center gap-2 text-sm text-slate-600">
                                             <Checkbox checked={form.data.send_message} onCheckedChange={(checked) => form.setData('send_message', checked === true)} />
                                             Send Message
                                         </label>
                                     </div>
 
-                                    <div className="flex flex-wrap justify-end gap-2">
-                                        <Button type="submit" disabled={form.processing}>Generate Barcode</Button>
-                                        <Button type="button" variant="secondary" onClick={completeBilling} disabled={completeForm.processing || !generatedBillId}>Complete Billing</Button>
+                                    <div className="flex flex-wrap justify-end gap-3 border-t border-slate-200 pt-4">
+                                        <Button type="submit" disabled={form.processing} className="bg-[#147da2] hover:bg-[#106385]">Generate Barcode</Button>
+                                        <Button type="button" variant="outline" onClick={completeBilling} disabled={completeForm.processing || !generatedBillId}>Complete Billing</Button>
                                     </div>
                                 </div>
                             </div>
@@ -819,7 +1019,7 @@ export default function BillingCreate({
                     </div>
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setDoctorModalOpen(false)}>Cancel</Button>
-                        <Button type="button" onClick={saveNewDoctor}>Save Doctor</Button>
+                        <Button type="button" onClick={saveNewDoctor} className="bg-[#147da2] hover:bg-[#106385]">Save Doctor</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

@@ -32,10 +32,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const cards = [
-    { key: 'patients', title: 'Patients', icon: Activity, bg: 'from-cyan-500 to-cyan-600' },
-    { key: 'bills', title: 'Bills', icon: FileText, bg: 'from-blue-500 to-blue-600' },
-    { key: 'tests', title: 'Revenue', icon: TestTube2, bg: 'from-amber-500 to-amber-600' },
-    { key: 'due', title: 'Service Charges', icon: Wallet, bg: 'from-rose-500 to-rose-600' },
+    { key: 'patients', title: 'Patients', icon: Activity, color: 'text-cyan-600', bg: 'bg-cyan-50' },
+    { key: 'bills', title: 'Bills', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { key: 'tests', title: 'Revenue', icon: TestTube2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { key: 'due', title: 'Service Charges', icon: Wallet, color: 'text-rose-600', bg: 'bg-rose-50' },
 ] as const;
 
 export default function Dashboard({ totals, recentBills }: Props) {
@@ -43,15 +43,15 @@ export default function Dashboard({ totals, recentBills }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Lab Analytics" />
 
-            <div className="flex h-full flex-1 flex-col gap-5 bg-[#f4f7fb] p-4 md:p-6">
-                <div className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+            <div className="flex h-full flex-1 flex-col gap-5 bg-slate-50/80 p-4 md:p-6">
+                <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-semibold text-slate-900">Lab Analytics</h1>
-                        <p className="text-sm text-slate-500">Operational overview for your pathology and radiology billing unit.</p>
+                        <h1 className="text-xl font-semibold text-slate-800">Lab Analytics</h1>
+                        <p className="mt-1 text-sm text-slate-500">Operational overview for your pathology and radiology billing unit.</p>
                     </div>
                     <Link
                         href="/lab/billing/create"
-                        className="rounded-lg bg-[#0f87af] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0c7395]"
+                        className="rounded-lg bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]"
                     >
                         + Create Bill
                     </Link>
@@ -64,22 +64,24 @@ export default function Dashboard({ totals, recentBills }: Props) {
                         return (
                             <div
                                 key={card.key}
-                                className={`rounded-2xl bg-gradient-to-br ${card.bg} p-5 text-white shadow-md`}
+                                className="rounded-lg border border-slate-200 bg-white p-5"
                             >
                                 <div className="flex items-center justify-between">
-                                    <p className="text-sm font-medium text-white/90">{card.title}</p>
-                                    <card.icon className="h-5 w-5" />
+                                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{card.title}</p>
+                                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${card.bg} ${card.color}`}>
+                                        <card.icon className="h-4 w-4" />
+                                    </div>
                                 </div>
-                                <p className="mt-3 text-3xl font-bold">{card.key === 'tests' || card.key === 'due' ? `₹${value}` : value}</p>
+                                <p className="mt-3 text-2xl font-semibold text-slate-800">{card.key === 'tests' || card.key === 'due' ? `₹${value}` : value}</p>
                             </div>
                         );
                     })}
                 </div>
 
-                <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                <div className="rounded-lg border border-slate-200 bg-white p-4">
                     <div className="mb-4 flex items-center justify-between">
-                        <h2 className="text-lg font-semibold text-slate-900">Recent Bills</h2>
-                        <Link href="/lab/billing/create" className="text-sm font-medium text-[#0f87af]">
+                        <h2 className="text-base font-semibold text-slate-800">Recent Bills</h2>
+                        <Link href="/lab/billing/create" className="text-sm font-medium text-[#147da2] transition hover:text-[#106385]">
                             New Bill
                         </Link>
                     </div>

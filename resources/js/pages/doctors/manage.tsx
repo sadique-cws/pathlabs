@@ -44,35 +44,35 @@ export default function ManageDoctors({ doctors, stats }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Lab Doctors List" />
 
-            <div className="min-h-full bg-[#f4f7fb] p-4 md:p-6">
-                <div className="mb-3">
-                    <h1 className="text-3xl font-semibold text-slate-800">Lab Doctors List</h1>
-                    <p className="mt-1 text-slate-600">View and manage doctors registered in your lab</p>
+            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+                <div className="mb-4">
+                    <h1 className="text-xl font-semibold text-slate-800">Lab Doctors List</h1>
+                    <p className="mt-1 text-sm text-slate-500">View and manage doctors registered in your lab</p>
                 </div>
 
-                <div className="mb-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4">
                     <label className="relative block">
                         <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search doctors by name, email, or phone..." className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3" />
+                        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search doctors by name, email, or phone..." className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" />
                     </label>
                 </div>
 
-                <div className="mb-3 grid gap-3 md:grid-cols-3">
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
-                        <p className="text-slate-500">Total Doctors</p>
-                        <p className="text-4xl font-semibold text-slate-800">{stats.total}</p>
+                <div className="mb-4 grid gap-3 md:grid-cols-3">
+                    <div className="rounded-lg border border-slate-200 bg-white p-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Total Doctors</p>
+                        <p className="mt-1 text-2xl font-semibold text-slate-800">{stats.total}</p>
                     </div>
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
-                        <p className="text-slate-500">Accepted</p>
-                        <p className="text-4xl font-semibold text-slate-800">{stats.accepted}</p>
+                    <div className="rounded-lg border border-slate-200 bg-white p-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Accepted</p>
+                        <p className="mt-1 text-2xl font-semibold text-slate-800">{stats.accepted}</p>
                     </div>
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
-                        <p className="text-slate-500">With Gifts</p>
-                        <p className="text-4xl font-semibold text-slate-800">{stats.with_gifts}</p>
+                    <div className="rounded-lg border border-slate-200 bg-white p-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">With Gifts</p>
+                        <p className="mt-1 text-2xl font-semibold text-slate-800">{stats.with_gifts}</p>
                     </div>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div className="rounded-lg border border-slate-200 bg-white">
                     <div className="overflow-x-auto">
                         <table className="w-full min-w-[980px] text-left">
                             <thead className="border-b border-slate-200 bg-slate-50/70 text-sm font-semibold text-slate-700">

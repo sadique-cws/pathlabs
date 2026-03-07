@@ -36,33 +36,33 @@ export default function TestMethods({ methods, totals }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage Test Methods" />
 
-            <div className="min-h-full bg-[#f4f7fb] p-4 md:p-6">
+            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
                 <div className="mb-4">
-                    <h1 className="text-3xl font-semibold text-slate-800">Manage Test Methods</h1>
-                    <p className="text-slate-500">Create and manage test methods for laboratory procedures</p>
+                    <h1 className="text-xl font-semibold text-slate-800">Manage Test Methods</h1>
+                    <p className="mt-1 text-sm text-slate-500">Create and manage test methods for laboratory procedures</p>
                 </div>
 
-                <div className="mb-4 rounded-xl border border-slate-200 bg-white p-4">
+                <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4">
                     <label className="relative block">
-                        <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                        <input className="w-full rounded-lg border border-slate-200 py-2.5 pl-9 pr-3 text-sm" placeholder="Search test methods by name..." value={search} onChange={(e) => setSearch(e.target.value)} />
+                        <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                        <input className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" placeholder="Search test methods by name..." value={search} onChange={(e) => setSearch(e.target.value)} />
                     </label>
                 </div>
 
                 <div className="mb-4 grid gap-3 md:grid-cols-2">
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
-                        <p className="text-slate-500">Total Test Methods</p>
-                        <p className="text-4xl font-bold text-slate-800">{totals.total_methods}</p>
+                    <div className="rounded-lg border border-slate-200 bg-white p-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Total Test Methods</p>
+                        <p className="mt-1 text-2xl font-bold text-slate-800">{totals.total_methods}</p>
                     </div>
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
-                        <p className="text-slate-500">Methods Available</p>
-                        <p className="text-4xl font-bold text-slate-800">{totals.available_methods}</p>
+                    <div className="rounded-lg border border-slate-200 bg-white p-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Methods Available</p>
+                        <p className="mt-1 text-2xl font-bold text-slate-800">{totals.available_methods}</p>
                     </div>
                 </div>
 
-                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
                     <table className="w-full min-w-[700px] text-left">
-                        <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <thead className="border-b border-slate-200 bg-slate-50/80 text-xs font-semibold uppercase tracking-wide text-slate-500">
                             <tr>
                                 <th className="px-4 py-3">Method Name</th>
                                 <th className="px-4 py-3">Method ID</th>

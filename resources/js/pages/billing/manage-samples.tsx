@@ -109,10 +109,10 @@ export default function ManageSamples({ samples }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage Samples" />
 
-            <div className="min-h-full bg-[#f4f7fb] p-4 md:p-6">
-                <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
-                        <h1 className="text-[34px] font-semibold text-slate-800">Manage Samples</h1>
+            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+                <div className="rounded-lg border border-slate-200 bg-white">
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
+                        <h1 className="text-[20px] font-semibold text-slate-800">Manage Samples</h1>
 
                         <div className="flex items-center gap-2">
                             <label className="relative">
@@ -137,7 +137,7 @@ export default function ManageSamples({ samples }: Props) {
                                         setPage(1);
                                     }}
                                     placeholder="Search"
-                                    className="rounded-lg border border-[#0f87af] bg-[#0f87af] py-2 pl-9 pr-3 text-sm text-white placeholder:text-white/90"
+                                    className="rounded-lg border border-slate-200 bg-slate-50/80 py-2 pl-9 pr-3 text-sm text-slate-800 transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                 />
                             </label>
                         </div>
@@ -145,7 +145,7 @@ export default function ManageSamples({ samples }: Props) {
 
                     <div className="overflow-x-auto">
                         <table className="min-w-[1260px] w-full text-left">
-                            <thead className="border-b border-slate-200 bg-slate-50/70 text-sm font-medium text-slate-700">
+                            <thead className="border-b border-slate-200 bg-slate-50/80 text-xs font-semibold uppercase tracking-wide text-slate-500">
                                 <tr>
                                     <th className="px-3 py-3"><input type="checkbox" /></th>
                                     <th className="px-3 py-3 whitespace-nowrap">Sample Code <ChevronDown className="ml-1 inline h-4 w-4" /></th>
@@ -215,7 +215,7 @@ export default function ManageSamples({ samples }: Props) {
                         </div>
 
                         <div className="flex items-center gap-1">
-                            <button type="button" disabled={currentPage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))} className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 disabled:opacity-50">
+                            <button type="button" disabled={currentPage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))} className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 transition disabled:opacity-50 hover:bg-slate-50">
                                 <ChevronLeft className="h-4 w-4" /> Previous
                             </button>
                             {Array.from({ length: Math.min(totalPages, 4) }, (_, index) => index + 1).map((pageNo) => (
@@ -223,12 +223,12 @@ export default function ManageSamples({ samples }: Props) {
                                     key={pageNo}
                                     type="button"
                                     onClick={() => setPage(pageNo)}
-                                    className={`rounded-md border px-3 py-1.5 ${currentPage === pageNo ? 'border-[#0f87af] bg-[#0f87af] text-white' : 'border-slate-200'}`}
+                                    className={`rounded-md border px-3 py-1.5 transition ${currentPage === pageNo ? 'border-[#147da2] bg-[#147da2] text-white' : 'border-slate-200 hover:bg-slate-50'}`}
                                 >
                                     {pageNo}
                                 </button>
                             ))}
-                            <button type="button" disabled={currentPage >= totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 disabled:opacity-50">
+                            <button type="button" disabled={currentPage >= totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 transition disabled:opacity-50 hover:bg-slate-50">
                                 Next <ChevronRight className="h-4 w-4" />
                             </button>
                         </div>

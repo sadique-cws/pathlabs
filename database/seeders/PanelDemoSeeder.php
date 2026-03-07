@@ -84,6 +84,8 @@ class PanelDemoSeeder extends Seeder
             );
         });
 
+        $this->seedTestParameters($tests);
+
         $executivePackage = TestPackage::query()->updateOrCreate(
             ['lab_id' => $lab->id, 'code' => 'EXEC100'],
             [
@@ -270,7 +272,16 @@ class PanelDemoSeeder extends Seeder
                 'reports.result_entry',
             ],
             'collection_center' => ['dashboard.view', 'front_desk.access', 'billing.create', 'billing.view', 'billing.manage'],
-            'doctor' => ['dashboard.view', 'billing.view', 'billing.manage'],
+            'doctor' => [
+                'dashboard.view',
+                'billing.view',
+                'billing.manage',
+                'test_result.entry',
+                'reports.result_entry',
+                'reports.test_units',
+                'reports.test_methods',
+                'reports.sample_management'
+            ],
             'front_desk' => [
                 'dashboard.view',
                 'front_desk.access',
@@ -297,7 +308,7 @@ class PanelDemoSeeder extends Seeder
 
         foreach ($rolePermissionMap as $roleSlug => $permissionSlugs) {
             $permissionIds = collect($permissionSlugs)
-                ->map(fn (string $slug): ?int => $permissionsBySlug[$slug]->id ?? null)
+                ->map(fn(string $slug): ?int => $permissionsBySlug[$slug]->id ?? null)
                 ->filter()
                 ->values();
 
@@ -376,5 +387,83 @@ class PanelDemoSeeder extends Seeder
         }
 
         $lab->permissions()->sync($syncData);
+    }
+
+    /**
+     * @param \Illuminate\Support\Collection<int, LabTest> $tests
+     */
+    private function seedTestParameters(\Illuminate\Support\Collection $tests): void
+    {
+        $cbc = $tests->firstWhere('code', 'CBC');
+        if ($cbc) {
+            $cbc->parameters()->createMany([
+                ['name' => 'Hemoglobin (Hb)', 'unit' => 'g/dL', 'normal_range' => '13.5 - 17.5'],
+                ['name' => 'Hematocrit (Hct)', 'unit' => '%', 'normal_range' => '40 - 50'],
+                ['name' => 'RBC Count', 'unit' => '10^6/uL', 'normal_range' => '4.5 - 5.9'],
+                ['name' => 'WBC Count', 'unit' => '10^3/uL', 'normal_range' => '4.0 - 11.0'],
+                ['name' => 'Platelet Count', 'unit' => '10^3/uL', 'normal_range' => '150 - 450'],
+                ['name' => 'Neutrophils', 'unit' => '%', 'normal_range' => '40 - 80'],
+                ['name' => 'Lymphocytes', 'unit' => '%', 'normal_range' => '20 - 40'],
+                ['name' => 'Eosinophils', 'unit' => '%', 'normal_range' => '1 - 6'],
+                ['name' => 'Monocytes', 'unit' => '%', 'normal_range' => '2 - 10'],
+                ['name' => 'Basophils', 'unit' => '%', 'normal_range' => '0 - 1'],
+            ]);
+        }
+
+        $lft = $tests->firstWhere('code', 'LFT');
+        if ($lft) {
+            $lft->parameters()->createMany([
+                ['name' => 'Bilirubin Total', 'unit' => 'mg/dL', 'normal_range' => '0.3 - 1.2'],
+                ['name' => 'Bilirubin Direct', 'unit' => 'mg/dL', 'normal_range' => '0.0 - 0.3'],
+                ['name' => 'Bilirubin Indirect', 'unit' => 'mg/dL', 'normal_range' => '0.1 - 1.0'],
+                ['name' => 'SGOT (AST)', 'unit' => 'U/L', 'normal_range' => '0 - 40'],
+                ['name' => 'SGPT (ALT)', 'unit' => 'U/L', 'normal_range' => '0 - 41'],
+                ['name' => 'Alkaline Phosphatase', 'unit' => 'U/L', 'normal_range' => '40 - 129'],
+                ['name' => 'Total Protein', 'unit' => 'g/dL', 'normal_range' => '6.6 - 8.3'],
+                ['name' => 'Albumin', 'unit' => 'g/dL', 'normal_range' => '3.5 - 5.2'],
+                ['name' => 'Globulin', 'unit' => 'g/dL', 'normal_range' => '2.3 - 3.5'],
+            ]);
+        }
+
+        $kft = $tests->firstWhere('code', 'KFT');
+        if ($kft) {
+            $kft->parameters()->createMany([
+                ['name' => 'Urea', 'unit' => 'mg/dL', 'normal_range' => '15 - 40'],
+                ['name' => 'Creatinine', 'unit' => 'mg/dL', 'normal_range' => '0.6 - 1.2'],
+                ['name' => 'Uric Acid', 'unit' => 'mg/dL', 'normal_range' => '3.5 - 7.2'],
+                ['name' => 'Sodium', 'unit' => 'mEq/L', 'normal_range' => '135 - 145'],
+                ['name' => 'Potassium', 'unit' => 'mEq/L', 'normal_range' => '3.5 - 5.1'],
+                ['name' => 'Chloride', 'unit' => 'mEq/L', 'normal_range' => '98 - 107'],
+            ]);
+        }
+
+        $xrch = $tests->firstWhere('code', 'XRCH');
+        if ($xrch) {
+            $xrch->parameters()->createMany([
+                ['name' => 'Observation / Findings', 'unit' => '-', 'normal_range' => 'Normal pattern'],
+                ['name' => 'Impression', 'unit' => '-', 'normal_range' => 'Clinically correlated'],
+            ]);
+        }
+
+        $usab = $tests->firstWhere('code', 'USAB');
+        if ($usab) {
+            $usab->parameters()->createMany([
+                ['name' => 'Liver Size & Echotexture', 'unit' => '-', 'normal_range' => 'Normal'],
+                ['name' => 'Gallbladder', 'unit' => '-', 'normal_range' => 'Normal'],
+                ['name' => 'Pancreas', 'unit' => '-', 'normal_range' => 'Normal'],
+                ['name' => 'Spleen', 'unit' => '-', 'normal_range' => 'Normal'],
+                ['name' => 'Kidneys', 'unit' => '-', 'normal_range' => 'Normal'],
+                ['name' => 'Impressions', 'unit' => '-', 'normal_range' => 'No focal lesion'],
+            ]);
+        }
+
+        $thy = $tests->firstWhere('code', 'THY');
+        if ($thy) {
+            $thy->parameters()->createMany([
+                ['name' => 'Total T3', 'unit' => 'ng/dL', 'normal_range' => '60 - 200'],
+                ['name' => 'Total T4', 'unit' => 'ug/dL', 'normal_range' => '4.5 - 12.0'],
+                ['name' => 'TSH', 'unit' => 'uIU/mL', 'normal_range' => '0.3 - 5.5'],
+            ]);
+        }
     }
 }

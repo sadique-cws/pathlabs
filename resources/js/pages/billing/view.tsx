@@ -66,122 +66,123 @@ export default function BillView({ bill }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Invoice ${bill.bill_number}`} />
 
-            <div className="min-h-full bg-[#f4f7fb] p-4 md:p-6">
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-4">
-                        <Link href="/lab/billing/manage" className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900">
+            <div className="min-h-full bg-slate-50/80 p-4 md:p-6 lg:p-8">
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <Link href="/lab/billing/manage" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900">
                             <ArrowLeft className="h-4 w-4" />
-                            Back
                         </Link>
-                        <h1 className="text-2xl font-semibold text-slate-800">Invoice #{bill.bill_number}</h1>
+                        <h1 className="text-xl font-semibold text-slate-800">Invoice #{bill.bill_number}</h1>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Link href={`/lab/billing/${bill.id}/edit`} className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Link href={`/lab/billing/${bill.id}/edit`} className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                             <Pencil className="h-4 w-4" />
                             Edit Bill
                         </Link>
-                        <button type="button" className="inline-flex items-center gap-2 rounded-lg bg-[#0f87af] px-3 py-2 text-sm font-semibold text-white">
+                        <button type="button" className="inline-flex items-center gap-2 rounded-md bg-[#147da2] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
                             <Download className="h-4 w-4" />
                             Download PDF
                         </button>
-                        <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">
+                        <button type="button" className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                             <Printer className="h-4 w-4" />
                             Print
                         </button>
-                        <a href={`/lab/billing/${bill.id}/barcodes`} className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
+                        <a href={`/lab/billing/${bill.id}/barcodes`} className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100">
                             <Printer className="h-4 w-4" />
                             Barcode Preview
                         </a>
                     </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <div className="mb-5 flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 pb-4">
+                <div className="mx-auto max-w-5xl rounded-lg border border-slate-200 bg-white p-6 md:p-8 lg:p-10">
+                    <div className="mb-8 flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-6">
                         <div>
-                            <h2 className="text-4xl font-bold text-slate-800">PathLab</h2>
-                            <p className="text-slate-500">Diagnostic Laboratory</p>
+                            <h2 className="text-3xl font-bold tracking-tight text-[#147da2]">PathLab</h2>
+                            <p className="mt-1 text-sm font-medium uppercase tracking-widest text-slate-500">Diagnostic Laboratory</p>
                         </div>
                         <div className="text-right">
-                            <p className="text-2xl font-semibold text-slate-800">INVOICE</p>
-                            <p className="text-slate-500">#{bill.bill_number}</p>
-                            <p className="text-slate-500">Issued: {bill.billing_at ?? '-'}</p>
+                            <p className="text-xl font-bold tracking-widest text-slate-300">INVOICE</p>
+                            <p className="mt-1 text-lg font-medium tracking-wide text-slate-800">#{bill.bill_number}</p>
+                            <p className="mt-1 text-sm text-slate-500">Issued: {bill.billing_at ?? '-'}</p>
                         </div>
                     </div>
 
-                    <div className="mb-6 grid gap-4 md:grid-cols-2">
-                        <div className="rounded-xl bg-slate-50 p-4">
-                            <h3 className="mb-3 text-xl font-semibold text-slate-700">Patient Information</h3>
-                            <div className="space-y-1 text-slate-700">
-                                <p><span className="font-medium">Name:</span> {bill.patient.name}</p>
-                                <p><span className="font-medium">Age/Gender:</span> {bill.patient.age} years, {bill.patient.gender}</p>
-                                <p><span className="font-medium">Phone:</span> {bill.patient.phone}</p>
-                                <p><span className="font-medium">Address:</span> {bill.patient.address}</p>
+                    <div className="mb-8 grid gap-6 md:grid-cols-2">
+                        <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-5">
+                            <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-400">Patient Information</h3>
+                            <div className="space-y-2 text-sm text-slate-700">
+                                <p><span className="font-semibold text-slate-800">Name:</span> {bill.patient.name}</p>
+                                <p><span className="font-semibold text-slate-800">Age/Gender:</span> {bill.patient.age} years, {bill.patient.gender}</p>
+                                <p><span className="font-semibold text-slate-800">Phone:</span> {bill.patient.phone}</p>
+                                <p><span className="font-semibold text-slate-800">Address:</span> {bill.patient.address}</p>
                             </div>
                         </div>
-                        <div className="rounded-xl bg-slate-50 p-4">
-                            <h3 className="mb-3 text-xl font-semibold text-slate-700">Bill Information</h3>
-                            <div className="space-y-1 text-slate-700">
-                                <p><span className="font-medium">Status:</span> {bill.status}</p>
-                                <p><span className="font-medium">Sample From:</span> {bill.info.sample_from}</p>
-                                <p><span className="font-medium">Doctor Discount:</span> ₹{bill.info.doctor_discount.toFixed(2)}</p>
-                                <p><span className="font-medium">Center Discount:</span> ₹{bill.info.center_discount.toFixed(2)}</p>
+                        <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-5">
+                            <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-400">Bill Information</h3>
+                            <div className="space-y-2 text-sm text-slate-700">
+                                <p><span className="font-semibold text-slate-800">Status:</span> {bill.status}</p>
+                                <p><span className="font-semibold text-slate-800">Sample From:</span> {bill.info.sample_from}</p>
+                                <p><span className="font-semibold text-slate-800">Doctor Discount:</span> ₹{bill.info.doctor_discount.toFixed(2)}</p>
+                                <p><span className="font-semibold text-slate-800">Center Discount:</span> ₹{bill.info.center_discount.toFixed(2)}</p>
                             </div>
                         </div>
                     </div>
 
-                    <h3 className="mb-3 text-xl font-semibold text-slate-800">Tests & Packages</h3>
-                    <div className="overflow-x-auto">
+                    <h3 className="mb-4 text-base font-semibold text-slate-800">Tests & Packages</h3>
+                    <div className="overflow-hidden rounded-lg border border-slate-200">
                         <table className="w-full min-w-[680px] text-left">
-                            <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            <thead className="border-b border-slate-200 bg-slate-50/80 text-xs font-semibold uppercase tracking-wide text-slate-500">
                                 <tr>
-                                    <th className="px-3 py-3">Item</th>
-                                    <th className="px-3 py-3">Type</th>
-                                    <th className="px-3 py-3">Code</th>
-                                    <th className="px-3 py-3 text-right">Price</th>
+                                    <th className="px-4 py-3">Item</th>
+                                    <th className="px-4 py-3">Type</th>
+                                    <th className="px-4 py-3">Code</th>
+                                    <th className="px-4 py-3 text-right">Price</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {bill.items.map((item, index) => (
-                                    <tr key={`${item.code}-${index}`} className="border-b border-slate-100 text-sm text-slate-700">
-                                        <td className="px-3 py-3">{item.name}</td>
-                                        <td className="px-3 py-3">{item.type}</td>
-                                        <td className="px-3 py-3">{item.code}</td>
-                                        <td className="px-3 py-3 text-right">₹{item.price.toFixed(2)}</td>
+                                    <tr key={`${item.code}-${index}`} className="border-b border-slate-100 bg-white text-sm text-slate-700 last:border-0">
+                                        <td className="px-4 py-3">{item.name}</td>
+                                        <td className="px-4 py-3">{item.type}</td>
+                                        <td className="px-4 py-3">{item.code}</td>
+                                        <td className="px-4 py-3 text-right">₹{item.price.toFixed(2)}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
 
-                    <div className="mt-6 flex justify-end">
-                        <div className="w-full max-w-sm space-y-2 text-sm">
-                            <div className="flex justify-between"><span>Subtotal:</span><span>₹{bill.summary.subtotal.toFixed(2)}</span></div>
-                            <div className="flex justify-between"><span>Doctor Discount:</span><span>-₹{bill.summary.doctor_discount.toFixed(2)}</span></div>
-                            <div className="flex justify-between"><span>Center Discount:</span><span>-₹{bill.summary.center_discount.toFixed(2)}</span></div>
-                            <div className="flex justify-between border-t border-slate-200 pt-2 text-xl font-semibold"><span>Total Amount:</span><span>₹{bill.summary.total.toFixed(2)}</span></div>
-                            <div className="flex justify-between text-lg font-semibold text-emerald-600"><span>Paid Amount:</span><span>₹{bill.summary.paid.toFixed(2)}</span></div>
-                            <div className="flex justify-between text-lg font-semibold text-rose-600"><span>Due Amount:</span><span>₹{bill.summary.due.toFixed(2)}</span></div>
+                    <div className="mt-8 flex justify-end">
+                        <div className="w-full max-w-sm rounded-lg bg-slate-50 p-5 text-sm">
+                            <div className="space-y-3 pb-4">
+                                <div className="flex justify-between text-slate-600"><span>Subtotal:</span><span>₹{bill.summary.subtotal.toFixed(2)}</span></div>
+                                <div className="flex justify-between text-slate-600"><span>Doctor Discount:</span><span>-₹{bill.summary.doctor_discount.toFixed(2)}</span></div>
+                                <div className="flex justify-between text-slate-600"><span>Center Discount:</span><span>-₹{bill.summary.center_discount.toFixed(2)}</span></div>
+                            </div>
+                            <div className="flex justify-between border-t border-slate-200 pt-4 text-lg font-bold text-slate-800"><span>Total Amount:</span><span>₹{bill.summary.total.toFixed(2)}</span></div>
+                            <div className="mt-2 flex justify-between text-base font-semibold text-emerald-600"><span>Paid Amount:</span><span>₹{bill.summary.paid.toFixed(2)}</span></div>
+                            <div className="mt-2 flex justify-between text-base font-semibold text-rose-600"><span>Due Amount:</span><span>₹{bill.summary.due.toFixed(2)}</span></div>
                         </div>
                     </div>
 
-                    <div id="barcodes" className="mt-8 border-t border-slate-200 pt-6">
-                        <div className="mb-3 flex items-center justify-between gap-3">
-                            <h3 className="text-xl font-semibold text-slate-800">Sample Barcodes</h3>
+                    <div id="barcodes" className="mt-10 border-t border-slate-100 pt-8">
+                        <div className="mb-4 flex items-center justify-between gap-3">
+                            <h3 className="text-base font-semibold text-slate-800">Sample Barcodes</h3>
                             <button
                                 type="button"
                                 onClick={() => window.print()}
-                                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700"
+                                className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                             >
                                 <Printer className="h-4 w-4" />
-                                Print
+                                Print Barcodes
                             </button>
                         </div>
-                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {bill.barcodes.map((sample) => (
-                                <div key={sample.sample_id} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                                    <p className="text-xs font-medium text-slate-500">Sample #{sample.sample_id}</p>
-                                    <p className="mt-1 text-sm text-slate-700">{sample.test_name}</p>
-                                    <Code39Barcode value={sample.barcode} className="mt-2 h-auto w-full" height={52} />
+                                <div key={sample.sample_id} className="flex flex-col items-center justify-center rounded-lg border border-slate-200 bg-white p-4 text-center">
+                                    <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Sample #{sample.sample_id}</p>
+                                    <p className="mt-1 mb-3 text-sm font-medium text-slate-700 line-clamp-1" title={sample.test_name}>{sample.test_name}</p>
+                                    <Code39Barcode value={sample.barcode} className="h-auto w-full max-w-[200px]" height={48} />
                                 </div>
                             ))}
                         </div>

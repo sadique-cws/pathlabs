@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use App\Models\Lab;
+use App\Models\Wallet;
+use Illuminate\Http\Request;
+use Inertia\Middleware;
+
+class HandleInertiaRequests extends Middleware
+{
+    /**
+     * The root template that's loaded on the first page visit.
+     *
+     * @see https://inertiajs.com/server-side-setup#root-template
+     *
+     * @var string
+     */
+    protected $rootView = 'app';
+
+    /**
+     * Determines the current asset version.
+     *
+     * @see https://inertiajs.com/asset-versioning
+     */
+    public function version(Request $request): ?string
+    {
+        return parent::version($request);
+    }
+
+    /**
+     * Define the props that are shared by default.
+     *
+     * @see https://inertiajs.com/shared-data
+     *
+     * @return array<string, mixed>
+     */
+    public function share(Request $request): array
+    {
+        $user = $request->user();
+        $walletBalance = null;
+        $labId = (int) ($request->attributes->get('lab_id') ?? $user?->lab_id ?? 0);
+        $accessPermissions = [];
+        $accessRoles = [];
+        $isAdmin = false;
+
+        if ($user?->lab_id !== null) {
+            $walletBalance = Wallet::query()
+                ->where('walletable_type', Lab::class)
+                ->where('walletable_id', $user->lab_id)
+                ->value('balance');
+        }
+
+        if ($user !== null) {
+            $accessRoles = $user->roles()->pluck('slug')->all();
+            $isAdmin = in_array('admin', $accessRoles, true) || in_array('super_admin', $accessRoles, true);
+            $accessPermissions = $user->permissionSlugs($labId > 0 ? $labId : null);
+        }
+
+        return [
+            ...parent::share($request),
+            'name' => config('app.name'),
+            'auth' => [
+                'user' => $user,
+            ],
+            'wallet' => [
+                'balance' => $walletBalance,
+                'currency' => 'INR',
+            ],
+            'access' => [
+                'permissions' => $accessPermissions,
+                'roles' => $accessRoles,
+                'is_admin' => $isAdmin,
+            ],
+            'flash' => [
+                'success' => fn (): ?string => $request->session()->get('success'),
+            ],
+            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+        ];
+    }
+}

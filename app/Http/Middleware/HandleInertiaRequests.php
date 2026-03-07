@@ -45,16 +45,16 @@ class HandleInertiaRequests extends Middleware
         $isAdmin = false;
 
         if ($user !== null) {
-            $walletBalance = Wallet::query()
-                ->where('walletable_type', \App\Models\User::class)
-                ->where('walletable_id', $user->id)
-                ->value('balance');
-        }
-
-        if ($user !== null) {
             $accessRoles = $user->roles()->pluck('slug')->all();
             $isAdmin = in_array('admin', $accessRoles, true) || in_array('super_admin', $accessRoles, true);
             $accessPermissions = $user->permissionSlugs($labId > 0 ? $labId : null);
+
+            // Fetch balance via relationship if permission exists
+            if (in_array('wallet.view', $accessPermissions, true)) {
+                $walletBalance = $user->wallet()
+                    ->when($labId > 0, fn($q) => $q->where('lab_id', $labId))
+                    ->value('balance') ?? 0;
+            }
         }
 
         return [

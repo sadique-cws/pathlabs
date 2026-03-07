@@ -88,8 +88,13 @@ class User extends Authenticatable
             ));
         }
 
+        $allPermissions = Permission::query()->pluck('slug')->all();
+
         if ($this->hasRole('super_admin') || $this->hasRole('admin')) {
-            return Permission::query()->pluck('slug')->all();
+            return array_values(array_filter(
+                $allPermissions,
+                fn(string $slug): bool => $slug !== 'wallet.view' && $slug !== 'wallet.topup'
+            ));
         }
 
         $rolePermissionSlugs = Permission::query()
@@ -122,6 +127,11 @@ class User extends Authenticatable
         return array_values(array_unique(array_values(array_intersect($rolePermissionSlugs, $enabledLabSlugs))));
     }
 
+    public function wallet(): \Illuminate\Database\Eloquent\Relations\MorphOne
+    {
+        return $this->morphOne(Wallet::class, 'walletable');
+    }
+
     public function canAccessFeature(string $permissionSlug, ?int $labId = null): bool
     {
         return in_array($permissionSlug, $this->permissionSlugs($labId), true);
@@ -132,7 +142,7 @@ class User extends Authenticatable
      */
     private function defaultPermissionSlugs(): array
     {
-        return [
+        $slugs = [
             'dashboard.view',
             'front_desk.access',
             'billing.create',
@@ -157,5 +167,14 @@ class User extends Authenticatable
             'wallet.topup',
             'admin.labs.features',
         ];
+
+        if ($this->hasRole('admin') || $this->hasRole('super_admin')) {
+            return array_values(array_filter(
+                $slugs,
+                fn(string $slug): bool => $slug !== 'wallet.view' && $slug !== 'wallet.topup'
+            ));
+        }
+
+        return $slugs;
     }
 }

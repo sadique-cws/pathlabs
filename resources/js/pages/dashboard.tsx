@@ -43,7 +43,7 @@ export default function Dashboard({ totals, recentBills }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Lab Analytics" />
 
-            <div className="flex h-full flex-1 flex-col gap-5 bg-slate-50/80 p-4 md:p-6">
+            <div className="flex h-full flex-1 flex-col gap-5 bg-slate-50/80">
                 <div className="flex items-center justify-end">
                     <Link
                         href="/lab/billing/create"

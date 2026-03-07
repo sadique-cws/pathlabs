@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/sidebar';
 import { logout } from '@/routes';
 import { useCurrentUrl } from '@/hooks/use-current-url';
+import { cn } from '@/lib/utils';
 import type { User } from '@/types';
 
 type MenuItem = {
@@ -212,8 +213,24 @@ export function AppSidebar() {
     const canAccessAdmin = permissions.includes('admin.labs.features');
     const canAccessFrontDesk = permissions.includes('front_desk.access') || frontDeskSections.some((section) => section.items.some((item) => permissions.includes(item.permission)));
 
+    const [scrolled, setScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 10);
+        window.addEventListener('scroll', handleScroll);
+        handleScroll();
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     return (
-        <Sidebar collapsible="offcanvas" variant="sidebar" className="top-14 h-[calc(100svh-3.5rem)] border-r border-slate-100 bg-white">
+        <Sidebar 
+            collapsible="offcanvas" 
+            variant="sidebar" 
+            className={cn(
+                "transition-all duration-300 border-r border-slate-100 bg-white",
+                scrolled ? "top-12 h-[calc(100svh-3rem)]" : "top-14 h-[calc(100svh-3.5rem)]"
+            )}
+        >
             <SidebarHeader className="border-b border-slate-100 pb-3">
                 <SidebarLogo />
                 {canAccessFrontDesk && (

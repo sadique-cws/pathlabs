@@ -56,7 +56,7 @@ export default function AddDoctor({ existingDoctors }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Add Doctor" />
 
-            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+            <div className="min-h-full bg-slate-50/80 p-0">
                 <div className="rounded-lg border border-slate-200 bg-white p-6">
                     <h1 className="border-b border-slate-100 pb-3 text-lg font-semibold text-slate-800">Add Doctor</h1>
                     <p className="mt-3 text-sm text-slate-500">First search by name and mobile. If doctor not found, then create new.</p>

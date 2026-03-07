@@ -305,7 +305,7 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Permission Management" />
 
-            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+            <div className="min-h-full bg-slate-50/80 p-0">
                 {/* Page header */}
                 <div className="mb-5">
                     <h1 className="text-lg font-semibold text-slate-800">Permission Management</h1>

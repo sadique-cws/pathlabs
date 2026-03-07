@@ -55,7 +55,7 @@ export default function EditPatient({ patient }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Patient" />
 
-            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+            <div className="min-h-full bg-slate-50/80 p-0">
                 <form
                     onSubmit={(event) => {
                         event.preventDefault();

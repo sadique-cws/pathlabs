@@ -66,7 +66,7 @@ export default function BillView({ bill }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Invoice ${bill.bill_number}`} />
 
-            <div className="min-h-full bg-slate-50/80 p-4 md:p-6 lg:p-8">
+            <div className="min-h-full bg-slate-50/80 p-0 lg:p-8">
                 <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <Link href="/lab/billing/manage" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900">

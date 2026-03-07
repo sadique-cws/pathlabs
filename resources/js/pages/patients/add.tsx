@@ -30,12 +30,9 @@ export default function AddPatient() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Add Patient" />
 
-            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+            <div className="min-h-full bg-slate-50/80 p-0">
                 <div className="rounded-lg border border-slate-200 bg-white">
-                    <div className="border-b border-slate-200 px-6 py-4">
-                        <h1 className="text-lg font-semibold text-slate-800">Add Patient</h1>
-                    </div>
-
+                 
                     <form
                         className="grid gap-6 p-6 lg:grid-cols-2"
                         onSubmit={(event) => {

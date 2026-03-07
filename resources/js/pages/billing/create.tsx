@@ -529,7 +529,7 @@ export default function BillingCreate({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Bill" />
 
-            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+            <div className="min-h-full bg-slate-50/80 p-0">
                 {flash?.success && (
                     <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
                         {flash.success}

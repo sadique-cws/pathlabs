@@ -64,12 +64,7 @@ export default function ManagePatients({ patients }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage Patients" />
 
-            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
-                <div className="mb-4">
-                    <h1 className="text-xl font-semibold text-slate-800">Manage Patients</h1>
-                    <p className="mt-1 text-sm text-slate-500">Manage and monitor all registered patients in your system</p>
-                </div>
-
+            <div className="min-h-full bg-slate-50/80 p-0">
                 <div className="rounded-lg border border-slate-200 bg-white">
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
                         <label className="relative w-full max-w-md">

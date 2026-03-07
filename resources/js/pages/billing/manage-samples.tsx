@@ -67,10 +67,10 @@ export default function ManageSamples({ samples, filters }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage Samples" />
 
-            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
-                <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="min-h-full bg-slate-50/80 p-0">
+                <div className="rounded-lg border border-slate-200 bg-white">
                     <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 px-5 py-4">
-                        <h1 className="text-xl font-semibold text-slate-800">Manage Samples</h1>
+                        <h1 className="text-lg font-semibold text-slate-800">Manage Samples</h1>
 
                         <div className="flex items-center gap-3">
                             <select

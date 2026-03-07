@@ -136,7 +136,7 @@ export default function ManageParameters({ parameters, tests, pagination, filter
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Test Parameters" />
 
-            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+            <div className="min-h-full bg-slate-50/80 p-0">
                 {flash?.success && (
                     <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
                         {flash.success}

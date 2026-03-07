@@ -44,7 +44,7 @@ export default function ManageDoctors({ doctors, stats }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Lab Doctors List" />
 
-            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+            <div className="min-h-full bg-slate-50/80 p-0">
                 <div className="mb-4">
                     <h1 className="text-xl font-semibold text-slate-800">Lab Doctors List</h1>
                     <p className="mt-1 text-sm text-slate-500">View and manage doctors registered in your lab</p>

@@ -93,7 +93,7 @@ export default function ManageBills({ bills }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage Patient Bills" />
 
-            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+            <div className="min-h-full bg-slate-50/80 p-0">
                 <div className="rounded-lg border border-slate-200 bg-white">
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
                         <h1 className="text-xl font-semibold text-slate-800">Manage Patient Bills</h1>

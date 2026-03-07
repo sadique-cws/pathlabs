@@ -221,6 +221,8 @@ class PanelDemoSeeder extends Seeder
             ['slug' => 'doctor_desk.records', 'name' => 'Lab Doctor Desk - Doctor Records', 'group' => 'front_desk'],
             ['slug' => 'procurement.vendors', 'name' => 'Procurement - Vendor Directory', 'group' => 'front_desk'],
             ['slug' => 'procurement.orders', 'name' => 'Procurement - Purchase Orders', 'group' => 'front_desk'],
+            ['slug' => 'wallet.view', 'name' => 'Wallet - View Balance', 'group' => 'billing'],
+            ['slug' => 'wallet.topup', 'name' => 'Wallet - Add Funds', 'group' => 'billing'],
             ['slug' => 'admin.labs.features', 'name' => 'Admin Lab Features', 'group' => 'admin'],
         ];
 
@@ -271,6 +273,8 @@ class PanelDemoSeeder extends Seeder
                 'reports.test_methods',
                 'reports.sample_management',
                 'reports.result_entry',
+                'wallet.view',
+                'wallet.topup',
                 'clinical_master.manage_tests',
             ],
             'collection_center' => ['dashboard.view', 'front_desk.access', 'billing.create', 'billing.view', 'billing.manage'],
@@ -379,6 +383,8 @@ class PanelDemoSeeder extends Seeder
             'reports.test_methods',
             'reports.sample_management',
             'reports.result_entry',
+            'wallet.view',
+            'wallet.topup',
             'clinical_master.manage_tests',
         ];
 

@@ -84,7 +84,7 @@ class User extends Authenticatable
 
             return array_values(array_filter(
                 $defaults,
-                fn (string $slug): bool => $slug !== 'admin.labs.features',
+                fn(string $slug): bool => $slug !== 'admin.labs.features',
             ));
         }
 
@@ -153,6 +153,8 @@ class User extends Authenticatable
             'reports.test_methods',
             'reports.sample_management',
             'reports.result_entry',
+            'wallet.view',
+            'wallet.topup',
             'admin.labs.features',
         ];
     }

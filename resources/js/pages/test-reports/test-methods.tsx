@@ -36,7 +36,7 @@ export default function TestMethods({ methods, totals }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage Test Methods" />
 
-            <div className="min-h-full bg-slate-50/80 p-4 md:p-6">
+            <div className="min-h-full bg-slate-50/80 p-0">
                 <div className="mb-4">
                     <h1 className="text-xl font-semibold text-slate-800">Manage Test Methods</h1>
                     <p className="mt-1 text-sm text-slate-500">Create and manage test methods for laboratory procedures</p>

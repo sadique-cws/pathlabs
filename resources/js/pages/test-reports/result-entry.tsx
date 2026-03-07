@@ -31,6 +31,8 @@ type Props = {
     filters: {
         status: string;
         department: string;
+        search: string;
+        date: string;
     };
 };
 
@@ -42,27 +44,21 @@ const statusBadge: Record<string, string> = {
 };
 
 export default function ResultEntry({ rows, stats, filters }: Props) {
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useState(filters.search || '');
     const [page, setPage] = useState(1);
     const itemsPerPage = 50;
 
-    const filtered = useMemo(() => {
-        setPage(1); // Reset page on new search
-        const query = search.trim().toLowerCase();
-        if (query === '') {
-            return rows;
-        }
-
-        return rows.filter((row) => (
-            `${row.barcode} ${row.bill_number} ${row.patient_name} ${row.test_name} ${row.department}`.toLowerCase().includes(query)
-        ));
-    }, [rows, search]);
-
-    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    const totalPages = Math.ceil(rows.length / itemsPerPage);
     const paginated = useMemo(() => {
         const start = (page - 1) * itemsPerPage;
-        return filtered.slice(start, start + itemsPerPage);
-    }, [filtered, page]);
+        return rows.slice(start, start + itemsPerPage);
+    }, [rows, page]);
+
+    // Handle search with debounce or manual trigger
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        applyFilter('search', search);
+    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Test Reports', href: '/lab/test-reports/result-entry' },
@@ -111,15 +107,24 @@ export default function ResultEntry({ rows, stats, filters }: Props) {
                 </div>
 
                 <div className="mb-4 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 sm:flex-row sm:items-center">
-                    <label className="relative flex-1">
+                    <form onSubmit={handleSearch} className="relative flex-1">
                         <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                         <input
                             className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
-                            placeholder="Search by patient, bill, test, or department..."
+                            placeholder="Press Enter to search Patient, Bill#, Barcode..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
-                    </label>
+                    </form>
+                    <select
+                        className="h-9 w-40 rounded-md border border-slate-200 px-3 text-sm outline-none"
+                        value={filters.date}
+                        onChange={(e) => applyFilter('date', e.target.value)}
+                    >
+                        <option value="">All Dates</option>
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                    </select>
                     <select
                         className="h-9 w-40 rounded-md border border-slate-200 px-3 text-sm outline-none"
                         value={filters.status}
@@ -186,7 +191,7 @@ export default function ResultEntry({ rows, stats, filters }: Props) {
                                         </td>
                                     </tr>
                                 ))}
-                                {filtered.length === 0 && (
+                                {rows.length === 0 && (
                                     <tr>
                                         <td colSpan={6} className="px-4 py-8 text-center text-slate-500">No samples found.</td>
                                     </tr>
@@ -199,8 +204,8 @@ export default function ResultEntry({ rows, stats, filters }: Props) {
                         <div className="flex items-center justify-between border-t border-slate-200 bg-white px-6 py-3">
                             <span className="text-sm text-slate-500">
                                 Showing <span className="font-semibold text-slate-700">{(page - 1) * itemsPerPage + 1}</span> to{' '}
-                                <span className="font-semibold text-slate-700">{Math.min(page * itemsPerPage, filtered.length)}</span> of{' '}
-                                <span className="font-semibold text-slate-700">{filtered.length}</span> results
+                                <span className="font-semibold text-slate-700">{Math.min(page * itemsPerPage, rows.length)}</span> of{' '}
+                                <span className="font-semibold text-slate-700">{rows.length}</span> results
                             </span>
                             <div className="flex gap-2">
                                 <button

@@ -74,6 +74,8 @@ class TestReportController extends Controller
         $labId = (int) $request->attributes->get('lab_id');
         $statusFilter = $request->input('status', '');
         $departmentFilter = $request->input('department', '');
+        $search = $request->input('search', '');
+        $dateFilter = $request->input('date', '');
 
         $query = Sample::query()
             ->where('lab_id', $labId)
@@ -81,11 +83,9 @@ class TestReportController extends Controller
                 'bill:id,bill_number,billing_at,patient_id',
                 'bill.patient:id,name,phone,gender,age_years',
                 'test:id,name,sample_type,department',
-            ])
-            ->orderByRaw("CASE WHEN status = 'collected' THEN 1 WHEN status = 'in_progress' THEN 2 WHEN status = 'pending' THEN 3 WHEN status = 'completed' THEN 4 ELSE 5 END")
-            ->latest('id')
-            ->limit(2500);
+            ]);
 
+        // Filters
         if ($statusFilter !== '') {
             $query->where('status', $statusFilter);
         }
@@ -96,7 +96,30 @@ class TestReportController extends Controller
             });
         }
 
-        $samples = $query->get();
+        if ($search !== '') {
+            $query->where(function ($q) use ($search): void {
+                $q->where('barcode', 'like', "%{$search}%")
+                    ->orWhereHas('bill', function ($bq) use ($search): void {
+                        $bq->where('bill_number', 'like', "%{$search}%")
+                            ->orWhereHas('patient', function ($pq) use ($search): void {
+                                $pq->where('name', 'like', "%{$search}%")
+                                    ->orWhere('phone', 'like', "%{$search}%");
+                            });
+                    });
+            });
+        }
+
+        if ($dateFilter === 'today') {
+            $query->whereHas('bill', fn($q) => $q->whereDate('billing_at', now()->toDateString()));
+        } elseif ($dateFilter === 'yesterday') {
+            $query->whereHas('bill', fn($q) => $q->whereDate('billing_at', now()->subDay()->toDateString()));
+        }
+
+        $samples = $query
+            ->orderByRaw("CASE WHEN status = 'collected' THEN 1 WHEN status = 'in_progress' THEN 2 WHEN status = 'pending' THEN 3 WHEN status = 'completed' THEN 4 ELSE 5 END")
+            ->latest('id')
+            ->limit(2500)
+            ->get();
 
         $statusMap = [
             'pending' => 'Pending',
@@ -136,6 +159,8 @@ class TestReportController extends Controller
             'filters' => [
                 'status' => $statusFilter,
                 'department' => $departmentFilter,
+                'search' => $search,
+                'date' => $dateFilter,
             ],
         ]);
     }

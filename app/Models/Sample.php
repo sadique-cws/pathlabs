@@ -36,7 +36,7 @@ class Sample extends Model
         return [
             'collected_at' => 'datetime',
             'result_payload' => 'array',
-            'approval_date' => 'date',
+            'approval_date' => 'datetime',
         ];
     }
 

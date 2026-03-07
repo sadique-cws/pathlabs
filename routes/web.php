@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\LabFeatureController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DoctorController;
+use App\Http\Controllers\Lab\WalletController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\TestReportController;
 use App\Http\Controllers\TestParameterController;
@@ -51,6 +52,13 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
         Route::post('billing/complete', [BillingController::class, 'complete'])
             ->middleware('feature:billing.create')
             ->name('billing.complete');
+
+        Route::get('wallet', [WalletController::class, 'index'])
+            ->middleware('feature:wallet.view')
+            ->name('wallet.index');
+        Route::post('wallet/topup', [WalletController::class, 'topup'])
+            ->middleware('feature:wallet.topup')
+            ->name('wallet.topup');
 
         Route::get('patients/manage', [PatientController::class, 'manage'])
             ->middleware('feature:patients.manage')

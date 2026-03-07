@@ -6,6 +6,7 @@ import {
     CreditCard,
     FileCheck2,
     LogOut,
+    ShoppingCart,
     Stethoscope,
     UserRound,
     Users,
@@ -38,9 +39,9 @@ type MenuSection = {
 
 const frontDeskSections: MenuSection[] = [
     {
-        key: 'clinical-master',
-        title: 'Clinical Master',
-        icon: CreditCard,
+        key: 'billing',
+        title: 'Billing & Front Desk',
+        icon: Building2,
         items: [
             { title: 'New Bill', href: '/lab/billing/create', permission: 'billing.create', matchPrefix: '/lab/billing/create' },
             { title: 'Manage Bills', href: '/lab/billing/manage', permission: 'billing.manage', matchPrefix: '/lab/billing/manage' },
@@ -54,6 +55,7 @@ const frontDeskSections: MenuSection[] = [
         items: [
             { title: 'Add Patient', href: '/lab/patients/add', permission: 'patients.manage', matchPrefix: '/lab/patients/add' },
             { title: 'Manage Patients', href: '/lab/patients/manage', permission: 'patients.manage', matchPrefix: '/lab/patients/manage' },
+            { title: 'Patient Records', href: '/lab/coming-soon', permission: 'patient_services.records', matchPrefix: '/lab/patient-services/records' },
         ],
     },
     {
@@ -63,6 +65,16 @@ const frontDeskSections: MenuSection[] = [
         items: [
             { title: 'Add Doctor', href: '/lab/doctors/add', permission: 'doctors.manage', matchPrefix: '/lab/doctors/add' },
             { title: 'Doctor List', href: '/lab/doctors/manage', permission: 'doctors.manage', matchPrefix: '/lab/doctors/manage' },
+            { title: 'Doctor Records', href: '/lab/coming-soon', permission: 'doctor_desk.records', matchPrefix: '/lab/doctor-desk/records' },
+        ],
+    },
+    {
+        key: 'clinical-master',
+        title: 'Clinical Master',
+        icon: CreditCard,
+        items: [
+            { title: 'Manage Groups', href: '/lab/coming-soon', permission: 'clinical_master.manage_groups', matchPrefix: '/lab/clinical-master/manage-groups' },
+            { title: 'Manage Packages', href: '/lab/coming-soon', permission: 'clinical_master.manage_packages', matchPrefix: '/lab/clinical-master/manage-packages' },
         ],
     },
     {
@@ -72,8 +84,22 @@ const frontDeskSections: MenuSection[] = [
         items: [
             { title: 'Test Units', href: '/lab/test-reports/test-units', permission: 'reports.test_units', matchPrefix: '/lab/test-reports/test-units' },
             { title: 'Test Methods', href: '/lab/test-reports/test-methods', permission: 'reports.test_methods', matchPrefix: '/lab/test-reports/test-methods' },
+            { title: 'Test Parameters', href: '/lab/test-reports/parameters', permission: 'clinical_master.manage_tests', matchPrefix: '/lab/test-reports/parameters' },
             { title: 'Sample Management', href: '/lab/test-reports/sample-management', permission: 'reports.sample_management', matchPrefix: '/lab/test-reports/sample-management' },
+            { title: 'Report Formats', href: '/lab/coming-soon', permission: 'reports.report_formats', matchPrefix: '/lab/test-reports/report-formats' },
             { title: 'Result Entry', href: '/lab/test-reports/result-entry', permission: 'reports.result_entry', matchPrefix: '/lab/test-reports/result-entry' },
+            { title: 'Job Sheets', href: '/lab/coming-soon', permission: 'reports.job_sheets', matchPrefix: '/lab/test-reports/job-sheets' },
+            { title: 'Performance Metrics', href: '/lab/coming-soon', permission: 'reports.performance_metrics', matchPrefix: '/lab/test-reports/performance-metrics' },
+            { title: 'Lab Overview', href: '/lab/coming-soon', permission: 'reports.lab_overview', matchPrefix: '/lab/test-reports/lab-overview' },
+        ],
+    },
+    {
+        key: 'procurement',
+        title: 'Procurement',
+        icon: ShoppingCart,
+        items: [
+            { title: 'Vendor Directory', href: '/lab/coming-soon', permission: 'procurement.vendors', matchPrefix: '/lab/procurement/vendors' },
+            { title: 'Purchase Orders', href: '/lab/coming-soon', permission: 'procurement.orders', matchPrefix: '/lab/procurement/orders' },
         ],
     },
 ];

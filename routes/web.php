@@ -5,6 +5,7 @@ use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\TestReportController;
+use App\Http\Controllers\TestParameterController;
 use App\Http\Middleware\EnsureLabContext;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -19,6 +20,10 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
         ->name('dashboard');
 
     Route::prefix('lab')->name('lab.')->group(function (): void {
+        Route::get('coming-soon', function () {
+            return inertia('coming-soon');
+        })->name('coming-soon');
+
         Route::get('billing/create', [BillingController::class, 'create'])
             ->middleware('feature:billing.create')
             ->name('billing.create');
@@ -98,6 +103,22 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
             Route::put('result-entry/{sample}', [TestReportController::class, 'saveResultEntry'])
                 ->middleware('feature:reports.result_entry')
                 ->name('result-entry-update');
+            Route::get('parameters', [TestParameterController::class, 'index'])
+                ->middleware('feature:clinical_master.manage_tests')
+                ->name('parameters');
+            Route::post('parameters', [TestParameterController::class, 'store'])
+                ->middleware('feature:clinical_master.manage_tests')
+                ->name('parameters.store');
+            Route::put('parameters/{testParameter}', [TestParameterController::class, 'update'])
+                ->middleware('feature:clinical_master.manage_tests')
+                ->name('parameters.update');
+            Route::delete('parameters/{testParameter}', [TestParameterController::class, 'destroy'])
+                ->middleware('feature:clinical_master.manage_tests')
+                ->name('parameters.destroy');
+        });
+
+        Route::prefix('clinical-master')->name('clinical-master.')->group(function (): void {
+            // Keep clinical-master group for future features like manage groups and packages
         });
     });
 
@@ -109,4 +130,4 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
     });
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';

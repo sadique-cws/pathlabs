@@ -270,6 +270,7 @@ class PanelDemoSeeder extends Seeder
                 'reports.test_methods',
                 'reports.sample_management',
                 'reports.result_entry',
+                'clinical_master.manage_tests',
             ],
             'collection_center' => ['dashboard.view', 'front_desk.access', 'billing.create', 'billing.view', 'billing.manage'],
             'doctor' => [
@@ -303,6 +304,7 @@ class PanelDemoSeeder extends Seeder
                 'reports.test_methods',
                 'reports.sample_management',
                 'reports.result_entry',
+                'clinical_master.manage_tests',
             ],
         ];
 
@@ -375,6 +377,7 @@ class PanelDemoSeeder extends Seeder
             'reports.test_methods',
             'reports.sample_management',
             'reports.result_entry',
+            'clinical_master.manage_tests',
         ];
 
         $syncData = [];

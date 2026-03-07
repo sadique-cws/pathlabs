@@ -31,77 +31,63 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const columns: Array<{ key: keyof Filters; label: string; placeholder: string }> = [
-    { key: 'bill', label: 'Bill#', placeholder: 'Filter bill...' },
-    { key: 'name', label: 'Name', placeholder: 'Filter name...' },
-    { key: 'mobile', label: 'Mobile', placeholder: 'Filter mobile...' },
-    { key: 'refDoctor', label: 'Ref Dr.', placeholder: 'Filter doctor...' },
-    { key: 'payable', label: 'Payable', placeholder: 'Filter amount...' },
-    { key: 'paid', label: 'Paid Amt', placeholder: 'Filter paid...' },
-    { key: 'due', label: 'Due', placeholder: 'Filter due...' },
-    { key: 'discount', label: 'Discount', placeholder: 'Filter discount...' },
-    { key: 'billDate', label: 'Bill Date', placeholder: 'Filter date...' },
-    { key: 'payment', label: 'Payment', placeholder: 'Filter payment...' },
-    { key: 'status', label: 'Status', placeholder: 'Filter status...' },
+const columns: Array<{ key: string; label: string }> = [
+    { key: 'bill', label: 'Bill#' },
+    { key: 'name', label: 'Name' },
+    { key: 'mobile', label: 'Mobile' },
+    { key: 'refDoctor', label: 'Ref Dr.' },
+    { key: 'payable', label: 'Payable' },
+    { key: 'paid', label: 'Paid Amt' },
+    { key: 'due', label: 'Due' },
+    { key: 'discount', label: 'Discount' },
+    { key: 'billDate', label: 'Bill Date' },
+    { key: 'payment', label: 'Payment' },
+    { key: 'status', label: 'Status' },
 ];
 
-type Filters = {
-    bill: string;
-    name: string;
-    mobile: string;
-    refDoctor: string;
-    payable: string;
-    paid: string;
-    due: string;
-    discount: string;
-    billDate: string;
-    payment: string;
-    status: string;
-};
-
-const defaultFilters: Filters = {
-    bill: '',
-    name: '',
-    mobile: '',
-    refDoctor: '',
-    payable: '',
-    paid: '',
-    due: '',
-    discount: '',
-    billDate: '',
-    payment: '',
-    status: '',
-};
-
 export default function ManageBills({ bills }: Props) {
-    const [filters, setFilters] = useState<Filters>(defaultFilters);
+    const [search, setSearch] = useState('');
+    const [dateRange, setDateRange] = useState('');
+    const [paymentStatus, setPaymentStatus] = useState<'' | 'Complete' | 'Partial'>('');
+    const [page, setPage] = useState(1);
+    const itemsPerPage = 50;
 
     const filteredBills = useMemo(() => {
-        return bills.filter((bill) => {
-            const checks: Array<boolean> = [
-                bill.bill_number.toLowerCase().includes(filters.bill.toLowerCase()),
-                (bill.patient_name ?? '').toLowerCase().includes(filters.name.toLowerCase()),
-                (bill.mobile ?? '').toLowerCase().includes(filters.mobile.toLowerCase()),
-                bill.ref_doctor.toLowerCase().includes(filters.refDoctor.toLowerCase()),
-                bill.payable_amount.toString().toLowerCase().includes(filters.payable.toLowerCase()),
-                bill.paid_amount.toString().toLowerCase().includes(filters.paid.toLowerCase()),
-                bill.due_amount.toString().toLowerCase().includes(filters.due.toLowerCase()),
-                bill.discount_amount.toString().toLowerCase().includes(filters.discount.toLowerCase()),
-                (bill.bill_date ?? '').toLowerCase().includes(filters.billDate.toLowerCase()),
-                bill.payment_status.toLowerCase().includes(filters.payment.toLowerCase()),
-                bill.status.toLowerCase().includes(filters.status.toLowerCase()),
-            ];
+        setPage(1); // Reset page on filter changes
+        const q = search.trim().toLowerCase();
+        let result = bills;
 
-            return checks.every(Boolean);
-        });
-    }, [bills, filters]);
+        if (q) {
+            result = result.filter(
+                (b) =>
+                    b.bill_number.toLowerCase().includes(q) ||
+                    (b.patient_name || '').toLowerCase().includes(q) ||
+                    (b.mobile || '').toLowerCase().includes(q),
+            );
+        }
 
-    const setFilter = (key: keyof Filters, value: string): void => {
-        setFilters((current) => ({
-            ...current,
-            [key]: value,
-        }));
-    };
+        if (dateRange === 'today') {
+            const today = new Date().toISOString().split('T')[0];
+            result = result.filter((b) => b.bill_date_value === today);
+        } else if (dateRange === 'yesterday') {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yDate = yesterday.toISOString().split('T')[0];
+            result = result.filter((b) => b.bill_date_value === yDate);
+        }
+
+        if (paymentStatus) {
+            result = result.filter((b) => b.payment_status === paymentStatus);
+        }
+
+        return result;
+    }, [bills, search, dateRange, paymentStatus]);
+
+    const totalPages = Math.ceil(filteredBills.length / itemsPerPage);
+    const paginated = useMemo(() => {
+        const start = (page - 1) * itemsPerPage;
+        return filteredBills.slice(start, start + itemsPerPage);
+    }, [filteredBills, page]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -126,6 +112,40 @@ export default function ManageBills({ bills }: Props) {
                         </div>
                     </div>
 
+                    <div className="flex flex-wrap items-center justify-between gap-3 p-4">
+                        <div className="flex items-center gap-2">
+                            <label className="relative block">
+                                <Search className="pointer-events-none absolute left-2 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                                <input
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    className="w-48 rounded-md border border-slate-200 py-1.5 pl-7 pr-2 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                    placeholder="Search bills..."
+                                />
+                            </label>
+
+                            <select
+                                value={dateRange}
+                                onChange={(e) => setDateRange(e.target.value)}
+                                className="rounded-md border border-slate-200 py-1.5 text-xs font-medium text-slate-700 outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                            >
+                                <option value="">All Dates</option>
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                            </select>
+
+                            <select
+                                value={paymentStatus}
+                                onChange={(e) => setPaymentStatus(e.target.value as '' | 'Complete' | 'Partial')}
+                                className="rounded-md border border-slate-200 py-1.5 text-xs font-medium text-slate-700 outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                            >
+                                <option value="">All Payment Status</option>
+                                <option value="Complete">Complete</option>
+                                <option value="Partial">Partial</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div className="overflow-x-auto">
                         <table className="min-w-[1380px] w-full text-left">
                             <thead className="border-b border-slate-200 bg-slate-50/70 text-sm font-medium text-slate-700">
@@ -135,27 +155,11 @@ export default function ManageBills({ bills }: Props) {
                                     ))}
                                     <th className="px-3 py-3 whitespace-nowrap">Opt</th>
                                 </tr>
-                                <tr className="bg-white">
-                                    {columns.map((column) => (
-                                        <th key={`filter-${column.key}`} className="px-2 py-2">
-                                            <label className="relative block">
-                                                <Search className="pointer-events-none absolute left-2 top-2.5 h-3.5 w-3.5 text-slate-400" />
-                                                <input
-                                                    value={filters[column.key]}
-                                                    onChange={(event) => setFilter(column.key, event.target.value)}
-                                                    className="w-full rounded-md border border-slate-200 py-1.5 pl-7 pr-2 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
-                                                    placeholder={column.placeholder}
-                                                />
-                                            </label>
-                                        </th>
-                                    ))}
-                                    <th className="px-2 py-2"></th>
-                                </tr>
                             </thead>
 
                             <tbody>
-                                {filteredBills.map((bill) => (
-                                    <tr key={bill.id} className="border-b border-slate-100 text-xs text-slate-800">
+                                {paginated.map((bill) => (
+                                    <tr key={bill.id} className="border-b border-slate-100 text-[13px] hover:bg-slate-50 transition-colors">
                                         <td className="px-3 py-3 whitespace-nowrap">{bill.bill_number}</td>
                                         <td className="px-3 py-3 whitespace-nowrap">{bill.patient_name ?? '-'}</td>
                                         <td className="px-3 py-3 whitespace-nowrap">{bill.mobile ?? '-'}</td>
@@ -197,6 +201,32 @@ export default function ManageBills({ bills }: Props) {
                             </tbody>
                         </table>
                     </div>
+                
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-between border-t border-slate-200 bg-white px-6 py-3">
+                            <span className="text-sm text-slate-500">
+                                Showing <span className="font-semibold text-slate-700">{(page - 1) * itemsPerPage + 1}</span> to{' '}
+                                <span className="font-semibold text-slate-700">{Math.min(page * itemsPerPage, filteredBills.length)}</span> of{' '}
+                                <span className="font-semibold text-slate-700">{filteredBills.length}</span> results
+                            </span>
+                            <div className="flex gap-2">
+                                <button
+                                    className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                    disabled={page === 1}
+                                >
+                                    Previous
+                                </button>
+                                <button
+                                    className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                    disabled={page === totalPages}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </AppLayout>

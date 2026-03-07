@@ -43,8 +43,11 @@ const statusBadge: Record<string, string> = {
 
 export default function ResultEntry({ rows, stats, filters }: Props) {
     const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const itemsPerPage = 50;
 
     const filtered = useMemo(() => {
+        setPage(1); // Reset page on new search
         const query = search.trim().toLowerCase();
         if (query === '') {
             return rows;
@@ -54,6 +57,12 @@ export default function ResultEntry({ rows, stats, filters }: Props) {
             `${row.barcode} ${row.bill_number} ${row.patient_name} ${row.test_name} ${row.department}`.toLowerCase().includes(query)
         ));
     }, [rows, search]);
+
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    const paginated = useMemo(() => {
+        const start = (page - 1) * itemsPerPage;
+        return filtered.slice(start, start + itemsPerPage);
+    }, [filtered, page]);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Test Reports', href: '/lab/test-reports/result-entry' },
@@ -148,8 +157,8 @@ export default function ResultEntry({ rows, stats, filters }: Props) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filtered.map((row) => (
-                                    <tr key={row.id} className="border-b border-slate-100 text-sm text-slate-700">
+                                {paginated.map((row) => (
+                                    <tr key={row.id} className="border-b border-slate-100 text-sm hover:bg-slate-50 transition-colors text-slate-700">
                                         <td className="px-4 py-3">
                                             <p className="font-medium">{row.bill_number}</p>
                                             <p className="text-xs text-slate-500">{row.barcode}</p>
@@ -185,6 +194,32 @@ export default function ResultEntry({ rows, stats, filters }: Props) {
                             </tbody>
                         </table>
                     </div>
+                    
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-between border-t border-slate-200 bg-white px-6 py-3">
+                            <span className="text-sm text-slate-500">
+                                Showing <span className="font-semibold text-slate-700">{(page - 1) * itemsPerPage + 1}</span> to{' '}
+                                <span className="font-semibold text-slate-700">{Math.min(page * itemsPerPage, filtered.length)}</span> of{' '}
+                                <span className="font-semibold text-slate-700">{filtered.length}</span> results
+                            </span>
+                            <div className="flex gap-2">
+                                <button
+                                    className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                    disabled={page === 1}
+                                >
+                                    Previous
+                                </button>
+                                <button
+                                    className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                                    disabled={page === totalPages}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </AppLayout>

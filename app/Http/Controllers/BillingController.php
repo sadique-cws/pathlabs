@@ -96,7 +96,7 @@ class BillingController extends Controller
             ->where('lab_id', $labId)
             ->with(['patient:id,name,phone', 'doctor:id,name'])
             ->latest('billing_at')
-            ->limit(300)
+            ->limit(1500)
             ->get()
             ->map(function (Bill $bill): array {
                 $payableAmount = round((float) $bill->net_total, 2);
@@ -137,8 +137,9 @@ class BillingController extends Controller
                 'bill.patient:id,name',
                 'test:id,name,sample_type',
             ])
+            ->orderByRaw("CASE WHEN status = 'pending' THEN 1 WHEN status = 'collected' THEN 2 WHEN status = 'in_progress' THEN 3 WHEN status = 'completed' THEN 4 ELSE 5 END")
             ->latest('id')
-            ->limit(400)
+            ->limit(1500)
             ->get()
             ->map(function (Sample $sample) use ($labId): array {
                 $billDate = $sample->bill?->billing_at?->format('Y-m-d');
@@ -221,7 +222,7 @@ class BillingController extends Controller
                     ];
                 })->values()->all(),
                 'barcodes' => $bill->samples
-                    ->map(fn (Sample $sample): array => [
+                    ->map(fn(Sample $sample): array => [
                         'sample_id' => $sample->id,
                         'barcode' => $sample->barcode ?? '',
                         'test_name' => $sample->test?->name ?? '-',
@@ -317,7 +318,7 @@ class BillingController extends Controller
                 'billing_at' => $bill->billing_at?->format('d M Y h:i A'),
                 'auto_print' => $request->boolean('print'),
                 'barcodes' => $bill->samples
-                    ->map(fn (Sample $sample): array => [
+                    ->map(fn(Sample $sample): array => [
                         'sample_id' => $sample->id,
                         'barcode' => $sample->barcode ?? '',
                         'test_name' => $sample->test?->name ?? '-',

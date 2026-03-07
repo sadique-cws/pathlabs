@@ -82,8 +82,9 @@ class TestReportController extends Controller
                 'bill.patient:id,name,phone,gender,age_years',
                 'test:id,name,sample_type,department',
             ])
+            ->orderByRaw("CASE WHEN status = 'collected' THEN 1 WHEN status = 'in_progress' THEN 2 WHEN status = 'pending' THEN 3 WHEN status = 'completed' THEN 4 ELSE 5 END")
             ->latest('id')
-            ->limit(400);
+            ->limit(2500);
 
         if ($statusFilter !== '') {
             $query->where('status', $statusFilter);

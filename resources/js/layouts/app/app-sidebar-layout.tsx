@@ -24,7 +24,7 @@ export default function AppSidebarLayout({
     return (
         <AppShell variant="sidebar">
             <AppHeader withSidebarToggle={true} />
-            <div className="flex w-full min-h-screen bg-slate-50/50">
+            <div className="flex w-full min-h-screen bg-slate-50/50 mesh-bg">
                 <AppSidebar />
                 <main className="flex flex-col flex-1 min-w-0">
                     {/* Integrated Spacer for Fixed Header */}

@@ -2,6 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import { Activity, FileText, TestTube2, Wallet } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
+import { cn } from '@/lib/utils';
 
 type BillRow = {
     id: number;
@@ -53,22 +54,26 @@ export default function Dashboard({ totals, recentBills }: Props) {
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    {cards.map((card) => {
+                <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4">
+                    {cards.map((card, index) => {
                         const value = totals[card.key];
 
                         return (
                             <div
                                 key={card.key}
-                                className="rounded-lg border border-slate-200 bg-white p-4 sm:p-5 shadow-sm transition-all hover:border-[#147da2]"
+                                className={cn(
+                                    "sawtooth bg-white p-4 sm:p-5 border-y border-r border-slate-200",
+                                    index === 0 && "border-l",
+                                    index === 2 && "border-l xl:border-l-0",
+                                )}
                             >
                                 <div className="flex items-center justify-between">
-                                    <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">{card.title}</p>
+                                    <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-slate-500">{card.title}</p>
                                     <div className={`flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg ${card.bg} ${card.color}`}>
                                         <card.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                     </div>
                                 </div>
-                                <p className="mt-2 sm:mt-3 text-lg sm:text-2xl font-bold text-slate-800 truncate">
+                                <p className="mt-2 sm:mt-3 text-lg sm:text-2xl font-bold text-slate-900 truncate">
                                     {card.key === 'tests' || card.key === 'due' ? `₹${value}` : value}
                                 </p>
                             </div>
@@ -76,11 +81,11 @@ export default function Dashboard({ totals, recentBills }: Props) {
                     })}
                 </div>
 
-                <div className="rounded-lg border border-slate-200 bg-white p-4">
+                <div className="sawtooth bg-white p-5 border border-slate-200 mt-2">
                     <div className="mb-4 flex items-center justify-between">
-                        <h2 className="text-base font-semibold text-slate-800">Recent Bills</h2>
-                        <Link href="/lab/billing/create" className="text-sm font-medium text-[#147da2] transition hover:text-[#106385]">
-                            New Bill
+                        <h2 className="text-base font-semibold text-slate-800">Recent Transactions</h2>
+                        <Link href="/lab/billing/create" className="text-xs font-bold uppercase tracking-widest text-[#147da2] transition hover:text-[#106385]">
+                            View All
                         </Link>
                     </div>
 

@@ -37,7 +37,7 @@ export default function AuthSimpleLayout({
             <div className="relative hidden flex-1 lg:flex flex-col bg-slate-50 border-l border-slate-100 overflow-hidden">
                 <div className="flex-1 relative overflow-hidden">
                     <img 
-                        src="/.gemini/antigravity/brain/0aaa14a1-dc62-485b-831b-84e2621bbe62/login_bg_lab_1772917381187.png" 
+                        src="/images/login-bg.png" 
                         alt="Lab background" 
                         className="h-full w-full object-cover grayscale-[0.2] opacity-40" 
                     />

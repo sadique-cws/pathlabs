@@ -65,44 +65,34 @@ export default function Welcome() {
             </header>
 
             <main className="mx-auto max-w-7xl px-6 py-16 lg:py-24">
-                <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
-                    <div>
-                        <span className="inline-flex rounded-md bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-600">
+                <div className="relative isolate overflow-hidden rounded-3xl border border-slate-100 bg-slate-900 px-6 py-24 shadow-2xl sm:px-24 xl:py-32">
+                    <img
+                        src="/images/hero_bg.png"
+                        alt=""
+                        className="absolute inset-0 -z-10 h-full w-full object-cover opacity-30 grayscale"
+                    />
+                    <div className="mx-auto max-w-2xl text-center">
+                        <span className="inline-flex rounded-md bg-[#147da2]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#147da2]">
                             Professional Lab Management
                         </span>
-                        <h1 className="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl">
-                            Modernize your <br />
-                            <span className="text-[#147da2]">Lab Operations</span>.
+                        <h1 className="mt-6 text-4xl font-bold tracking-tight text-white sm:text-6xl">
+                            Modernize your <span className="text-[#147da2]">Lab Operations</span>.
                         </h1>
-                        <p className="mt-8 text-lg text-slate-500 max-w-lg leading-relaxed">
+                        <p className="mt-6 text-lg leading-8 text-slate-300">
                             A unified platform for diagnostic billing, wallet management, and laboratory reporting. 
                             Built for accuracy, speed, and security.
                         </p>
-                        
-                        <div className="mt-10 flex flex-wrap items-center gap-4">
+                        <div className="mt-10 flex items-center justify-center gap-x-6">
                             <Link
                                 href={auth.user ? dashboard() : login()}
-                                className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white hover:bg-slate-800 transition-colors shadow-sm"
+                                className="rounded-xl bg-[#147da2] px-6 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-[#106385] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#147da2] transition-all"
                             >
                                 {auth.user ? 'Go to Dashboard' : 'Get Started'}
-                                <ArrowRight className="h-4 w-4" />
                             </Link>
-                            <span className="text-sm font-medium text-slate-400">Trusted by modern diagnostic centers</span>
+                            <Link href="#" className="text-sm font-semibold leading-6 text-white">
+                                Learn more <span aria-hidden="true">→</span>
+                            </Link>
                         </div>
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        {features.map((feature, idx) => (
-                            <div key={idx} className="rounded-2xl border border-slate-100 bg-slate-50/50 p-6 hover:border-slate-200 transition-colors">
-                                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-slate-100 shadow-sm">
-                                    <feature.icon className="h-5 w-5 text-[#147da2]" />
-                                </div>
-                                <h3 className="text-base font-bold text-slate-900">{feature.title}</h3>
-                                <p className="mt-1 text-sm text-slate-500 leading-relaxed">
-                                    {feature.description}
-                                </p>
-                            </div>
-                        ))}
                     </div>
                 </div>
 

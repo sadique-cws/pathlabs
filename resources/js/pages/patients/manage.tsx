@@ -65,7 +65,7 @@ export default function ManagePatients({ patients }: Props) {
             <Head title="Manage Patients" />
 
             <div className="min-h-full bg-slate-50/80 p-0">
-                <div className="rounded-lg border border-slate-200 bg-white">
+                <div className="sawtooth border border-slate-200 bg-white">
                     <div className="flex flex-col gap-4 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
                         <label className="relative w-full sm:max-w-md">
                             <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />

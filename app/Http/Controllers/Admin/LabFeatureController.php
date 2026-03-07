@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateLabPermissionsRequest;
+use App\Http\Requests\UpdateRolePermissionsRequest;
 use App\Http\Requests\UpdateUserRolesRequest;
 use App\Models\Lab;
 use App\Models\Permission;
@@ -30,12 +31,15 @@ class LabFeatureController extends Controller
             ->all();
 
         $roles = Role::query()
+            ->with(['permissions:id,slug'])
             ->orderBy('name')
-            ->get(['id', 'name', 'slug'])
+            ->get(['id', 'name', 'slug', 'is_system'])
             ->map(fn (Role $role): array => [
                 'id' => $role->id,
                 'name' => $role->name,
                 'slug' => $role->slug,
+                'is_system' => (bool) $role->is_system,
+                'permissions' => $role->permissions->pluck('slug')->values()->all(),
             ])
             ->values()
             ->all();
@@ -99,5 +103,14 @@ class LabFeatureController extends Controller
         $user->roles()->sync($roleIds);
 
         return back()->with('success', "Updated roles for {$user->name}.");
+    }
+
+    public function updateRolePermissions(UpdateRolePermissionsRequest $request, Role $role): RedirectResponse
+    {
+        $permissionSlugs = $request->validated('permission_slugs');
+        $permissionIds = Permission::query()->whereIn('slug', $permissionSlugs)->pluck('id');
+        $role->permissions()->sync($permissionIds);
+
+        return back()->with('success', "Updated permissions for role {$role->name}.");
     }
 }

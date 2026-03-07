@@ -1,6 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { CalendarDays, Search } from 'lucide-react';
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
@@ -87,6 +87,8 @@ export default function BillingCreate({
     const [testSearch, setTestSearch] = useState('');
     const [packageSearch, setPackageSearch] = useState('');
     const [patientSearch, setPatientSearch] = useState('');
+    const [showPatientSuggestions, setShowPatientSuggestions] = useState(false);
+    const [selectedPatientLabel, setSelectedPatientLabel] = useState<string | null>(null);
     const [sampleSources, setSampleSources] = useState<string[]>(sampleCollectionSources.map((source) => source.name));
     const [selectedServiceMasterId, setSelectedServiceMasterId] = useState('');
     const [newServiceName, setNewServiceName] = useState('');
@@ -96,6 +98,7 @@ export default function BillingCreate({
     const [dobYear, setDobYear] = useState('');
     const [dobMonth, setDobMonth] = useState('');
     const [dobDay, setDobDay] = useState('');
+    const patientSearchRef = useRef<HTMLDivElement | null>(null);
     const deferredPatientSearch = useDeferredValue(patientSearch);
     const deferredTestSearch = useDeferredValue(testSearch);
     const deferredPackageSearch = useDeferredValue(packageSearch);
@@ -183,6 +186,25 @@ export default function BillingCreate({
         });
     }, [dobYear, dobMonth, dobDay]);
 
+    useEffect(() => {
+        const onClickOutside = (event: MouseEvent): void => {
+            const target = event.target;
+            if (!(target instanceof Node)) {
+                return;
+            }
+
+            if (patientSearchRef.current !== null && !patientSearchRef.current.contains(target)) {
+                setShowPatientSuggestions(false);
+            }
+        };
+
+        document.addEventListener('mousedown', onClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', onClickOutside);
+        };
+    }, []);
+
     const matchedPatients = useMemo(() => {
         const query = deferredPatientSearch.trim().toLowerCase();
         if (query === '') {
@@ -266,7 +288,9 @@ export default function BillingCreate({
             setDobDay(String(date.getDate()));
         }
 
-        setPatientSearch(patient.name);
+        setSelectedPatientLabel(`${patient.name} • ${patient.phone}`);
+        setPatientSearch('');
+        setShowPatientSuggestions(false);
     }
 
     function addTest(testId: number): void {
@@ -367,16 +391,51 @@ export default function BillingCreate({
                         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
                             <h2 className="mb-3 text-lg font-semibold text-slate-800">Patient Basic Information</h2>
 
-                            <input className="mb-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" placeholder="Enter phone number to search patients..." value={patientSearch} onChange={(e) => setPatientSearch(e.target.value)} />
+                            <div ref={patientSearchRef} className="mb-2">
+                                <input
+                                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                                    placeholder="Enter patient name or phone to search..."
+                                    value={patientSearch}
+                                    onFocus={() => setShowPatientSuggestions(patientSearch.trim() !== '')}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setPatientSearch(value);
+                                        setShowPatientSuggestions(value.trim() !== '');
+                                        setSelectedPatientLabel(null);
+                                        form.setData('patient_id', '');
+                                    }}
+                                />
 
-                            {patientSearch !== '' && matchedPatients.length > 0 && (
-                                <div className="mb-3 max-h-40 overflow-auto rounded-lg border border-slate-200 bg-white p-1">
-                                    {matchedPatients.map((patient) => (
-                                        <button type="button" key={patient.id} onClick={() => selectExistingPatient(patient)} className="flex w-full items-center justify-between rounded px-2 py-2 text-left text-sm hover:bg-slate-50">
-                                            <span>{patient.name}</span>
-                                            <span className="text-xs text-slate-500">{patient.phone}</span>
-                                        </button>
-                                    ))}
+                                {showPatientSuggestions && patientSearch !== '' && (
+                                    <div className="mt-2 max-h-40 overflow-auto rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
+                                        {matchedPatients.map((patient) => (
+                                            <button type="button" key={patient.id} onClick={() => selectExistingPatient(patient)} className="flex w-full items-center justify-between rounded px-2 py-2 text-left text-sm hover:bg-slate-50">
+                                                <span>{patient.name}</span>
+                                                <span className="text-xs text-slate-500">{patient.phone}</span>
+                                            </button>
+                                        ))}
+                                        {matchedPatients.length === 0 && (
+                                            <div className="px-2 py-2 text-sm text-slate-500">
+                                                No existing patient found.
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {selectedPatientLabel !== null && (
+                                <div className="mb-3 flex items-center justify-between gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                                    <span>Selected: {selectedPatientLabel}</span>
+                                    <button
+                                        type="button"
+                                        className="rounded border border-emerald-300 px-2 py-0.5 text-xs font-medium"
+                                        onClick={() => {
+                                            setSelectedPatientLabel(null);
+                                            form.setData('patient_id', '');
+                                        }}
+                                    >
+                                        Change
+                                    </button>
                                 </div>
                             )}
 

@@ -18,7 +18,7 @@ const quickActions = [
     { title: '+ Lab Bill', href: '/lab/billing/create', permission: 'billing.create' },
     { title: '+ CC Bill', href: '/lab/billing/create', permission: 'billing.create' },
     { title: 'Manage Bills', href: '/lab/billing/manage', permission: 'billing.manage' },
-    { title: 'Test Result Entry', href: '/lab/billing/create', permission: 'test_result.entry' },
+    { title: 'Test Result Entry', href: '/lab/test-reports/result-entry', permission: 'reports.result_entry' },
     { title: 'Admin Features', href: '/admin/labs/features', permission: 'admin.labs.features' },
 ];
 
@@ -100,7 +100,7 @@ export function AppHeader({ breadcrumbs = [], withSidebarToggle = false }: Props
 
     return (
         <>
-            <header className="border-b border-[#0d708e] bg-[#147da2] text-white">
+            <header className="fixed inset-x-0 top-0 z-50 border-b border-[#0d708e] bg-[#147da2] text-white">
                 <div className="flex h-14 items-center px-4">
                     <div className="mr-5">
                         {withSidebarToggle ? <SidebarToggleButton /> : null}
@@ -132,6 +132,7 @@ export function AppHeader({ breadcrumbs = [], withSidebarToggle = false }: Props
                     </div>
                 </div>
             </header>
+            <div className="h-14" />
 
             {breadcrumbs.length > 0 && (
                 <div className="border-b bg-white">

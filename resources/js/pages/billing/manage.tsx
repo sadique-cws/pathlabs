@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Eye, FileSpreadsheet, Printer, Search } from 'lucide-react';
+import { Eye, FileSpreadsheet, Pencil, Printer, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
@@ -172,9 +172,17 @@ export default function ManageBills({ bills }: Props) {
                                             <span className="inline-flex h-3 w-3 rounded-full bg-amber-400"></span>
                                         </td>
                                         <td className="px-3 py-3 whitespace-nowrap">
-                                            <button type="button" className="rounded p-1 text-blue-500 hover:bg-blue-50">
-                                                <Eye className="h-4 w-4" />
-                                            </button>
+                                            <div className="flex items-center gap-1">
+                                                <Link href={`/lab/billing/${bill.id}/view`} className="rounded p-1 text-blue-500 hover:bg-blue-50">
+                                                    <Eye className="h-4 w-4" />
+                                                </Link>
+                                                <a href={`/lab/billing/${bill.id}/barcodes`} className="rounded p-1 text-emerald-600 hover:bg-emerald-50" title="View / Print Barcodes">
+                                                    <Printer className="h-4 w-4" />
+                                                </a>
+                                                <Link href={`/lab/billing/${bill.id}/edit`} className="rounded p-1 text-slate-500 hover:bg-slate-100">
+                                                    <Pencil className="h-4 w-4" />
+                                                </Link>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CompleteBillingRequest;
 use App\Http\Requests\StoreBillRequest;
+use App\Http\Requests\UpdateBillRequest;
 use App\Models\Bill;
 use App\Models\CollectionCenter;
 use App\Models\Doctor;
 use App\Models\LabTest;
 use App\Models\Patient;
+use App\Models\Sample;
 use App\Models\SampleCollectionSource;
 use App\Models\ServiceCharge;
 use App\Models\TestPackage;
@@ -121,6 +123,208 @@ class BillingController extends Controller
 
         return Inertia::render('billing/manage', [
             'bills' => $bills,
+        ]);
+    }
+
+    public function manageSamples(Request $request): Response
+    {
+        $labId = (int) $request->attributes->get('lab_id');
+
+        $samples = Sample::query()
+            ->where('lab_id', $labId)
+            ->with([
+                'bill:id,bill_number,billing_at,patient_id',
+                'bill.patient:id,name',
+                'test:id,name,sample_type',
+            ])
+            ->latest('id')
+            ->limit(400)
+            ->get()
+            ->map(function (Sample $sample) use ($labId): array {
+                $billDate = $sample->bill?->billing_at?->format('Y-m-d');
+                $sampleDate = $sample->bill?->billing_at?->format('ymd') ?? now()->format('ymd');
+                $sampleCode = sprintf(
+                    '%d-%s-%02d',
+                    $labId,
+                    $sampleDate,
+                    ((int) $sample->id) % 100,
+                );
+
+                return [
+                    'id' => $sample->id,
+                    'sample_code' => $sampleCode,
+                    'barcode' => $sample->barcode,
+                    'bill_number' => $sample->bill?->bill_number,
+                    'patient_name' => $sample->bill?->patient?->name,
+                    'test_name' => $sample->test?->name,
+                    'sample_type' => $sample->test?->sample_type !== null && $sample->test?->sample_type !== '' ? ucfirst($sample->test->sample_type) : 'None',
+                    'bill_date' => $billDate,
+                    'collected_at' => $sample->collected_at?->format('Y-m-d H:i'),
+                    'outsource' => '-',
+                ];
+            })
+            ->values();
+
+        return Inertia::render('billing/manage-samples', [
+            'samples' => $samples,
+        ]);
+    }
+
+    public function view(Request $request, Bill $bill): Response
+    {
+        $labId = (int) $request->attributes->get('lab_id');
+        abort_if($bill->lab_id !== $labId, 404);
+
+        $bill->load([
+            'patient',
+            'doctor',
+            'collectionCenter',
+            'items',
+            'samples.test:id,name',
+        ]);
+
+        $totalAmount = round((float) $bill->net_total, 2);
+        $paidAmount = round((float) $bill->payment_amount, 2);
+        $dueAmount = max(0, round($totalAmount - $paidAmount, 2));
+
+        return Inertia::render('billing/view', [
+            'bill' => [
+                'id' => $bill->id,
+                'bill_number' => $bill->bill_number,
+                'billing_at' => $bill->billing_at?->format('d M Y \\a\\t h:i a'),
+                'status' => $dueAmount <= 0 ? 'Paid' : 'Due',
+                'patient' => [
+                    'name' => $bill->patient?->name ?? '-',
+                    'age' => $bill->patient?->age_years ?? 0,
+                    'gender' => $bill->patient?->gender !== null && $bill->patient?->gender !== '' ? ucfirst((string) $bill->patient?->gender) : '-',
+                    'phone' => $bill->patient?->phone ?? '-',
+                    'address' => trim(collect([
+                        $bill->patient?->address,
+                        $bill->patient?->city,
+                        $bill->patient?->state,
+                        $bill->patient?->pin_code,
+                    ])->filter()->implode(', ')) ?: '-',
+                ],
+                'info' => [
+                    'sample_from' => $bill->sample_collected_from ?? '-',
+                    'doctor_discount' => round((float) $bill->doctor_discount_amount, 2),
+                    'center_discount' => round((float) $bill->center_discount_amount, 2),
+                ],
+                'items' => $bill->items->map(function ($item): array {
+                    return [
+                        'name' => $item->name,
+                        'type' => ucfirst((string) $item->billable_type),
+                        'code' => $item->billable_type === 'test'
+                            ? sprintf('TEST-%04d', (int) $item->billable_id)
+                            : sprintf('PACK-%04d', (int) $item->billable_id),
+                        'price' => round((float) $item->total_price, 2),
+                    ];
+                })->values()->all(),
+                'barcodes' => $bill->samples
+                    ->map(fn (Sample $sample): array => [
+                        'sample_id' => $sample->id,
+                        'barcode' => $sample->barcode ?? '',
+                        'test_name' => $sample->test?->name ?? '-',
+                    ])
+                    ->values()
+                    ->all(),
+                'summary' => [
+                    'subtotal' => round((float) $bill->gross_total, 2),
+                    'doctor_discount' => round((float) $bill->doctor_discount_amount, 2),
+                    'center_discount' => round((float) $bill->center_discount_amount, 2),
+                    'total' => $totalAmount,
+                    'paid' => $paidAmount,
+                    'due' => $dueAmount,
+                ],
+                'auto_print_barcodes' => $request->query('print') === 'barcodes',
+            ],
+        ]);
+    }
+
+    public function edit(Request $request, Bill $bill): Response
+    {
+        $labId = (int) $request->attributes->get('lab_id');
+        abort_if($bill->lab_id !== $labId, 404);
+        $bill->load('patient');
+
+        return Inertia::render('billing/edit', [
+            'bill' => [
+                'id' => $bill->id,
+                'bill_number' => $bill->bill_number,
+                'billing_at' => $bill->billing_at?->format('Y-m-d\TH:i'),
+                'sample_collected_from' => $bill->sample_collected_from,
+                'insurance_details' => $bill->insurance_details,
+                'offer' => $bill->offer,
+                'doctor_discount_amount' => (float) $bill->doctor_discount_amount,
+                'doctor_discount_type' => $bill->doctor_discount_type ?? 'fixed',
+                'center_discount_amount' => (float) $bill->center_discount_amount,
+                'center_discount_type' => $bill->center_discount_type ?? 'fixed',
+                'payment_amount' => (float) $bill->payment_amount,
+                'previous_reports' => $bill->previous_reports,
+                'agent_referrer' => $bill->agent_referrer,
+                'notes' => $bill->notes,
+                'urgent' => (bool) $bill->urgent,
+                'soft_copy_only' => (bool) $bill->soft_copy_only,
+                'send_message' => (bool) $bill->send_message,
+                'patient' => [
+                    'name' => $bill->patient?->name ?? '',
+                    'phone' => $bill->patient?->phone ?? '',
+                    'gender' => $bill->patient?->gender ?? 'male',
+                    'age_years' => $bill->patient?->age_years,
+                    'city' => $bill->patient?->city,
+                    'address' => $bill->patient?->address,
+                    'state' => $bill->patient?->state,
+                    'pin_code' => $bill->patient?->pin_code,
+                ],
+            ],
+        ]);
+    }
+
+    public function update(UpdateBillRequest $request, Bill $bill): RedirectResponse
+    {
+        $labId = (int) $request->attributes->get('lab_id');
+        abort_if($bill->lab_id !== $labId, 404);
+
+        $data = $request->validated();
+        $patientData = $data['patient'];
+        unset($data['patient']);
+
+        if ($bill->patient !== null) {
+            $bill->patient->update($patientData);
+        }
+
+        $bill->update($data);
+
+        return to_route('lab.billing.view', ['bill' => $bill->id])->with('success', 'Bill and patient details updated.');
+    }
+
+    public function barcodes(Request $request, Bill $bill): Response
+    {
+        $labId = (int) $request->attributes->get('lab_id');
+        abort_if($bill->lab_id !== $labId, 404);
+
+        $bill->load([
+            'patient:id,name',
+            'samples:id,bill_id,test_id,barcode',
+            'samples.test:id,name',
+        ]);
+
+        return Inertia::render('billing/barcodes', [
+            'bill' => [
+                'id' => $bill->id,
+                'bill_number' => $bill->bill_number,
+                'patient_name' => $bill->patient?->name ?? '-',
+                'billing_at' => $bill->billing_at?->format('d M Y h:i A'),
+                'auto_print' => $request->boolean('print'),
+                'barcodes' => $bill->samples
+                    ->map(fn (Sample $sample): array => [
+                        'sample_id' => $sample->id,
+                        'barcode' => $sample->barcode ?? '',
+                        'test_name' => $sample->test?->name ?? '-',
+                    ])
+                    ->values()
+                    ->all(),
+            ],
         ]);
     }
 

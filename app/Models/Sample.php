@@ -21,6 +21,9 @@ class Sample extends Model
         'test_id',
         'barcode',
         'status',
+        'result_payload',
+        'result_remarks',
+        'approval_date',
         'collected_at',
     ];
 
@@ -31,6 +34,8 @@ class Sample extends Model
     {
         return [
             'collected_at' => 'datetime',
+            'result_payload' => 'array',
+            'approval_date' => 'date',
         ];
     }
 

@@ -134,12 +134,25 @@ class User extends Authenticatable
     {
         return [
             'dashboard.view',
+            'front_desk.access',
             'billing.create',
+            'billing.view',
+            'billing.edit',
             'billing.manage',
             'samples.manage',
+            'patients.add',
+            'patients.view',
+            'patients.edit',
             'patients.manage',
+            'doctors.add',
+            'doctors.view',
+            'doctors.edit',
             'doctors.manage',
             'test_result.entry',
+            'reports.test_units',
+            'reports.test_methods',
+            'reports.sample_management',
+            'reports.result_entry',
             'admin.labs.features',
         ];
     }

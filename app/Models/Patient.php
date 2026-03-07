@@ -20,6 +20,7 @@ class Patient extends Model
         'title',
         'name',
         'phone',
+        'alternative_phone',
         'gender',
         'date_of_birth',
         'age_years',
@@ -34,6 +35,8 @@ class Patient extends Model
         'state',
         'pin_code',
         'id_type',
+        'discount_package',
+        'discount_expiry_date',
     ];
 
     /**
@@ -43,6 +46,7 @@ class Patient extends Model
     {
         return [
             'date_of_birth' => 'date',
+            'discount_expiry_date' => 'date',
             'weight_kg' => 'decimal:2',
             'height_cm' => 'decimal:2',
         ];

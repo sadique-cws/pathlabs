@@ -32,7 +32,6 @@ export default function AddPatient() {
 
             <div className="min-h-full bg-slate-50/80 p-0">
                 <div className="rounded-lg border border-slate-200 bg-white">
-                 
                     <form
                         className="grid gap-6 p-6 lg:grid-cols-2"
                         onSubmit={(event) => {

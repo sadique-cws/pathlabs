@@ -91,9 +91,8 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
 
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <h1 className="text-xl font-semibold text-slate-800">Test Result Entry</h1>
-                        <p className="mt-1 text-sm text-slate-500">
-                            {sample.test_name} — <span className="font-medium text-[#147da2]">{sample.department}</span>
+                        <p className="text-sm font-semibold text-[#147da2]">
+                            {sample.test_name} — <span className="font-medium text-slate-500">{sample.department}</span>
                         </p>
                     </div>
                     <div className="flex items-center gap-3">

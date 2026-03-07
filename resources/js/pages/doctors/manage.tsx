@@ -45,11 +45,6 @@ export default function ManageDoctors({ doctors, stats }: Props) {
             <Head title="Lab Doctors List" />
 
             <div className="min-h-full bg-slate-50/80 p-0">
-                <div className="mb-4">
-                    <h1 className="text-xl font-semibold text-slate-800">Lab Doctors List</h1>
-                    <p className="mt-1 text-sm text-slate-500">View and manage doctors registered in your lab</p>
-                </div>
-
                 <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4">
                     <label className="relative block">
                         <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />

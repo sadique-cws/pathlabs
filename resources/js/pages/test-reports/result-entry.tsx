@@ -78,10 +78,7 @@ export default function ResultEntry({ rows, stats, filters }: Props) {
             <Head title="Test Reports Dashboard" />
 
             <div className="min-h-full bg-slate-50/80 p-0">
-                <div className="mb-4">
-                    <h1 className="text-xl font-semibold text-slate-800">Test Reports Dashboard</h1>
-                    <p className="mt-1 text-sm text-slate-500">Manage patient test samples and enter results</p>
-                </div>
+
 
                 <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                     <div className="rounded-lg border border-slate-200 bg-white p-4">

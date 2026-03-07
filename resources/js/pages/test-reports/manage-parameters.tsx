@@ -144,14 +144,10 @@ export default function ManageParameters({ parameters, tests, pagination, filter
                 )}
 
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-xl font-semibold text-slate-800">Test Parameters</h1>
-                        <p className="mt-1 text-sm text-slate-500">Manage lab test parameters and normal ranges.</p>
-                    </div>
                     <button
                         type="button"
                         onClick={() => openModal()}
-                        className="flex items-center gap-1.5 rounded-md bg-[#147da2] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#106385]"
+                        className="flex items-center gap-1.5 rounded-md bg-[#147da2] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#106385] ml-auto"
                     >
                         <Plus className="h-4 w-4" />
                         Add Parameter

@@ -96,8 +96,7 @@ export default function ManageBills({ bills }: Props) {
             <div className="min-h-full bg-slate-50/80 p-0">
                 <div className="rounded-lg border border-slate-200 bg-white">
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
-                        <h1 className="text-xl font-semibold text-slate-800">Manage Patient Bills</h1>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 ml-auto">
                             <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                                 <Printer className="h-4 w-4" />
                                 Printer

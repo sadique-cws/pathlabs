@@ -2,6 +2,18 @@ import { useState, useEffect } from 'react';
 
 export type ConnectivityStatus = 'Strong' | 'Weak' | 'Offline';
 
+interface NetworkInformation extends EventTarget {
+    readonly saveData: boolean;
+    readonly effectiveType: 'slow-2g' | '2g' | '3g' | '4g';
+    readonly rtt: number;
+}
+
+interface NavigatorWithConnection extends Navigator {
+    readonly connection?: NetworkInformation;
+    readonly mozConnection?: NetworkInformation;
+    readonly webkitConnection?: NetworkInformation;
+}
+
 export function useConnectivity() {
     const [status, setStatus] = useState<ConnectivityStatus>('Strong');
 
@@ -12,8 +24,8 @@ export function useConnectivity() {
                 return;
             }
 
-            // @ts-ignore - navigator.connection is not standard in all browsers
-            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            const nav = navigator as NavigatorWithConnection;
+            const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
             
             if (connection) {
                 if (connection.saveData) {

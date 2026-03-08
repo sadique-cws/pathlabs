@@ -2,6 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import { Eye, Pencil, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
+import { Pagination } from '@/components/pagination';
 import type { BreadcrumbItem } from '@/types';
 
 type PatientRow = {
@@ -131,34 +132,18 @@ export default function ManagePatients({ patients }: Props) {
                         </table>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-3 text-sm">
-                        <div className="flex items-center gap-4">
-                            <span>Showing {from} to {to} of {totalItems} items</span>
-                            <label className="flex items-center gap-2">
-                                <span>Show:</span>
-                                <select
-                                    value={pageSize}
-                                    onChange={(event) => {
-                                        setPageSize(Number(event.target.value));
-                                        setPage(1);
-                                    }}
-                                    className=" border border-slate-200 px-2 py-1"
-                                >
-                                    {pageSizeOptions.map((size) => <option key={size} value={size}>{size}</option>)}
-                                </select>
-                            </label>
-                        </div>
-
-                        <div className="flex items-center gap-1">
-                            <button type="button" disabled={currentPage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))} className=" border border-slate-200 px-3 py-1.5 transition hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-50">Previous</button>
-                            {Array.from({ length: Math.min(totalPages, 4) }, (_, index) => index + 1).map((pageNo) => (
-                                <button key={pageNo} type="button" onClick={() => setPage(pageNo)} className={` border px-3 py-1.5 transition ${currentPage === pageNo ? 'border-[#147da2] bg-[#147da2] text-white font-medium' : 'border-slate-200 hover:bg-slate-50'}`}>
-                                    {pageNo}
-                                </button>
-                            ))}
-                            <button type="button" disabled={currentPage >= totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} className=" border border-slate-200 px-3 py-1.5 transition hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-50">Next</button>
-                        </div>
-                    </div>
+                    <Pagination
+                        totalItems={totalItems}
+                        pageSize={pageSize}
+                        currentPage={currentPage}
+                        onPageChange={setPage}
+                        onPageSizeChange={(size) => {
+                            setPageSize(size);
+                            setPage(1);
+                        }}
+                        from={from}
+                        to={to}
+                    />
                 </div>
             </div>
         </AppLayout>

@@ -2,6 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
+import { Pagination } from '@/components/pagination';
 import type { BreadcrumbItem } from '@/types';
 
 type ResultRow = {
@@ -202,30 +203,15 @@ export default function ResultEntry({ rows, stats, filters }: Props) {
                         </table>
                     </div>
                     
-                    {totalPages > 1 && (
-                        <div className="flex items-center justify-between border-t border-slate-200 bg-white px-6 py-3">
-                            <span className="text-sm text-slate-500">
-                                Showing <span className="font-semibold text-slate-700">{(page - 1) * itemsPerPage + 1}</span> to{' '}
-                                <span className="font-semibold text-slate-700">{Math.min(page * itemsPerPage, rows.length)}</span> of{' '}
-                                <span className="font-semibold text-slate-700">{rows.length}</span> results
-                            </span>
-                            <div className="flex gap-2">
-                                <button
-                                    className=" border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
-                                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                    disabled={page === 1}
-                                >
-                                    Previous
-                                </button>
-                                <button
-                                    className=" border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
-                                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                    disabled={page === totalPages}
-                                >
-                                    Next
-                                </button>
-                            </div>
-                        </div>
+                    {rows.length > 0 && (
+                        <Pagination
+                            totalItems={rows.length}
+                            pageSize={itemsPerPage}
+                            currentPage={page}
+                            onPageChange={setPage}
+                            from={(page - 1) * itemsPerPage + 1}
+                            to={Math.min(page * itemsPerPage, rows.length)}
+                        />
                     )}
                 </div>
             </div>

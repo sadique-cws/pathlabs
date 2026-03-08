@@ -2,6 +2,7 @@ import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Edit2, Plus, Search, Trash2, Lock, X } from 'lucide-react';
 import { FormEvent, useEffect, useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
+import { Pagination } from '@/components/pagination';
 import type { BreadcrumbItem } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
@@ -267,9 +268,16 @@ export default function ManagePackages({ packages, availableTests, pagination, f
                     </div>
 
                     {pagination.total > 50 && (
-                        <div className="border-t border-slate-200 px-4 py-3 text-right text-xs text-slate-500">
-                            Showing page {pagination.current_page} of {pagination.last_page} ({pagination.total} total)
-                        </div>
+                        <Pagination
+                            totalItems={pagination.total}
+                            pageSize={50}
+                            currentPage={pagination.current_page}
+                            onPageChange={(p) =>
+                                router.get('/lab/clinical-master/packages', { page: p, search }, { preserveState: true })
+                            }
+                            from={(pagination.current_page - 1) * 50 + 1}
+                            to={Math.min(pagination.current_page * 50, pagination.total)}
+                        />
                     )}
                 </div>
             </div>

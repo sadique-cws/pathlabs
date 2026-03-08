@@ -1,7 +1,8 @@
 import { Head, router } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
+import { Pagination } from '@/components/pagination';
 import type { BreadcrumbItem } from '@/types';
 
 type SampleRow = {
@@ -111,7 +112,7 @@ export default function ManageSamples({ samples, filters }: Props) {
                                 </tr>
                             </thead>
                             <tbody className="text-[13px] text-slate-700">
-                                {paginatedRows.map((row) => (
+                                {paginatedRows.map((row: SampleRow) => (
                                     <tr key={row.id} className="border-b border-slate-100 transition hover:bg-slate-50/50">
                                         <td className="px-5 py-3 font-medium text-slate-900">{row.sample_code}</td>
                                         <td className="px-5 py-3 whitespace-nowrap">
@@ -153,52 +154,18 @@ export default function ManageSamples({ samples, filters }: Props) {
                         </table>
                     </div>
 
-                    <div className="flex items-center justify-between border-t border-slate-200 bg-white px-5 py-3">
-                        <div className="flex items-center gap-4">
-                            <span className="text-sm text-slate-500 lowercase">
-                                Showing <span className="font-semibold text-slate-700">{from}</span> to{' '}
-                                <span className="font-semibold text-slate-700">{to}</span> of{' '}
-                                <span className="font-semibold text-slate-700">{totalItems}</span> results
-                            </span>
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm text-slate-400">Items per page:</span>
-                                <select
-                                    value={pageSize}
-                                    onChange={(e) => {
-                                        setPageSize(Number(e.target.value));
-                                        setPage(1);
-                                    }}
-                                    className="h-7 border border-slate-200 bg-white px-1 text-xs outline-none"
-                                >
-                                    {pageSizeOptions.map((size) => (
-                                        <option key={size} value={size}>
-                                            {size}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                className="inline-flex h-8 w-8 items-center justify-center  border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </button>
-                            <div className="flex items-center px-1 text-sm font-medium text-slate-500">
-                                Page {currentPage} of {totalPages}
-                            </div>
-                            <button
-                                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                disabled={currentPage === totalPages}
-                                className="inline-flex h-8 w-8 items-center justify-center  border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </button>
-                        </div>
-                    </div>
+                    <Pagination
+                        totalItems={totalItems}
+                        pageSize={pageSize}
+                        currentPage={currentPage}
+                        onPageChange={setPage}
+                        onPageSizeChange={(size) => {
+                            setPageSize(size);
+                            setPage(1);
+                        }}
+                        from={from}
+                        to={to}
+                    />
                 </div>
             </div>
         </AppLayout>

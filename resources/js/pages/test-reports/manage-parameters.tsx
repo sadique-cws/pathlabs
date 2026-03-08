@@ -2,6 +2,7 @@ import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Edit2, Plus, Search, Trash2 } from 'lucide-react';
 import { FormEvent, useEffect, useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
+import { Pagination } from '@/components/pagination';
 import type { BreadcrumbItem } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -237,33 +238,20 @@ export default function ManageParameters({ parameters, tests, pagination, filter
                     </div>
 
                     {pagination.total > pagination.per_page && (
-                        <div className="border-t border-slate-200 px-4 py-3 text-right sm:px-6 text-sm text-slate-500">
-                            Showing page {pagination.current_page} of {pagination.last_page} ({pagination.total} total)
-                            <div className="mt-2 flex justify-end gap-2">
-                                {pagination.current_page > 1 && (
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            router.get(`/lab/test-reports/parameters?page=${pagination.current_page - 1}&search=${search}&test_id=${selectedTest}`)
-                                        }
-                                        className="border border-slate-200 px-3 py-1 hover:bg-slate-50"
-                                    >
-                                        Previous
-                                    </button>
-                                )}
-                                {pagination.current_page < pagination.last_page && (
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            router.get(`/lab/test-reports/parameters?page=${pagination.current_page + 1}&search=${search}&test_id=${selectedTest}`)
-                                        }
-                                        className="border border-slate-200 px-3 py-1 hover:bg-slate-50"
-                                    >
-                                        Next
-                                    </button>
-                                )}
-                            </div>
-                        </div>
+                        <Pagination
+                            totalItems={pagination.total}
+                            pageSize={pagination.per_page}
+                            currentPage={pagination.current_page}
+                            onPageChange={(p) =>
+                                router.get(`/lab/test-reports/parameters`, { 
+                                    page: p, 
+                                    search, 
+                                    test_id: selectedTest 
+                                }, { preserveState: true })
+                            }
+                            from={(pagination.current_page - 1) * pagination.per_page + 1}
+                            to={Math.min(pagination.current_page * pagination.per_page, pagination.total)}
+                        />
                     )}
                 </div>
             </div>

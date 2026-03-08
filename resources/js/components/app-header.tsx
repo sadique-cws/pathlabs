@@ -11,7 +11,8 @@ import {
     Wallet,
     ChevronDown,
     UserCircle,
-    LogOut
+    LogOut,
+    X
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useConnectivity } from '@/hooks/use-connectivity';
@@ -57,6 +58,7 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [showResults, setShowResults] = useState(false);
+    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
     useEffect(() => {
         if (!searchQuery.trim() || searchQuery.length < 2) {
@@ -121,6 +123,35 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
             "bg-[#147da2] text-white w-full",
             scrolled ? "h-12 shadow-md" : "h-14"
         )}>
+            {/* Mobile Search Overlay */}
+            {isMobileSearchOpen && (
+                <div className="absolute inset-0 z-[100] bg-[#147da2] flex items-center px-4 gap-3 animate-in fade-in slide-in-from-top duration-200">
+                    <div className="flex-1 flex items-center bg-white/10 border border-white/20 px-3 py-2">
+                        <Search className={cn("h-4 w-4 text-white/60", isSearching && "animate-pulse")} />
+                        <input
+                            autoFocus
+                            type="text"
+                            placeholder="Find Patient, Bill, Test, Doctor..."
+                            className="bg-transparent border-none outline-none ml-2 text-sm text-white placeholder:text-white/40 w-full"
+                            value={searchQuery}
+                            onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <button 
+                        onClick={() => setIsMobileSearchOpen(false)}
+                        className="p-2 text-white/80 hover:text-white"
+                    >
+                        <X className="h-5 w-5" />
+                    </button>
+                    
+                    {showResults && (
+                        <div className="absolute top-14 left-0 w-full bg-white shadow-2xl border-b border-slate-200 overflow-hidden overflow-y-auto max-h-[80vh]">
+                            {searchQueryResult()}
+                        </div>
+                    )}
+                </div>
+            )}
             <div className="flex items-center gap-4 flex-1">
                 {withSidebarToggle && (
                     <SidebarTrigger className="text-white hover:bg-white/10 shrink-0" />
@@ -151,8 +182,8 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
                 </div>
             </div>
 
-            <div className="flex items-center gap-2 md:gap-5 flex-1 justify-end lg:justify-center">
-                <div className="search-container relative w-full max-w-[400px]">
+            <div className="flex items-center gap-2 md:gap-5 lg:flex-1 justify-end lg:justify-center">
+                <div className="search-container relative hidden lg:flex w-full max-w-[400px]">
                     <div className="flex items-center bg-white/10 hover:bg-white/20 transition-all border border-white/20 px-3 py-1.5 group w-full">
                         <Search className={cn("h-4 w-4 text-white/60 group-hover:text-white/80 transition-colors", isSearching && "animate-pulse")} />
                         <input
@@ -168,54 +199,31 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
                     {showResults && (
                         <div className="absolute top-full left-0 w-full mt-1 bg-white shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                             <div className="max-h-80 overflow-y-auto">
-                                {searchResults.length > 0 ? (
-                                    <div className="py-2">
-                                        {searchResults.map((result, index) => (
-                                            <Link
-                                                key={index}
-                                                href={result.url}
-                                                className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-b border-slate-50 last:border-0 transition-colors group"
-                                                onClick={() => setShowResults(false)}
-                                            >
-                                                <div className="flex h-8 w-8 items-center justify-center bg-[#147da2]/10 text-[#147da2] group-hover:bg-[#147da2] group-hover:text-white transition-colors">
-                                                    {getResultIcon(result.type)}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{result.type}</span>
-                                                        <span className="text-[13px] font-bold text-slate-800 truncate">{result.title}</span>
-                                                    </div>
-                                                    <p className="text-[11px] text-slate-500 truncate">{result.subtitle}</p>
-                                                </div>
-                                            </Link>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="p-8 text-center bg-white">
-                                        <div className="flex justify-center mb-2">
-                                            <Search className="h-8 w-8 text-slate-200" />
-                                        </div>
-                                        <p className="text-sm font-semibold text-slate-500">No results for "{searchQuery}"</p>
-                                        <p className="text-xs text-slate-400 mt-1">Try another keyword</p>
-                                    </div>
-                                )}
+                                {searchQueryResult()}
                             </div>
                         </div>
                     )}
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5 md:gap-3">
+                    <button 
+                        onClick={() => setIsMobileSearchOpen(true)}
+                        className="p-2 hover:bg-white/10 transition-colors lg:hidden"
+                    >
+                        <Search className="h-5 w-5" />
+                    </button>
+
                     {permissions?.includes('wallet.view') && (
                         <Link 
                             href="/lab/wallet" 
-                            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 transition-all border border-white/10  px-3 py-1 text-xs md:text-sm font-semibold"
+                            className="flex items-center gap-1.5 md:gap-2 bg-white/10 hover:bg-white/20 transition-all border border-white/10 px-2 md:px-3 py-1 text-xs md:text-sm font-semibold"
                         >
                             <div className="p-1 bg-emerald-500 ">
                                 <Wallet className="h-3.5 w-3.5 text-white" />
                             </div>
-                            <div className="flex flex-col items-start leading-none mr-2">
-                                <span className="text-[9px] uppercase tracking-wider opacity-60">Balance</span>
-                                <span>₹{parseFloat(walletBalance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                            <div className="flex flex-col items-start leading-none mr-1 md:mr-2">
+                                <span className="hidden md:block text-[9px] uppercase tracking-wider opacity-60">Balance</span>
+                                <span className="text-[11px] md:text-[13px]">₹{parseFloat(walletBalance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                             </div>
                         </Link>
                     )}
@@ -268,4 +276,45 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
             </div>
         </header>
     );
+
+    function searchQueryResult() {
+        if (searchResults.length > 0) {
+            return (
+                <div className="py-2">
+                    {searchResults.map((result: any, index: number) => (
+                        <Link
+                            key={index}
+                            href={result.url}
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-b border-slate-50 last:border-0 transition-colors group"
+                            onClick={() => {
+                                setShowResults(false);
+                                setIsMobileSearchOpen(false);
+                            }}
+                        >
+                            <div className="flex h-8 w-8 items-center justify-center bg-[#147da2]/10 text-[#147da2] group-hover:bg-[#147da2] group-hover:text-white transition-colors shrink-0">
+                                {getResultIcon(result.type)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{result.type}</span>
+                                    <span className="text-[13px] font-bold text-slate-800 truncate">{result.title}</span>
+                                </div>
+                                <p className="text-[11px] text-slate-500 truncate">{result.subtitle}</p>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            );
+        }
+
+        return (
+            <div className="p-8 text-center bg-white">
+                <div className="flex justify-center mb-2">
+                    <Search className="h-8 w-8 text-slate-200" />
+                </div>
+                <p className="text-sm font-semibold text-slate-500">No results for "{searchQuery}"</p>
+                <p className="text-xs text-slate-400 mt-1">Try another keyword</p>
+            </div>
+        );
+    }
 }

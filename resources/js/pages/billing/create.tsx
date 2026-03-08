@@ -659,7 +659,7 @@ export default function BillingCreate({
                                 {/* Title + Name */}
                                 <div className="md:col-span-2">
                                     <FieldLabel required>Patient Name</FieldLabel>
-                                    <div className="grid grid-cols-1 xs:grid-cols-[100px_1fr] gap-2">
+                                    <div className="grid grid-cols-[100px_1fr] gap-2">
                                         <SearchableSelect options={titleOptions} value={form.data.patient.title} onChange={(v) => form.setData('patient', { ...form.data.patient, title: v })} placeholder="Title" />
                                         <input className={`${inputClasses} ${form.errors['patient.name'] ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20' : ''}`} placeholder="Full name" value={form.data.patient.name} onChange={(e) => form.setData('patient', { ...form.data.patient, name: e.target.value })} />
                                     </div>
@@ -679,23 +679,21 @@ export default function BillingCreate({
                                 {/* DOB only */}
                                 <div className="md:col-span-2">
                                     <FieldLabel>Date of Birth</FieldLabel>
-                                    <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
-                                        <div className="col-span-2 xs:col-span-1">
-                                            <SearchableSelect options={yearOptions} value={dobYear} onChange={setDobYear} placeholder="Year" />
-                                        </div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <SearchableSelect options={yearOptions} value={dobYear} onChange={setDobYear} placeholder="Year" />
                                         <SearchableSelect options={monthOptions} value={dobMonth} onChange={setDobMonth} placeholder="Month" />
                                         <SearchableSelect options={dayOptions} value={dobDay} onChange={setDobDay} placeholder="Day" />
                                     </div>
                                 </div>
 
                                 {/* Doctor */}
-                                <div className="md:col-span-2">
+                                <div>
                                     <FieldLabel>Referring Doctor</FieldLabel>
                                     <SearchableSelect options={doctorOptions} value={form.data.doctor_id === '' ? '__none__' : form.data.doctor_id} onChange={onDoctorSelect} placeholder="Select doctor" />
                                 </div>
 
                                 {/* Collection center */}
-                                <div className="md:col-span-2">
+                                <div>
                                     <FieldLabel>Collection Center</FieldLabel>
                                     <SearchableSelect options={collectionCenterOptions} value={form.data.collection_center_id} onChange={(v) => form.setData('collection_center_id', v)} placeholder="Select center" />
                                 </div>
@@ -904,9 +902,9 @@ export default function BillingCreate({
 
                                     <div>
                                         <FieldLabel>Sample Collected From</FieldLabel>
-                                        <div className="grid grid-cols-1 xs:grid-cols-[1fr_auto] gap-2">
+                                        <div className="grid grid-cols-[1fr_auto] gap-2">
                                             <Input list="sample-sources" value={form.data.sample_collected_from} onChange={(e) => form.setData('sample_collected_from', e.target.value)} />
-                                            <Button type="button" variant="outline" size="sm" className="h-9 w-full xs:w-auto" onClick={addSampleSource}>+ Add</Button>
+                                            <Button type="button" variant="outline" size="sm" className="h-9" onClick={addSampleSource}>+ Add</Button>
                                             <datalist id="sample-sources">{sampleSources.map((source) => <option key={source} value={source} />)}</datalist>
                                         </div>
                                     </div>
@@ -918,9 +916,9 @@ export default function BillingCreate({
 
                                     <div>
                                         <FieldLabel>Service / Other Charges</FieldLabel>
-                                        <div className="grid grid-cols-1 xs:grid-cols-[1fr_auto] gap-2">
+                                        <div className="grid grid-cols-[1fr_auto] gap-2">
                                             <SearchableSelect options={serviceChargeOptions} value={selectedServiceMasterId} onChange={setSelectedServiceMasterId} placeholder="Select service charge" />
-                                            <Button type="button" variant="outline" size="sm" className="h-9 w-full xs:w-auto" onClick={addSelectedServiceCharge}>+ Add</Button>
+                                            <Button type="button" variant="outline" size="sm" className="h-9" onClick={addSelectedServiceCharge}>+ Add</Button>
                                         </div>
                                     </div>
 
@@ -948,7 +946,7 @@ export default function BillingCreate({
 
                                     <div>
                                         <FieldLabel>Doctor Discount</FieldLabel>
-                                        <div className="grid grid-cols-1 xs:grid-cols-[1fr_140px] gap-2">
+                                        <div className="grid grid-cols-[1fr_140px] gap-2">
                                             <Input type="number" min={0} step="0.01" value={form.data.doctor_discount} onChange={(e) => form.setData('doctor_discount', Number(e.target.value))} />
                                             <SearchableSelect options={discountTypeOptions} value={form.data.doctor_discount_type} onChange={(v) => form.setData('doctor_discount_type', v)} />
                                         </div>
@@ -956,7 +954,7 @@ export default function BillingCreate({
 
                                     <div>
                                         <FieldLabel>Center Discount</FieldLabel>
-                                        <div className="grid grid-cols-1 xs:grid-cols-[1fr_140px] gap-2">
+                                        <div className="grid grid-cols-[1fr_140px] gap-2">
                                             <Input type="number" min={0} step="0.01" value={form.data.center_discount} onChange={(e) => form.setData('center_discount', Number(e.target.value))} />
                                             <SearchableSelect options={discountTypeOptions} value={form.data.center_discount_type} onChange={(v) => form.setData('center_discount_type', v)} />
                                         </div>
@@ -985,13 +983,19 @@ export default function BillingCreate({
                                 <div className="space-y-4 p-5">
                                     <div className="flex items-center gap-2">
                                         <h3 className="text-base font-semibold text-slate-800">Payment Information</h3>
-                                        <Badge variant="secondary" className="text-xs">Complete billing first</Badge>
+                                        {(form.data.test_ids.length > 0 || form.data.package_ids.length > 0) ? (
+                                            <Badge className="text-xs bg-emerald-500 hover:bg-emerald-600 text-white border-0">Billing Ready</Badge>
+                                        ) : (
+                                            <Badge variant="secondary" className="text-xs">Complete billing first</Badge>
+                                        )}
                                     </div>
 
-                                    <Alert variant="destructive">
-                                        <AlertTitle>Complete billing information before payment</AlertTitle>
-                                        <AlertDescription>At least one test or package must be selected.</AlertDescription>
-                                    </Alert>
+                                    {!(form.data.test_ids.length > 0 || form.data.package_ids.length > 0) && (
+                                        <Alert variant="destructive">
+                                            <AlertTitle>Complete billing information before payment</AlertTitle>
+                                            <AlertDescription>At least one test or package must be selected.</AlertDescription>
+                                        </Alert>
+                                    )}
 
                                     <div>
                                         <FieldLabel>Payment Amount</FieldLabel>

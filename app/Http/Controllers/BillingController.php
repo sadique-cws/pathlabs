@@ -6,6 +6,7 @@ use App\Http\Requests\CompleteBillingRequest;
 use App\Http\Requests\StoreBillRequest;
 use App\Http\Requests\UpdateBillRequest;
 use App\Models\Bill;
+use App\Models\Lab;
 use App\Models\CollectionCenter;
 use App\Models\Doctor;
 use App\Models\LabTest;
@@ -202,6 +203,8 @@ class BillingController extends Controller
         $labId = (int) $request->attributes->get('lab_id');
         abort_if($bill->lab_id !== $labId, 404);
 
+        $lab = Lab::query()->find($labId);
+
         $bill->load([
             'patient',
             'doctor',
@@ -265,6 +268,20 @@ class BillingController extends Controller
                 ],
                 'auto_print_barcodes' => $request->query('print') === 'barcodes',
             ],
+            'labConfig' => $lab ? [
+                'name' => $lab->name,
+                'logo_url' => $lab->logo_path ? \Illuminate\Support\Facades\Storage::url($lab->logo_path) : null,
+                'email' => $lab->email,
+                'phone' => $lab->phone,
+                'website' => $lab->website,
+                'address' => trim(collect([$lab->address, $lab->city, $lab->state, $lab->pincode])->filter()->implode(', ')),
+                'gst_number' => $lab->gst_number,
+                'lab_license_number' => $lab->lab_license_number,
+                'lab_director_name' => $lab->lab_director_name,
+                'technician_name' => $lab->technician_name,
+                'technician_qualification' => $lab->technician_qualification,
+                'technician_signature_url' => $lab->technician_signature_path ? \Illuminate\Support\Facades\Storage::url($lab->technician_signature_path) : null,
+            ] : null,
         ]);
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SaveSampleResultRequest;
+use App\Models\Lab;
 use App\Models\Sample;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -277,6 +278,8 @@ class TestReportController extends Controller
         $labId = (int) $request->attributes->get('lab_id');
         abort_if($sample->lab_id !== $labId, 404);
 
+        $lab = Lab::query()->find($labId);
+
         $sample->load([
             'bill:id,bill_number,billing_at,patient_id',
             'bill.patient:id,name,phone,gender,age_years,dob,address,city,state,pin_code',
@@ -335,6 +338,20 @@ class TestReportController extends Controller
                 'age' => $sample->bill?->patient?->age_years ?? 0,
             ],
             'parameters' => $parameters,
+            'labConfig' => $lab ? [
+                'name' => $lab->name,
+                'logo_url' => $lab->logo_path ? \Illuminate\Support\Facades\Storage::url($lab->logo_path) : null,
+                'email' => $lab->email,
+                'phone' => $lab->phone,
+                'website' => $lab->website,
+                'address' => trim(collect([$lab->address, $lab->city, $lab->state, $lab->pincode])->filter()->implode(', ')),
+                'gst_number' => $lab->gst_number,
+                'lab_license_number' => $lab->lab_license_number,
+                'lab_director_name' => $lab->lab_director_name,
+                'technician_name' => $lab->technician_name,
+                'technician_qualification' => $lab->technician_qualification,
+                'technician_signature_url' => $lab->technician_signature_path ? \Illuminate\Support\Facades\Storage::url($lab->technician_signature_path) : null,
+            ] : null,
         ]);
     }
 

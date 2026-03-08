@@ -12,6 +12,21 @@ type BillViewItem = {
     price: number;
 };
 
+type LabConfig = {
+    name: string;
+    logo_url: string | null;
+    email: string | null;
+    phone: string | null;
+    website: string | null;
+    address: string | null;
+    gst_number: string | null;
+    lab_license_number: string | null;
+    lab_director_name: string | null;
+    technician_name: string | null;
+    technician_qualification: string | null;
+    technician_signature_url: string | null;
+};
+
 type BillViewProps = {
     id: number;
     bill_number: string;
@@ -48,9 +63,10 @@ type BillViewProps = {
 
 type Props = {
     bill: BillViewProps;
+    labConfig: LabConfig | null;
 };
 
-export default function BillView({ bill }: Props) {
+export default function BillView({ bill, labConfig }: Props) {
     useEffect(() => {
         if (bill.auto_print_barcodes) {
             window.setTimeout(() => window.print(), 200);
@@ -62,12 +78,47 @@ export default function BillView({ bill }: Props) {
         { title: `Invoice ${bill.bill_number}`, href: `/lab/billing/${bill.id}/view` },
     ];
 
+    const labName = labConfig?.name || 'PathLab';
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Invoice ${bill.bill_number}`} />
 
+            {/* Print-specific styles */}
+            <style>{`
+                @page {
+                    size: A4;
+                    margin: 10mm;
+                }
+                @media print {
+                    .no-print,
+                    nav,
+                    aside,
+                    header,
+                    [data-sidebar],
+                    [data-topbar] {
+                        display: none !important;
+                    }
+                    body {
+                        background: white !important;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                    .print-area {
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        border: none !important;
+                        box-shadow: none !important;
+                    }
+                    main {
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+                }
+            `}</style>
+
             <div className="min-h-full bg-slate-50/80 p-0 lg:p-8">
-                <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+                <div className="no-print mb-6 flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <Link href="/lab/billing/manage" className="inline-flex h-9 w-9 items-center justify-center  border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900">
                             <ArrowLeft className="h-4 w-4" />
@@ -79,11 +130,19 @@ export default function BillView({ bill }: Props) {
                             <Pencil className="h-4 w-4" />
                             Edit Bill
                         </Link>
-                        <button type="button" className="inline-flex items-center gap-2  bg-[#147da2] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
+                        <button
+                            type="button"
+                            onClick={() => window.print()}
+                            className="inline-flex items-center gap-2  bg-[#147da2] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]"
+                        >
                             <Download className="h-4 w-4" />
                             Download PDF
                         </button>
-                        <button type="button" className="inline-flex items-center gap-2  border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                        <button
+                            type="button"
+                            onClick={() => window.print()}
+                            className="inline-flex items-center gap-2  border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                        >
                             <Printer className="h-4 w-4" />
                             Print
                         </button>
@@ -94,11 +153,35 @@ export default function BillView({ bill }: Props) {
                     </div>
                 </div>
 
-                <div className="mx-auto max-w-5xl  border border-slate-200 bg-white p-6 md:p-8 lg:p-10">
+                <div className="print-area mx-auto max-w-5xl  border border-slate-200 bg-white p-6 md:p-8 lg:p-10">
+                    {/* ── Invoice Header with Lab Details ── */}
                     <div className="mb-8 flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-6">
-                        <div>
-                            <h2 className="text-3xl font-bold tracking-tight text-[#147da2]">PathLab</h2>
-                            <p className="mt-1 text-sm font-medium uppercase tracking-widest text-slate-500">Diagnostic Laboratory</p>
+                        <div className="flex items-start gap-4">
+                            {labConfig?.logo_url && (
+                                <img
+                                    src={labConfig.logo_url}
+                                    alt={labName}
+                                    className="h-16 w-16 object-contain border border-slate-100 p-1"
+                                />
+                            )}
+                            <div>
+                                <h2 className="text-3xl font-bold tracking-tight text-[#147da2]">{labName}</h2>
+                                <p className="mt-1 text-sm font-medium uppercase tracking-widest text-slate-500">Diagnostic Laboratory</p>
+                                {labConfig?.address && (
+                                    <p className="mt-1 text-sm text-slate-500">{labConfig.address}</p>
+                                )}
+                                <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-slate-400">
+                                    {labConfig?.phone && <span>Ph: {labConfig.phone}</span>}
+                                    {labConfig?.email && <span>Email: {labConfig.email}</span>}
+                                    {labConfig?.website && <span>Web: {labConfig.website}</span>}
+                                </div>
+                                {labConfig?.gst_number && (
+                                    <p className="mt-0.5 text-xs text-slate-400">GST: {labConfig.gst_number}</p>
+                                )}
+                                {labConfig?.lab_license_number && (
+                                    <p className="text-xs text-slate-400">License: {labConfig.lab_license_number}</p>
+                                )}
+                            </div>
                         </div>
                         <div className="text-right">
                             <p className="text-xl font-bold tracking-widest text-slate-300">INVOICE</p>
@@ -165,13 +248,44 @@ export default function BillView({ bill }: Props) {
                         </div>
                     </div>
 
+                    {/* ── Technician / Director Signature ── */}
+                    {(labConfig?.technician_name || labConfig?.lab_director_name) && (
+                        <div className="mt-8 border-t border-slate-100 pt-6">
+                            <div className="flex items-end justify-between">
+                                <div className="text-xs text-slate-400">
+                                    <p>Generated by {labName}</p>
+                                    <p>This is a computer-generated invoice.</p>
+                                </div>
+                                <div className="text-center">
+                                    {labConfig?.technician_signature_url && (
+                                        <img
+                                            src={labConfig.technician_signature_url}
+                                            alt="Signature"
+                                            className="mx-auto mb-1 h-12 max-w-[160px] object-contain"
+                                        />
+                                    )}
+                                    {labConfig?.lab_director_name && (
+                                        <p className="text-sm font-bold text-slate-800">{labConfig.lab_director_name}</p>
+                                    )}
+                                    <div className="mb-1 h-px w-48 bg-slate-400" />
+                                    {labConfig?.technician_name && (
+                                        <p className="text-xs text-slate-500">
+                                            Lab Technician: {labConfig.technician_name}
+                                            {labConfig.technician_qualification && ` (${labConfig.technician_qualification})`}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div id="barcodes" className="mt-10 border-t border-slate-100 pt-8">
                         <div className="mb-4 flex items-center justify-between gap-3">
                             <h3 className="text-base font-semibold text-slate-800">Sample Barcodes</h3>
                             <button
                                 type="button"
                                 onClick={() => window.print()}
-                                className="inline-flex items-center gap-2  border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                                className="no-print inline-flex items-center gap-2  border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                             >
                                 <Printer className="h-4 w-4" />
                                 Print Barcodes

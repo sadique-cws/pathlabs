@@ -197,7 +197,7 @@ export default function LabConfiguration({ lab }: Props) {
 
             <div className="flex h-full flex-1 flex-col bg-slate-50/50">
                 {/* Page Header */}
-                <div className="bg-white border-b border-slate-200 px-6 py-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="bg-white border-b border-slate-200 px-6 py-2 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                         <div className="h-12 w-12 bg-[#147da2]/10 flex items-center justify-center text-[#147da2]">
                             <Building2 className="h-6 w-6" />
@@ -248,7 +248,7 @@ export default function LabConfiguration({ lab }: Props) {
                 </div>
 
                 {/* Form Content */}
-                <form id="lab-config-form" onSubmit={submit} className="p-6 space-y-6 max-w-5xl">
+                <form id="lab-config-form" onSubmit={submit} className="p-6 space-y-6">
                     {/* ─── 1. Basic Information ─── */}
                     <ConfigSection icon={Building2} title="Basic Information">
                         <div className="space-y-6">
@@ -256,7 +256,7 @@ export default function LabConfiguration({ lab }: Props) {
                             <div className="flex items-start gap-6">
                                 <div className="space-y-2">
                                     <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Lab Logo</Label>
-                                    <div className="h-20 w-20 border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden">
+                                    <div className="h-20 p-3 w-20 border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden">
                                         {(logoPreview || lab?.logo_url) ? (
                                             <img
                                                 src={logoPreview || lab?.logo_url || ''}
@@ -279,7 +279,7 @@ export default function LabConfiguration({ lab }: Props) {
                             </div>
 
                             {/* Fields Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <Field label="Laboratory Name" required>
                                     <Input
                                         value={form.data.name}
@@ -357,7 +357,7 @@ export default function LabConfiguration({ lab }: Props) {
                                 />
                             </Field>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <Field label="City" required>
                                     <Input
                                         value={form.data.city}
@@ -440,7 +440,7 @@ export default function LabConfiguration({ lab }: Props) {
                                             className="h-full w-full object-contain p-2"
                                         />
                                     ) : (
-                                        <div className="text-center">
+                                        <div className="text-center p-4">
                                             <CreditCard className="h-6 w-6 text-slate-300 mx-auto" />
                                             <span className="text-[10px] text-slate-400 mt-1 block">No QR</span>
                                         </div>
@@ -460,7 +460,7 @@ export default function LabConfiguration({ lab }: Props) {
 
                     {/* ─── 4. Booking Information ─── */}
                     <ConfigSection icon={Calendar} title="Booking Information" color="bg-violet-600">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <Toggle
                                 label="Online Booking Available"
                                 checked={form.data.online_booking_available}
@@ -476,7 +476,7 @@ export default function LabConfiguration({ lab }: Props) {
 
                     {/* ─── 5. Legal Information ─── */}
                     <ConfigSection icon={Scale} title="Legal Information" color="bg-slate-700">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <Field label="GST Number">
                                 <div className="relative">
                                     <Input
@@ -518,7 +518,7 @@ export default function LabConfiguration({ lab }: Props) {
 
                     {/* ─── 6. Technician Information ─── */}
                     <ConfigSection icon={Stethoscope} title="Technician Information" color="bg-rose-600">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <Field label="Lab Technician Name" required>
                                 <Input
                                     value={form.data.technician_name}

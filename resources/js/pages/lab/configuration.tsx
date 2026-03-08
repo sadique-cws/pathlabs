@@ -73,7 +73,7 @@ function ConfigSection({
     color?: string;
 }) {
     return (
-        <div className="bg-white border border-slate-200 overflow-hidden">
+        <div className="bg-white border-b border-r border-slate-200 overflow-hidden">
             <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50/50">
                 <div className={cn('h-8 w-8 flex items-center justify-center text-white', color)}>
                     <Icon className="h-4 w-4" />
@@ -203,7 +203,7 @@ export default function LabConfiguration({ lab }: Props) {
                             <Building2 className="h-6 w-6" />
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Lab Configuration</h1>
+                            <h1 className="text-lg font-bold text-slate-900 tracking-tight">Lab Configuration</h1>
                             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Manage your laboratory's profile and settings</p>
                         </div>
                     </div>
@@ -248,7 +248,7 @@ export default function LabConfiguration({ lab }: Props) {
                 </div>
 
                 {/* Form Content */}
-                <form id="lab-config-form" onSubmit={submit} className="p-6 space-y-6">
+                <form id="lab-config-form" onSubmit={submit} className="space-y-0">
                     {/* ─── 1. Basic Information ─── */}
                     <ConfigSection icon={Building2} title="Basic Information">
                         <div className="space-y-6">

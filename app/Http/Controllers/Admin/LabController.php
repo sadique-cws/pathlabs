@@ -16,7 +16,10 @@ class LabController extends Controller
     public function index(): Response
     {
         $labs = Lab::query()
-            ->with(['currentSubscription.plan'])
+            ->with([
+                'currentSubscription.plan',
+                'permissions'
+            ])
             ->withCount(['users', 'tests'])
             ->orderBy('name')
             ->get()
@@ -33,13 +36,31 @@ class LabController extends Controller
                     'subscription_status' => $lab->currentSubscription?->status ?? 'none',
                     'bills_used' => $lab->currentSubscription?->bills_used ?? 0,
                     'bill_limit' => $lab->currentSubscription?->bill_limit ?? 0,
+                    'permissions' => $lab->permissions
+                        ->filter(fn($p) => (bool) $p->pivot?->is_enabled)
+                        ->pluck('slug')
+                        ->values()
+                        ->all(),
                     'created_at' => $lab->created_at->format('d/m/Y'),
                 ];
             });
 
+        $permissionGroups = \App\Models\Permission::query()
+            ->orderBy('group')
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug', 'group'])
+            ->groupBy('group')
+            ->map(fn($items): array => $items->map(fn($permission): array => [
+                'id' => $permission->id,
+                'name' => $permission->name,
+                'slug' => $permission->slug,
+            ])->values()->all())
+            ->all();
+
         return Inertia::render('admin/labs/manage', [
             'labs' => $labs,
             'plans' => SubscriptionPlan::where('is_active', true)->get(),
+            'permissionGroups' => $permissionGroups,
         ]);
     }
 

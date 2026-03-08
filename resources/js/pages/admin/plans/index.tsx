@@ -152,7 +152,7 @@ export default function SubscriptionPlans({ plans }: Props) {
                                         <td className="px-3 py-4">
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-slate-800">{plan.name}</span>
-                                                <span className="text-[10px] font-bold uppercase tracking-tighter text-slate-400 italic">
+                                                <span className="text-[10px] font-bold uppercase tracking-tighter text-slate-400">
                                                     {plan.type === 'subscription' ? 'Tiered Prepaid' : 'Instant Pay-per-use'}
                                                 </span>
                                             </div>
@@ -167,7 +167,7 @@ export default function SubscriptionPlans({ plans }: Props) {
                                         </td>
                                         <td className="px-3 py-4">
                                             <div className="flex flex-col">
-                                                <span className="text-xs font-bold text-slate-700 italic">
+                                                <span className="text-xs font-bold text-slate-700">
                                                     {plan.bill_limit ? `${plan.bill_limit} Bills Included` : 'Unlimited Processing'}
                                                 </span>
                                                 <span className="text-[10px] font-medium text-slate-400 leading-tight max-w-[200px] truncate" title={plan.description || ''}>
@@ -214,7 +214,7 @@ export default function SubscriptionPlans({ plans }: Props) {
                                 ))}
                                 {plans.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} className="px-3 py-10 text-center text-slate-400 italic font-medium">
+                                        <td colSpan={5} className="px-3 py-10 text-center text-slate-400 font-medium uppercase tracking-widest text-[10px]">
                                             No billing strategies defined yet. Click "New Strategy" to begin.
                                         </td>
                                     </tr>
@@ -354,7 +354,7 @@ function StatBox({ title, value, icon: Icon, color = "text-slate-900", isLast = 
                     <Icon className="h-4 w-4" />
                 </div>
             </div>
-            <p className={cn("mt-2 text-2xl font-black italic", color)}>{value}</p>
+            <p className={cn("mt-2 text-2xl font-black", color)}>{value}</p>
         </div>
     );
 }

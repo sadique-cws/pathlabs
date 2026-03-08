@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { CreditCard, History, IndianRupee, Landmark, Plus } from 'lucide-react';
 import { useState } from 'react';
 import AppLayout from '@/layouts/app-layout';
@@ -35,6 +35,8 @@ type Props = {
 export default function WalletIndex({ wallet, transactions, razorpayKey }: Props) {
     const [amount, setAmount] = useState('500');
     const [isProcessing, setIsProcessing] = useState(false);
+    const { access } = usePage<any>().props;
+    const canTopUp = access.permissions.includes('wallet.topup');
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Wallet', href: '/lab/wallet' },
@@ -108,28 +110,31 @@ export default function WalletIndex({ wallet, transactions, razorpayKey }: Props
                             <span className="text-4xl font-bold text-slate-900">₹{parseFloat(wallet.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                             <span className="text-slate-400 font-medium">INR</span>
                         </div>
-                        <div className="mt-8 flex items-center gap-4">
-                            <div className="flex-1 max-w-[200px]">
-                                <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₹</span>
-                                    <input
-                                        type="number"
-                                        value={amount}
-                                        onChange={(e) => setAmount(e.target.value)}
-                                        className="w-full h-10 pl-7 pr-3  border border-slate-200 outline-none focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 transition"
-                                        placeholder="Enter amount"
-                                    />
+                        
+                        {canTopUp && (
+                            <div className="mt-8 flex items-center gap-4">
+                                <div className="flex-1 max-w-[200px]">
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₹</span>
+                                        <input
+                                            type="number"
+                                            value={amount}
+                                            onChange={(e) => setAmount(e.target.value)}
+                                            className="w-full h-10 pl-7 pr-3 border border-slate-200 outline-none focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 transition"
+                                            placeholder="Enter amount"
+                                        />
+                                    </div>
                                 </div>
+                                <Button
+                                    onClick={handleTopUp}
+                                    disabled={isProcessing}
+                                    className="bg-[#147da2] hover:bg-[#0d708e] text-white flex gap-2"
+                                >
+                                    <Plus size={18} />
+                                    Top-up Now
+                                </Button>
                             </div>
-                            <Button
-                                onClick={handleTopUp}
-                                disabled={isProcessing}
-                                className="bg-[#147da2] hover:bg-[#0d708e] text-white flex gap-2"
-                            >
-                                <Plus size={18} />
-                                Top-up Now
-                            </Button>
-                        </div>
+                        )}
                     </div>
 
                     {/* Quick Stats */}

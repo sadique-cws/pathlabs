@@ -55,6 +55,26 @@ class HandleInertiaRequests extends Middleware
                     ->when($labId > 0, fn($q) => $q->where('lab_id', $labId))
                     ->value('balance') ?? 0;
             }
+
+            $currentSubscription = null;
+            $subscriptionReminder = null;
+            if ($labId > 0) {
+                $lab = Lab::find($labId);
+                if ($lab) {
+                    $sub = $lab->getEffectiveSubscription();
+                    if ($sub) {
+                        $currentSubscription = [
+                            'plan_name' => $sub->plan->name,
+                            'plan_type' => $sub->plan->type,
+                            'plan_price' => (float) $sub->plan->price,
+                            'bills_used' => $sub->bills_used,
+                            'bill_limit' => $sub->bill_limit,
+                            'ends_at' => $sub->ends_at?->toIso8601String(),
+                        ];
+                    }
+                    $subscriptionReminder = $lab->getSubscriptionReminder();
+                }
+            }
         }
 
         return [
@@ -77,6 +97,8 @@ class HandleInertiaRequests extends Middleware
                 'id' => $labId,
                 'name' => $labId > 0 ? Lab::where('id', $labId)->value('name') : null,
             ],
+            'subscription' => $currentSubscription,
+            'subscriptionReminder' => $subscriptionReminder,
             'flash' => [
                 'success' => fn(): ?string => $request->session()->get('success'),
             ],

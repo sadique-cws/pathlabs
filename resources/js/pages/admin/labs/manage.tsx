@@ -10,7 +10,8 @@ import {
     Pencil, 
     Trash2,
     Calendar,
-    ChevronDown
+    ChevronDown,
+    CheckCircle2
 } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import AppLayout from '@/layouts/app-layout';
@@ -50,6 +51,7 @@ type Lab = {
     bills_used: number;
     bill_limit: number;
     created_at: string;
+    permissions: string[];
 };
 
 type Plan = {
@@ -58,9 +60,16 @@ type Plan = {
     type: string;
 };
 
+type Permission = {
+    id: number;
+    name: string;
+    slug: string;
+};
+
 type Props = {
     labs: Lab[];
     plans: Plan[];
+    permissionGroups: Record<string, Permission[]>;
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -68,13 +77,18 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Manage Laboratories', href: '/admin/labs' },
 ];
 
-export default function ManageLabs({ labs, plans }: Props) {
+export default function ManageLabs({ labs, plans, permissionGroups }: Props) {
     const [searchQuery, setSearchQuery] = useState('');
     const [isAssignPlanOpen, setIsAssignPlanOpen] = useState(false);
+    const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
     const [selectedLab, setSelectedLab] = useState<Lab | null>(null);
 
     const { data: planData, setData: setPlanData, post: postPlan, processing: planProcessing } = useForm({
         subscription_plan_id: '',
+    });
+
+    const { data: featureData, setData: setFeatureData, put: putFeatures, processing: featuresProcessing } = useForm({
+        permission_slugs: [] as string[],
     });
 
     const filteredLabs = useMemo(() => {
@@ -92,10 +106,35 @@ export default function ManageLabs({ labs, plans }: Props) {
         setIsAssignPlanOpen(true);
     };
 
+    const handleManageFeatures = (lab: Lab) => {
+        setSelectedLab(lab);
+        setFeatureData('permission_slugs', lab.permissions || []);
+        setIsFeaturesOpen(true);
+    };
+
+    const togglePermission = (slug: string) => {
+        const current = [...featureData.permission_slugs];
+        const index = current.indexOf(slug);
+        if (index > -1) {
+            current.splice(index, 1);
+        } else {
+            current.push(slug);
+        }
+        setFeatureData('permission_slugs', current);
+    };
+
     const submitAssignPlan = (e: React.FormEvent) => {
         e.preventDefault();
         postPlan(`/admin/labs/${selectedLab?.id}/assign-plan`, {
             onSuccess: () => setIsAssignPlanOpen(false),
+        });
+    };
+
+    const submitFeatures = (e: React.FormEvent) => {
+        e.preventDefault();
+        putFeatures(`/admin/labs/${selectedLab?.id}/features`, {
+            preserveScroll: true,
+            onSuccess: () => setIsFeaturesOpen(false),
         });
     };
 
@@ -155,7 +194,7 @@ export default function ManageLabs({ labs, plans }: Props) {
                                 <tr className="text-[10px] uppercase tracking-widest text-slate-400 font-bold border-b border-slate-100">
                                     <th className="px-3 py-3">Lab Details</th>
                                     <th className="px-3 py-3">Subscription Plan</th>
-                                    <th className="px-3 py-3">Usage Stats</th>
+                                    <th className="px-3 py-3">Usage & Features</th>
                                     <th className="px-3 py-3">Status</th>
                                     <th className="px-3 py-3 text-right">Actions</th>
                                 </tr>
@@ -166,7 +205,7 @@ export default function ManageLabs({ labs, plans }: Props) {
                                         <td className="px-3 py-4">
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-slate-800">{lab.name}</span>
-                                                <span className="text-[10px] font-bold uppercase tracking-tighter text-slate-400 italic">ID: {lab.code}</span>
+                                                <span className="text-[10px] font-bold uppercase tracking-tighter text-slate-400">ID: {lab.code}</span>
                                             </div>
                                         </td>
                                         <td className="px-3 py-4">
@@ -182,10 +221,15 @@ export default function ManageLabs({ labs, plans }: Props) {
                                         </td>
                                         <td className="px-3 py-4">
                                             <div className="flex flex-col">
-                                                <span className="text-xs font-bold text-slate-800 italic">
-                                                    {lab.bills_used} / {lab.bill_limit || '∞'}
-                                                </span>
-                                                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-tighter">Bills Processed</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs font-bold text-slate-800">
+                                                        {lab.bills_used} / {lab.bill_limit || '∞'}
+                                                    </span>
+                                                    <span className="text-[10px] font-black bg-[#147da2]/10 text-[#147da2] px-1.5 py-0.25">
+                                                        {lab.permissions?.length || 0} FEATURES
+                                                    </span>
+                                                </div>
+                                                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-tighter">Usage & Modules Active</span>
                                             </div>
                                         </td>
                                         <td className="px-3 py-4">
@@ -231,12 +275,10 @@ export default function ManageLabs({ labs, plans }: Props) {
                                                             <CreditCard className="mr-2 h-4 w-4 text-emerald-500" />
                                                             Assign/Upgrade Plan
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem asChild className="cursor-pointer text-xs font-bold">
-                                                            <Link href="/admin/labs/features">
-                                                                <Settings className="mr-2 h-4 w-4 text-amber-500" />
-                                                                Manage Features
-                                                            </Link>
-                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleManageFeatures(lab)} className="cursor-pointer text-xs font-bold">
+                                                             <Settings className="mr-2 h-4 w-4 text-amber-500" />
+                                                             Manage Features
+                                                         </DropdownMenuItem>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem className="text-rose-600 cursor-pointer text-xs font-bold focus:bg-rose-50">
                                                             <Trash2 className="mr-2 h-4 w-4 text-rose-500" />
@@ -261,7 +303,7 @@ export default function ManageLabs({ labs, plans }: Props) {
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl" />
                         <DialogTitle className="text-xl font-bold tracking-tight">Assign Subscription Plan</DialogTitle>
                         <DialogDescription className="text-white/70 text-xs mt-1">
-                            Set or upgrade the billing plan for <span className="font-bold text-white uppercase italic">{selectedLab?.name}</span>.
+                            Set or upgrade the billing plan for <span className="font-bold text-white uppercase">{selectedLab?.name}</span>.
                         </DialogDescription>
                     </div>
 
@@ -281,7 +323,7 @@ export default function ManageLabs({ labs, plans }: Props) {
                                             <SelectItem key={plan.id} value={plan.id.toString()}>
                                                 <div className="flex items-center gap-2">
                                                     <span className="font-bold">{plan.name}</span>
-                                                    <span className="text-[9px] font-black uppercase text-slate-400 italic px-1.5 py-0.5 bg-slate-100">
+                                                    <span className="text-[9px] font-black uppercase text-slate-400 px-1.5 py-0.5 bg-slate-100">
                                                         {plan.type === 'subscription' ? 'Prepaid' : 'Per Bill'}
                                                     </span>
                                                 </div>
@@ -302,7 +344,95 @@ export default function ManageLabs({ labs, plans }: Props) {
                         </div>
                     </form>
                 </DialogContent>
-            </Dialog>
+                </Dialog>
+
+                {/* Manage Features Dialog - Premium Side Panel Style */}
+                <Dialog open={isFeaturesOpen} onOpenChange={setIsFeaturesOpen}>
+                    <DialogContent className="sm:max-w-[700px] p-0 overflow-hidden border-none shadow-3xl">
+                        <div className="bg-[#147da2] p-6 text-white relative">
+                            <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-24 -mt-24 blur-3xl" />
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 bg-white/20 flex items-center justify-center rounded-none backdrop-blur-sm">
+                                    <Settings className="h-6 w-6" />
+                                </div>
+                                <div>
+                                    <DialogTitle className="text-xl font-bold tracking-tight">Manage Laboratory Features</DialogTitle>
+                                    <DialogDescription className="text-white/70 text-xs mt-1">
+                                        Enable or disable specific product modules for <span className="font-bold text-white uppercase">{selectedLab?.name}</span>.
+                                    </DialogDescription>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form onSubmit={submitFeatures} className="bg-white">
+                            <div className="p-6 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200">
+                                <div className="space-y-8">
+                                    {Object.entries(permissionGroups).map(([group, permissions]) => (
+                                        <div key={group} className="space-y-4">
+                                            <div className="flex items-center gap-3">
+                                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 whitespace-nowrap">
+                                                    {group.replace('_', ' ')}
+                                                </h3>
+                                                <div className="h-px w-full bg-slate-100" />
+                                            </div>
+                                            
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                {permissions.map((permission) => (
+                                                    <div 
+                                                        key={permission.id}
+                                                        onClick={() => togglePermission(permission.slug)}
+                                                        className={cn(
+                                                            "p-3 border transition-all cursor-pointer flex items-center justify-between group",
+                                                            featureData.permission_slugs.includes(permission.slug) 
+                                                                ? "bg-[#147da2]/5 border-[#147da2]/20" 
+                                                                : "bg-white border-slate-100 hover:border-slate-300"
+                                                        )}
+                                                    >
+                                                        <div className="flex flex-col">
+                                                            <span className={cn(
+                                                                "text-xs font-bold transition-colors",
+                                                                featureData.permission_slugs.includes(permission.slug) ? "text-[#147da2]" : "text-slate-700"
+                                                            )}>
+                                                                {permission.name}
+                                                            </span>
+                                                            <span className="text-[9px] font-medium text-slate-400 mt-0.5">
+                                                                {permission.slug}
+                                                            </span>
+                                                        </div>
+                                                        <div className={cn(
+                                                            "h-4 w-4 rounded-none border flex items-center justify-center transition-all",
+                                                            featureData.permission_slugs.includes(permission.slug)
+                                                                ? "bg-[#147da2] border-[#147da2] shadow-sm"
+                                                                : "border-slate-300 group-hover:border-slate-400"
+                                                        )}>
+                                                            {featureData.permission_slugs.includes(permission.slug) && (
+                                                                <CheckCircle2 className="h-2.5 w-2.5 text-white" />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-4">
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                    <span className="text-[#147da2]">{featureData.permission_slugs.length}</span> Features Enabled
+                                </div>
+                                <div className="flex gap-3">
+                                    <Button type="button" variant="ghost" onClick={() => setIsFeaturesOpen(false)} className="font-bold text-xs uppercase tracking-widest text-slate-400 h-10 px-6">
+                                        Discard
+                                    </Button>
+                                    <Button type="submit" disabled={featuresProcessing} className="bg-[#147da2] hover:bg-[#106385] font-bold text-xs uppercase tracking-widest shadow-xl h-10 px-8">
+                                        {featuresProcessing ? 'Updating...' : 'Save Configuration'}
+                                    </Button>
+                                </div>
+                            </div>
+                        </form>
+                    </DialogContent>
+                </Dialog>
         </AppLayout>
     );
 }
@@ -319,7 +449,7 @@ function StatBox({ title, value, icon: Icon, color = "text-slate-900", isLast = 
                     <Icon className="h-4 w-4" />
                 </div>
             </div>
-            <p className={cn("mt-2 text-2xl font-black italic", color)}>{value}</p>
+            <p className={cn("mt-2 text-2xl font-black", color)}>{value}</p>
         </div>
     );
 }

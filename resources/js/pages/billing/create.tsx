@@ -1,5 +1,5 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { CalendarDays, ChevronDown, Search } from 'lucide-react';
+import { CalendarDays, ChevronDown, Search, Zap } from 'lucide-react';
 import { useDeferredValue, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import type { BreadcrumbItem } from '@/types';
 
 type LabTest = { id: number; name: string; price: string };
@@ -57,6 +58,14 @@ type Props = {
     serviceChargeMasters: ServiceMaster[];
     generatedBillId?: number | null;
     serviceCharge: number;
+    subscription: {
+        plan_name: string;
+        plan_type: 'pay_as_you_go' | 'subscription';
+        plan_price: number;
+        bills_used: number;
+        bill_limit: number | null;
+        ends_at: string | null;
+    } | null;
 };
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'New Billing', href: '/lab/billing/create' }];
@@ -186,9 +195,10 @@ export default function BillingCreate({
     serviceChargeMasters,
     generatedBillId,
     serviceCharge,
+    subscription,
 }: Props) {
-    const page = usePage();
-    const flash = page.props.flash as { success?: string };
+    const { wallet } = usePage<any>().props;
+    const flash = usePage<any>().props.flash as { success?: string };
 
     const [tab, setTab] = useState<'tests' | 'packages' | 'others'>('tests');
     const [testSearch, setTestSearch] = useState('');
@@ -536,6 +546,55 @@ export default function BillingCreate({
                 )}
 
                 <form onSubmit={generateBarcode}>
+                    {/* Strategy Implementation Awareness */}
+                    <div className="sawtooth bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <Zap className="h-4 w-4 text-[#147da2]" />
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#147da2]">Strategy Active</p>
+                                <p className="text-sm font-bold text-slate-900">{subscription?.plan_name || 'No Strategy Assigned'}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-6">
+                            {subscription?.plan_type === 'pay_as_you_go' ? (
+                                <>
+                                    <div className="text-right">
+                                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Execution Fee</p>
+                                        <p className="text-sm font-black text-slate-900">₹{subscription.plan_price} / bill</p>
+                                    </div>
+                                    <div className="h-8 w-px bg-slate-100" />
+                                    <div className="text-right">
+                                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Wallet Liquidity</p>
+                                        <p className={cn(
+                                            "text-sm font-black",
+                                            (parseFloat(wallet.balance) < subscription.plan_price) ? "text-rose-600" : "text-[#147da2]"
+                                        )}>
+                                            ₹{wallet.balance}
+                                        </p>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="text-right">
+                                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Strategy Utilization</p>
+                                        <p className="text-sm font-black text-slate-900">{subscription?.bills_used} / {subscription?.bill_limit || '∞'}</p>
+                                    </div>
+                                    <div className="h-8 w-px bg-slate-100" />
+                                    <div className="text-right">
+                                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Quota status</p>
+                                        <p className={cn(
+                                            "text-sm font-black shadow-none",
+                                            (subscription?.bill_limit && subscription.bills_used >= subscription.bill_limit) ? "text-rose-600" : "text-emerald-600"
+                                        )}>
+                                            {(subscription?.bill_limit && subscription.bills_used >= subscription.bill_limit) ? 'LIMIT EXHAUSTED' : 'OPERATIONAL'}
+                                        </p>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
                     {/* ─── Patient Info Row ─── */}
                     <div className="grid xl:grid-cols-2">
                         {/* Patient Basic */}

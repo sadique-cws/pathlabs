@@ -79,7 +79,51 @@ class Lab extends Model
     public function currentSubscription(): HasOne
     {
         return $this->hasOne(LabSubscription::class)
-            ->where('is_current', true)
-            ->where('status', 'active');
+            ->where('is_current', true);
+    }
+
+    public function getEffectiveSubscription()
+    {
+        $sub = $this->currentSubscription()->with('plan')->first();
+
+        if ($sub && $sub->status === 'active' && $sub->ends_at && $sub->ends_at->isPast() && $sub->plan->type !== 'pay_as_you_go') {
+            // Auto-shift to Pay As You Go (ID 1)
+            \Illuminate\Support\Facades\DB::transaction(function () use ($sub) {
+                /** @var \App\Models\LabSubscription $sub */
+                $sub->update(['status' => 'expired', 'is_current' => false]);
+
+                $payAsYouGo = SubscriptionPlan::find(1);
+                if ($payAsYouGo) {
+                    LabSubscription::create([
+                        'lab_id' => $this->id,
+                        'subscription_plan_id' => $payAsYouGo->id,
+                        'status' => 'active',
+                        'starts_at' => now(),
+                        'ends_at' => null,
+                        'bill_limit' => $payAsYouGo->bill_limit,
+                        'bills_used' => 0,
+                        'is_current' => true,
+                    ]);
+                }
+            });
+
+            return $this->currentSubscription()->with('plan')->first();
+        }
+
+        return $sub;
+    }
+
+    public function getSubscriptionReminder(): ?string
+    {
+        $sub = $this->currentSubscription()->with('plan')->first();
+
+        if ($sub && $sub->status === 'active' && $sub->ends_at && $sub->plan->type !== 'pay_as_you_go') {
+            $daysLeft = (int) now()->diffInDays($sub->ends_at, false);
+            if ($daysLeft >= 0 && $daysLeft <= 5) {
+                return "Your strategy '{$sub->plan->name}' expires in {$daysLeft} days. Please renew to avoid shifting to Pay As You Go.";
+            }
+        }
+
+        return null;
     }
 }

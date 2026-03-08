@@ -3,6 +3,9 @@ import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { useEffect, useState } from 'react';
+import { router, usePage } from '@inertiajs/react';
+import { AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { AppLayoutProps } from '@/types';
 
@@ -42,6 +45,21 @@ export default function AppSidebarLayout({
                     )}
                     
                     <div className="flex-1 overflow-x-hidden">
+                        {usePage().props.subscriptionReminder && (
+                            <div className="bg-amber-50 border-b border-amber-100 p-3 flex items-center gap-3">
+                                <AlertCircle className="h-4 w-4 text-amber-500" />
+                                <p className="text-[11px] font-bold uppercase tracking-widest text-amber-700">
+                                    {usePage().props.subscriptionReminder as any}
+                                </p>
+                                <Button 
+                                    variant="link" 
+                                    className="ml-auto h-auto p-0 text-[11px] font-black uppercase tracking-widest text-[#147da2]"
+                                    onClick={() => router.get('/lab/subscription')}
+                                >
+                                    Renew Implementation
+                                </Button>
+                            </div>
+                        )}
                         {children}
                     </div>
                 </main>

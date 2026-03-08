@@ -68,14 +68,14 @@ export default function ManageSamples({ samples, filters }: Props) {
             <Head title="Manage Samples" />
 
             <div className="min-h-full bg-slate-50/80 p-0">
-                <div className="rounded-lg border border-slate-200 bg-white">
+                <div className=" border-r border-b border-slate-200 bg-white">
                     <div className="p-4 border-b border-slate-100">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center w-full sm:w-auto">
                                 <select
                                     value={filters.date || ''}
                                     onChange={(e) => applyServerFilter('date', e.target.value)}
-                                    className="h-9 w-full sm:w-40 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                    className="h-9 w-full sm:w-40  border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                 >
                                     <option value="">All Dates</option>
                                     <option value="today">Today</option>
@@ -88,7 +88,7 @@ export default function ManageSamples({ samples, filters }: Props) {
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
                                         placeholder="Search barcode, bill..."
-                                        className="h-9 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 shadow-sm"
+                                        className="h-9 w-full  border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                     />
                                 </form>
                             </div>
@@ -99,35 +99,35 @@ export default function ManageSamples({ samples, filters }: Props) {
                         <table className="min-w-[1200px] w-full text-left text-sm">
                             <thead className="border-b border-slate-200 bg-slate-50/50 text-xs font-semibold uppercase tracking-wider text-slate-500">
                                 <tr>
-                                    <th className="px-5 py-3">Sample Code</th>
-                                    <th className="px-5 py-3">Barcode</th>
-                                    <th className="px-3 py-3">Bill#</th>
-                                    <th className="px-3 py-3">Patient Name</th>
-                                    <th className="px-3 py-3">Test Name</th>
-                                    <th className="px-3 py-3">Sample Type</th>
-                                    <th className="px-3 py-3 text-center">Bill Date</th>
-                                    <th className="px-3 py-3">Collected At</th>
-                                    <th className="px-3 py-3">Outsource</th>
+                                    <th className="px-5 py-3 whitespace-nowrap">Sample Code</th>
+                                    <th className="px-5 py-3 whitespace-nowrap">Barcode</th>
+                                    <th className="px-3 py-3 whitespace-nowrap">Bill#</th>
+                                    <th className="px-3 py-3 whitespace-nowrap">Patient Name</th>
+                                    <th className="px-3 py-3 whitespace-nowrap">Test Name</th>
+                                    <th className="px-3 py-3 whitespace-nowrap">Sample Type</th>
+                                    <th className="px-3 py-3 text-center whitespace-nowrap">Bill Date</th>
+                                    <th className="px-3 py-3 whitespace-nowrap">Collected At</th>
+                                    <th className="px-3 py-3 whitespace-nowrap">Outsource</th>
                                 </tr>
                             </thead>
                             <tbody className="text-[13px] text-slate-700">
                                 {paginatedRows.map((row) => (
                                     <tr key={row.id} className="border-b border-slate-100 transition hover:bg-slate-50/50">
                                         <td className="px-5 py-3 font-medium text-slate-900">{row.sample_code}</td>
-                                        <td className="px-5 py-3">
+                                        <td className="px-5 py-3 whitespace-nowrap">
                                             {row.barcode ? (
-                                                <span className="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-600">
+                                                <span className="bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-600">
                                                     {row.barcode}
                                                 </span>
                                             ) : (
                                                 <span className="text-slate-400 italic">No Barcode</span>
                                             )}
                                         </td>
-                                        <td className="px-3 py-3">{row.bill_number ?? '-'}</td>
-                                        <td className="px-3 py-3 font-medium">{row.patient_name ?? '-'}</td>
-                                        <td className="px-3 py-3">{row.test_name ?? '-'}</td>
-                                        <td className="px-3 py-3">
-                                            <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
+                                        <td className="px-3 py-3 whitespace-nowrap">{row.bill_number ?? '-'}</td>
+                                        <td className="px-3 py-3 font-medium whitespace-nowrap">{row.patient_name ?? '-'}</td>
+                                        <td className="px-3 py-3 whitespace-nowrap">{row.test_name ?? '-'}</td>
+                                        <td className="px-3 py-3 whitespace-nowrap">
+                                            <span className="inline-flex  bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
                                                 {row.sample_type}
                                             </span>
                                         </td>
@@ -168,7 +168,7 @@ export default function ManageSamples({ samples, filters }: Props) {
                                         setPageSize(Number(e.target.value));
                                         setPage(1);
                                     }}
-                                    className="h-7 rounded border border-slate-200 bg-white px-1 text-xs outline-none"
+                                    className="h-7 border border-slate-200 bg-white px-1 text-xs outline-none"
                                 >
                                     {pageSizeOptions.map((size) => (
                                         <option key={size} value={size}>
@@ -183,7 +183,7 @@ export default function ManageSamples({ samples, filters }: Props) {
                             <button
                                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                                 disabled={currentPage === 1}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+                                className="inline-flex h-8 w-8 items-center justify-center  border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                             >
                                 <ChevronLeft className="h-4 w-4" />
                             </button>
@@ -193,7 +193,7 @@ export default function ManageSamples({ samples, filters }: Props) {
                             <button
                                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                 disabled={currentPage === totalPages}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+                                className="inline-flex h-8 w-8 items-center justify-center  border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                             >
                                 <ChevronRight className="h-4 w-4" />
                             </button>

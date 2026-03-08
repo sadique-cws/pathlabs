@@ -138,24 +138,14 @@ export default function ManageParameters({ parameters, tests, pagination, filter
 
             <div className="min-h-full bg-slate-50/80 p-0">
                 {flash?.success && (
-                    <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                    <div className="mb-4 sawtooth border-b border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
                         {flash.success}
                     </div>
                 )}
 
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-                    <button
-                        type="button"
-                        onClick={() => openModal()}
-                        className="flex items-center gap-1.5 rounded-md bg-[#147da2] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#106385] ml-auto"
-                    >
-                        <Plus className="h-4 w-4" />
-                        Add Parameter
-                    </button>
-                </div>
-
-                <div className="rounded-lg border border-slate-200 bg-white">
-                    <div className="p-4 border-b border-slate-100 shadow-sm">
+              
+                <div className="sawtooth border-b border-slate-200 bg-white">
+                    <div className="p-4 border-b border-slate-100">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center w-full sm:w-auto">
                                 <div className="relative w-full sm:w-64">
@@ -163,13 +153,13 @@ export default function ManageParameters({ parameters, tests, pagination, filter
                                     <input
                                         type="text"
                                         placeholder="Search parameters or tests..."
-                                        className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 shadow-sm"
+                                        className="h-9 w-full  border border-slate-200 pl-9 pr-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                         value={search}
                                         onChange={handleSearchChange}
                                     />
                                 </div>
                                 <select
-                                    className="h-9 w-full sm:w-48 rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 shadow-sm"
+                                    className="h-9 w-full sm:w-48  border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                     value={selectedTest}
                                     onChange={handleTestChange}
                                 >
@@ -181,6 +171,14 @@ export default function ManageParameters({ parameters, tests, pagination, filter
                                     ))}
                                 </select>
                             </div>
+                             <button
+                        type="button"
+                        onClick={() => openModal()}
+                        className="flex items-center gap-1.5  bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385] ml-auto"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Add Parameter
+                    </button>
                         </div>
                     </div>
 
@@ -210,7 +208,7 @@ export default function ManageParameters({ parameters, tests, pagination, filter
                                                     <button
                                                         type="button"
                                                         onClick={() => openModal(p)}
-                                                        className="rounded text-slate-400 hover:text-[#147da2]"
+                                                        className="text-slate-400 hover:text-[#147da2]"
                                                         title="Edit parameter"
                                                     >
                                                         <Edit2 className="h-4 w-4" />
@@ -218,7 +216,7 @@ export default function ManageParameters({ parameters, tests, pagination, filter
                                                     <button
                                                         type="button"
                                                         onClick={() => deleteParameter(p)}
-                                                        className="rounded text-slate-400 hover:text-red-500"
+                                                        className="text-slate-400 hover:text-red-500"
                                                         title="Delete parameter"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
@@ -248,7 +246,7 @@ export default function ManageParameters({ parameters, tests, pagination, filter
                                         onClick={() =>
                                             router.get(`/lab/test-reports/parameters?page=${pagination.current_page - 1}&search=${search}&test_id=${selectedTest}`)
                                         }
-                                        className="rounded border border-slate-200 px-3 py-1 hover:bg-slate-50"
+                                        className="border border-slate-200 px-3 py-1 hover:bg-slate-50"
                                     >
                                         Previous
                                     </button>
@@ -259,7 +257,7 @@ export default function ManageParameters({ parameters, tests, pagination, filter
                                         onClick={() =>
                                             router.get(`/lab/test-reports/parameters?page=${pagination.current_page + 1}&search=${search}&test_id=${selectedTest}`)
                                         }
-                                        className="rounded border border-slate-200 px-3 py-1 hover:bg-slate-50"
+                                        className="border border-slate-200 px-3 py-1 hover:bg-slate-50"
                                     >
                                         Next
                                     </button>
@@ -281,7 +279,7 @@ export default function ManageParameters({ parameters, tests, pagination, filter
                             <label htmlFor="test_id" className="text-sm font-semibold text-slate-700">Lab Test <span className="text-red-500">*</span></label>
                             <select
                                 id="test_id"
-                                className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                className="h-9 w-full  border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                 value={form.data.test_id}
                                 onChange={(e) => form.setData('test_id', e.target.value)}
                                 required
@@ -301,7 +299,7 @@ export default function ManageParameters({ parameters, tests, pagination, filter
                             <input
                                 id="name"
                                 type="text"
-                                className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                className="h-9 w-full  border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                 value={form.data.name}
                                 onChange={(e) => form.setData('name', e.target.value)}
                                 required
@@ -315,7 +313,7 @@ export default function ManageParameters({ parameters, tests, pagination, filter
                                 <input
                                     id="unit"
                                     type="text"
-                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                    className="h-9 w-full  border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                     value={form.data.unit}
                                     placeholder="e.g. g/dL"
                                     onChange={(e) => form.setData('unit', e.target.value)}
@@ -328,7 +326,7 @@ export default function ManageParameters({ parameters, tests, pagination, filter
                                 <input
                                     id="normal_range"
                                     type="text"
-                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                    className="h-9 w-full  border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                     value={form.data.normal_range}
                                     placeholder="e.g. 13.5 - 17.5"
                                     onChange={(e) => form.setData('normal_range', e.target.value)}
@@ -341,14 +339,14 @@ export default function ManageParameters({ parameters, tests, pagination, filter
                             <button
                                 type="button"
                                 onClick={closeModal}
-                                className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                                className=" border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={form.processing}
-                                className="rounded-md bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385] disabled:opacity-50"
+                                className=" bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385] disabled:opacity-50"
                             >
                                 {editingParameter ? 'Save Changes' : 'Add Parameter'}
                             </button>

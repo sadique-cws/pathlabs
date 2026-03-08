@@ -55,7 +55,7 @@ export default function BillBarcodeSheet({ bill }: Props) {
             <div className="min-h-screen bg-slate-100 p-4 md:p-6">
                 <div className="no-print mx-auto mb-4 flex max-w-5xl flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <Link href="/lab/billing/manage" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">
+                        <Link href="/lab/billing/manage" className="inline-flex items-center gap-2  border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">
                             <ArrowLeft className="h-4 w-4" />
                             Back
                         </Link>
@@ -65,15 +65,15 @@ export default function BillBarcodeSheet({ bill }: Props) {
                         </div>
                     </div>
 
-                    <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-lg bg-[#0f87af] px-4 py-2 text-sm font-semibold text-white">
+                    <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2  bg-[#0f87af] px-4 py-2 text-sm font-semibold text-white">
                         <Printer className="h-4 w-4" />
                         Print Labels
                     </button>
                 </div>
 
-                <div className="label-sheet mx-auto grid max-w-5xl gap-3 rounded-xl bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-3">
+                <div className="label-sheet mx-auto grid max-w-5xl gap-3  bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-3">
                     {bill.barcodes.map((sample) => (
-                        <div key={sample.sample_id} className="label-card rounded-lg border border-slate-300 bg-white p-3">
+                        <div key={sample.sample_id} className="label-card  border border-slate-300 bg-white p-3">
                             <div className="mb-2 text-xs text-slate-600">
                                 <p className="font-semibold text-slate-900">Bill: {bill.bill_number}</p>
                                 <p>Sample #{sample.sample_id}</p>

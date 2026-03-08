@@ -21,6 +21,7 @@ class TestPackage extends Model
         'code',
         'price',
         'is_active',
+        'is_system',
     ];
 
     /**
@@ -31,6 +32,7 @@ class TestPackage extends Model
         return [
             'price' => 'decimal:2',
             'is_active' => 'boolean',
+            'is_system' => 'boolean',
         ];
     }
 

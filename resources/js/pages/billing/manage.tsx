@@ -94,18 +94,18 @@ export default function ManageBills({ bills }: Props) {
             <Head title="Manage Patient Bills" />
 
             <div className="min-h-full bg-slate-50/80 p-0">
-                <div className="rounded-lg border border-slate-200 bg-white">
+                <div className=" border-0 border-slate-200 bg-white">
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
                         <div className="flex flex-wrap items-center gap-2 ml-auto w-full sm:w-auto">
-                            <button type="button" className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                            <button type="button" className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2  border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                                 <Printer className="h-4 w-4" />
                                 <span className="hidden xs:inline">Printer</span>
                             </button>
-                            <button type="button" className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                            <button type="button" className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2  border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                                 <FileSpreadsheet className="h-4 w-4" />
                                 <span className="hidden xs:inline">Export</span>
                             </button>
-                            <Link href="/lab/billing/create" className="flex-[2] sm:flex-none text-center rounded-lg bg-[#147da2] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
+                            <Link href="/lab/billing/create" className="flex-[2] sm:flex-none text-center  bg-[#147da2] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
                                 + New Bill
                             </Link>
                         </div>
@@ -119,7 +119,7 @@ export default function ManageBills({ bills }: Props) {
                                     <input
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
-                                        className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 shadow-sm"
+                                        className="h-9 w-full  border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                         placeholder="Search bills..."
                                     />
                                 </label>
@@ -128,7 +128,7 @@ export default function ManageBills({ bills }: Props) {
                                     <select
                                         value={dateRange}
                                         onChange={(e) => setDateRange(e.target.value)}
-                                        className="h-9 w-full sm:w-auto rounded-md border border-slate-200 px-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                        className="h-9 w-full sm:w-auto  border border-slate-200 px-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                     >
                                         <option value="">All Dates</option>
                                         <option value="today">Today</option>
@@ -138,7 +138,7 @@ export default function ManageBills({ bills }: Props) {
                                     <select
                                         value={paymentStatus}
                                         onChange={(e) => setPaymentStatus(e.target.value as '' | 'Complete' | 'Partial')}
-                                        className="h-9 w-full sm:w-auto rounded-md border border-slate-200 px-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                        className="h-9 w-full sm:w-auto  border border-slate-200 px-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                     >
                                         <option value="">All Status</option>
                                         <option value="Complete">Complete</option>
@@ -176,17 +176,17 @@ export default function ManageBills({ bills }: Props) {
                                             <span className={bill.payment_status === 'Complete' ? 'text-emerald-600' : 'text-amber-600'}>{bill.payment_status}</span>
                                         </td>
                                         <td className="px-3 py-3 whitespace-nowrap">
-                                            <span className="inline-flex h-3 w-3 rounded-full bg-amber-400"></span>
+                                            <span className="inline-flex h-3 w-3  bg-amber-400"></span>
                                         </td>
                                         <td className="px-3 py-3 whitespace-nowrap">
                                             <div className="flex items-center gap-1">
-                                                <Link href={`/lab/billing/${bill.id}/view`} className="rounded p-1 text-blue-500 hover:bg-blue-50">
+                                                <Link href={`/lab/billing/${bill.id}/view`} className="p-1 text-blue-500 hover:bg-blue-50">
                                                     <Eye className="h-4 w-4" />
                                                 </Link>
-                                                <a href={`/lab/billing/${bill.id}/barcodes`} className="rounded p-1 text-emerald-600 hover:bg-emerald-50" title="View / Print Barcodes">
+                                                <a href={`/lab/billing/${bill.id}/barcodes`} className="p-1 text-emerald-600 hover:bg-emerald-50" title="View / Print Barcodes">
                                                     <Printer className="h-4 w-4" />
                                                 </a>
-                                                <Link href={`/lab/billing/${bill.id}/edit`} className="rounded p-1 text-slate-500 hover:bg-slate-100">
+                                                <Link href={`/lab/billing/${bill.id}/edit`} className="p-1 text-slate-500 hover:bg-slate-100">
                                                     <Pencil className="h-4 w-4" />
                                                 </Link>
                                             </div>
@@ -214,14 +214,14 @@ export default function ManageBills({ bills }: Props) {
                             </span>
                             <div className="flex gap-2">
                                 <button
-                                    className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                                    className=" border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                                     disabled={page === 1}
                                 >
                                     Previous
                                 </button>
                                 <button
-                                    className="rounded-md border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                                    className=" border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                                     disabled={page === totalPages}
                                 >

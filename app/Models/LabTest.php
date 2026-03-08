@@ -29,6 +29,7 @@ class LabTest extends Model
         'collection_center_commission_value',
         'collection_center_commission_type',
         'is_active',
+        'is_system',
     ];
 
     /**
@@ -41,6 +42,7 @@ class LabTest extends Model
             'referral_commission_value' => 'decimal:2',
             'collection_center_commission_value' => 'decimal:2',
             'is_active' => 'boolean',
+            'is_system' => 'boolean',
         ];
     }
 

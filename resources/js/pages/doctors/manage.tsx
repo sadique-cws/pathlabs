@@ -45,34 +45,39 @@ export default function ManageDoctors({ doctors, stats }: Props) {
             <Head title="Lab Doctors List" />
 
             <div className="min-h-full bg-slate-50/80 p-0">
-                <div className="sawtooth mb-4 border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
-                    <label className="relative block">
+                <div className="sawtooth flex justify-between border-b-0 border-slate-200 bg-white p-3 sm:p-4 border-b">
+                    <label className="relative block w-full sm:max-w-md">
                         <Search className="pointer-events-none absolute left-3 top-[11px] h-4 w-4 text-slate-400" />
                         <input 
                             value={search} 
                             onChange={(e) => setSearch(e.target.value)} 
                             placeholder="Search doctors by name, email, or phone..." 
-                            className="h-10 w-full rounded-md border border-slate-200 bg-slate-50/20 pl-10 pr-3 text-sm outline-none transition focus:bg-white focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 shadow-inner" 
+                            className="h-10 w-full  border border-slate-200 bg-slate-50/20 pl-10 pr-3 text-sm outline-none transition focus:bg-white focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" 
                         />
                     </label>
+
+                    {/* add doctor */}
+                    <Link href="/lab/doctors/add" className="inline-flex items-center justify-center  bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385] w-full sm:w-auto">
+                        + Add Doctor
+                    </Link>
                 </div>
 
-                <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    <div className="sawtooth border border-slate-200 bg-white p-3 sm:p-4">
+                <div className="sawtooth grid grid-cols-2 sm:grid-cols-3">
+                    <div className="sawtooth border-r border-t border-slate-200 bg-white p-3 sm:p-4">
                         <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">Total Doctors</p>
                         <p className="mt-1 text-xl sm:text-2xl font-bold text-slate-800">{stats.total}</p>
                     </div>
-                    <div className="sawtooth border border-slate-200 bg-white p-3 sm:p-4">
+                    <div className="sawtooth border-r border-t border-slate-200 bg-white p-3 sm:p-4">
                         <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">Accepted</p>
                         <p className="mt-1 text-xl sm:text-2xl font-bold text-emerald-600">{stats.accepted}</p>
                     </div>
-                    <div className="sawtooth border border-slate-200 bg-white p-3 sm:p-4 col-span-2 sm:col-span-1">
+                    <div className="sawtooth border-t border-slate-200 bg-white p-3 sm:p-4 col-span-2 sm:col-span-1">
                         <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">With Gifts</p>
                         <p className="mt-1 text-xl sm:text-2xl font-bold text-[#147da2]">{stats.with_gifts}</p>
                     </div>
                 </div>
 
-                <div className="sawtooth border border-slate-200 bg-white overflow-hidden">
+                <div className="sawtooth border-y border-0 border-slate-200 bg-white overflow-hidden">
                     <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
                         <table className="w-full min-w-[800px] text-left">
                             <thead className="border-b border-slate-200 bg-slate-50/70 text-sm font-semibold text-slate-700">
@@ -94,13 +99,13 @@ export default function ManageDoctors({ doctors, stats }: Props) {
                                         <td className="px-3 py-3">{doctor.phone ?? '-'}</td>
                                         <td className="px-3 py-3 font-mono text-xs">{doctor.gift_total > 0 ? `₹${doctor.gift_total.toFixed(2)}` : 'Not Assigned'}</td>
                                         <td className="px-3 py-3">
-                                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${doctor.status === 'Accepted' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                                            <span className={`inline-flex items-center  px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${doctor.status === 'Accepted' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
                                                 {doctor.status}
                                             </span>
                                         </td>
                                         <td className="px-3 py-3 text-slate-500 text-xs">{doctor.created_date ?? '-'}</td>
                                         <td className="px-3 py-3 text-right">
-                                            <Link href={`/lab/doctors/${doctor.id}/edit`} className="inline-flex h-8 items-center rounded border border-slate-200 bg-white px-3 text-xs font-bold uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-colors">
+                                            <Link href={`/lab/doctors/${doctor.id}/edit`} className="inline-flex h-8 items-center border border-slate-200 bg-white px-3 text-xs font-bold uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-colors">
                                                 Edit
                                             </Link>
                                         </td>

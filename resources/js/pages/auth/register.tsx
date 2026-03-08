@@ -36,7 +36,7 @@ export default function Register() {
                                     autoComplete="name"
                                     name="name"
                                     placeholder="John Doe"
-                                    className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm transition-all focus:border-[#147da2] focus:ring-[#147da2]/10"
+                                    className="h-11  border-slate-200 bg-white px-4 text-sm transition-all focus:border-[#147da2] focus:ring-[#147da2]/10"
                                 />
                                 <InputError
                                     message={errors.name}
@@ -54,7 +54,7 @@ export default function Register() {
                                     autoComplete="email"
                                     name="email"
                                     placeholder="your@email.com"
-                                    className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm transition-all focus:border-[#147da2] focus:ring-[#147da2]/10"
+                                    className="h-11  border-slate-200 bg-white px-4 text-sm transition-all focus:border-[#147da2] focus:ring-[#147da2]/10"
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -69,7 +69,7 @@ export default function Register() {
                                     autoComplete="new-password"
                                     name="password"
                                     placeholder="••••••••"
-                                    className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm transition-all focus:border-[#147da2] focus:ring-[#147da2]/10"
+                                    className="h-11  border-slate-200 bg-white px-4 text-sm transition-all focus:border-[#147da2] focus:ring-[#147da2]/10"
                                 />
                                 <InputError message={errors.password} />
                             </div>
@@ -86,7 +86,7 @@ export default function Register() {
                                     autoComplete="new-password"
                                     name="password_confirmation"
                                     placeholder="••••••••"
-                                    className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm transition-all focus:border-[#147da2] focus:ring-[#147da2]/10"
+                                    className="h-11  border-slate-200 bg-white px-4 text-sm transition-all focus:border-[#147da2] focus:ring-[#147da2]/10"
                                 />
                                 <InputError
                                     message={errors.password_confirmation}
@@ -95,7 +95,7 @@ export default function Register() {
 
                             <Button
                                 type="submit"
-                                className="h-11 w-full rounded-xl bg-[#147da2] text-sm font-bold shadow-lg shadow-[#147da2]/20 transition-all hover:bg-[#106385] hover:shadow-xl hover:shadow-[#147da2]/30 active:scale-[0.98]"
+                                className="h-11 w-full  bg-[#147da2] text-sm font-bold shadow-lg shadow-[#147da2]/20 transition-all hover:bg-[#106385] hover:shadow-xl hover:shadow-[#147da2]/30 active:scale-[0.98]"
                                 tabIndex={5}
                                 data-test="register-user-button"
                             >

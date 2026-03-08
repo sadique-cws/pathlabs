@@ -126,7 +126,31 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
         });
 
         Route::prefix('clinical-master')->name('clinical-master.')->group(function (): void {
-            // Keep clinical-master group for future features like manage groups and packages
+            Route::get('tests', [\App\Http\Controllers\Lab\ClinicalMasterController::class, 'manageTests'])
+                ->middleware('feature:clinical_master.manage_tests')
+                ->name('tests');
+            Route::post('tests', [\App\Http\Controllers\Lab\ClinicalMasterController::class, 'storeTest'])
+                ->middleware('feature:clinical_master.manage_tests')
+                ->name('tests.store');
+            Route::put('tests/{test}', [\App\Http\Controllers\Lab\ClinicalMasterController::class, 'updateTest'])
+                ->middleware('feature:clinical_master.manage_tests')
+                ->name('tests.update');
+            Route::delete('tests/{test}', [\App\Http\Controllers\Lab\ClinicalMasterController::class, 'destroyTest'])
+                ->middleware('feature:clinical_master.manage_tests')
+                ->name('tests.destroy');
+
+            Route::get('packages', [\App\Http\Controllers\Lab\ClinicalMasterController::class, 'managePackages'])
+                ->middleware('feature:clinical_master.manage_packages')
+                ->name('packages');
+            Route::post('packages', [\App\Http\Controllers\Lab\ClinicalMasterController::class, 'storePackage'])
+                ->middleware('feature:clinical_master.manage_packages')
+                ->name('packages.store');
+            Route::put('packages/{package}', [\App\Http\Controllers\Lab\ClinicalMasterController::class, 'updatePackage'])
+                ->middleware('feature:clinical_master.manage_packages')
+                ->name('packages.update');
+            Route::delete('packages/{package}', [\App\Http\Controllers\Lab\ClinicalMasterController::class, 'destroyPackage'])
+                ->middleware('feature:clinical_master.manage_packages')
+                ->name('packages.destroy');
         });
     });
 

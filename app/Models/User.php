@@ -165,6 +165,8 @@ class User extends Authenticatable
             'reports.result_entry',
             'wallet.view',
             'wallet.topup',
+            'clinical_master.manage_tests',
+            'clinical_master.manage_packages',
             'admin.labs.features',
         ];
 

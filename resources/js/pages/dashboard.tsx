@@ -44,16 +44,7 @@ export default function Dashboard({ totals, recentBills }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Lab Analytics" />
 
-            <div className="flex h-full flex-1 flex-col gap-5 bg-slate-50/80">
-                <div className="flex items-center justify-end">
-                    <Link
-                        href="/lab/billing/create"
-                        className="w-full sm:w-auto text-center rounded-lg bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]"
-                    >
-                        + Create Bill
-                    </Link>
-                </div>
-
+            <div className="flex h-full flex-1 flex-col bg-slate-50/80">
                 <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4">
                     {cards.map((card, index) => {
                         const value = totals[card.key];
@@ -62,14 +53,14 @@ export default function Dashboard({ totals, recentBills }: Props) {
                             <div
                                 key={card.key}
                                 className={cn(
-                                    "sawtooth bg-white p-4 sm:p-5 border-y border-r border-slate-200",
-                                    index === 0 && "border-l",
+                                    "sawtooth bg-white p-4 sm:p-5 border-y border-r border-t-0 border-slate-200",
+                                    index === 0 && "border-l-0",
                                     index === 2 && "border-l xl:border-l-0",
                                 )}
                             >
                                 <div className="flex items-center justify-between">
                                     <p className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-slate-500">{card.title}</p>
-                                    <div className={`flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg ${card.bg} ${card.color}`}>
+                                    <div className={`flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center  ${card.bg} ${card.color}`}>
                                         <card.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                     </div>
                                 </div>
@@ -81,7 +72,7 @@ export default function Dashboard({ totals, recentBills }: Props) {
                     })}
                 </div>
 
-                <div className="sawtooth bg-white p-5 border border-slate-200 mt-2">
+                <div className="sawtooth bg-white p-5 border-b border-slate-200">
                     <div className="mb-4 flex items-center justify-between">
                         <h2 className="text-base font-semibold text-slate-800">Recent Transactions</h2>
                         <Link href="/lab/billing/create" className="text-xs font-bold uppercase tracking-widest text-[#147da2] transition hover:text-[#106385]">
@@ -108,7 +99,7 @@ export default function Dashboard({ totals, recentBills }: Props) {
                                         <td className="px-3 py-3 text-slate-600">{new Date(bill.billing_at).toLocaleString()}</td>
                                         <td className="px-3 py-3 font-semibold text-slate-800">₹{bill.net_total}</td>
                                         <td className="px-3 py-3">
-                                            <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">
+                                            <span className=" bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">
                                                 {bill.status}
                                             </span>
                                         </td>

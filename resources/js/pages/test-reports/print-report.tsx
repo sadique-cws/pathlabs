@@ -65,7 +65,7 @@ export default function PrintReport({ sample, patient, parameters }: Props) {
                     <div className="flex items-center gap-3">
                         <Link
                             href={`/lab/test-reports/result-entry/${sample.id}`}
-                            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700"
+                            className="inline-flex items-center gap-2  border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700"
                         >
                             <ArrowLeft className="h-4 w-4" />
                             Back
@@ -79,7 +79,7 @@ export default function PrintReport({ sample, patient, parameters }: Props) {
                     <button
                         type="button"
                         onClick={() => window.print()}
-                        className="inline-flex items-center gap-2 rounded-lg bg-[#147da2] px-4 py-2 text-sm font-semibold text-white shadow-sm"
+                        className="inline-flex items-center gap-2  bg-[#147da2] px-4 py-2 text-sm font-semibold text-white shadow-sm"
                     >
                         <Printer className="h-4 w-4" />
                         Print Report
@@ -87,7 +87,7 @@ export default function PrintReport({ sample, patient, parameters }: Props) {
                 </div>
 
                 {/* Report */}
-                <div className="report-page mx-auto max-w-4xl rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div className="report-page mx-auto max-w-4xl  border border-slate-200 bg-white shadow-sm">
                     {/* Header */}
                     <div className="border-b-2 border-[#147da2] px-8 py-6">
                         <div className="flex items-center justify-between">

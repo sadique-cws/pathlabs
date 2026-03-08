@@ -84,18 +84,18 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
 
             <div className="min-h-full bg-slate-50/80 p-0">
                 {flash?.success && (
-                    <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                    <div className="border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
                         {flash.success}
                     </div>
                 )}
 
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                         <p className="text-sm font-semibold text-[#147da2]">
                             {sample.test_name} — <span className="font-medium text-slate-500">{sample.department}</span>
                         </p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center">
                         {/* Lab Tech: can Save Draft & Mark Collected */}
                         {!isDoctor && !isCompleted && (
                             <>
@@ -103,7 +103,7 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
                                     <button
                                         type="button"
                                         onClick={() => submit('collect')}
-                                        className="rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+                                        className=" border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
                                     >
                                         Mark Collected
                                     </button>
@@ -111,7 +111,7 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
                                 <button
                                     type="button"
                                     onClick={() => submit('draft')}
-                                    className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                                    className=" border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                                 >
                                     Save Draft
                                 </button>
@@ -123,14 +123,14 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
                                 <button
                                     type="button"
                                     onClick={() => submit('draft')}
-                                    className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                                    className=" border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                                 >
                                     Save Draft
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => submit('approve')}
-                                    className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                                    className=" bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
                                 >
                                     Approve & Complete
                                 </button>
@@ -140,7 +140,7 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
                         {isCompleted && (
                             <Link
                                 href={`/lab/test-reports/result-entry/${sample.id}/print`}
-                                className="flex items-center gap-1.5 rounded-md bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]"
+                                className="flex items-center gap-1.5  bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]"
                             >
                                 <Printer className="h-4 w-4" />
                                 Print Report
@@ -150,10 +150,10 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
                 </div>
 
                 <div className="grid gap-4 xl:grid-cols-[320px_1fr]">
-                    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className=" border border-slate-200 bg-white p-5 shadow-sm">
                         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
                             <h2 className="text-base font-semibold text-slate-800">Sample Information</h2>
-                            <span className={`inline-flex rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider ${currentStatus.className}`}>
+                            <span className={`inline-flex  px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider ${currentStatus.className}`}>
                                 {currentStatus.label}
                             </span>
                         </div>
@@ -203,9 +203,9 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
                         </div>
 
                         {isCompleted && (
-                            <div className="mt-5 flex flex-col gap-1.5 rounded-lg border border-emerald-100 bg-emerald-50/50 p-3.5 text-xs text-emerald-800">
+                            <div className="mt-5 flex flex-col gap-1.5  border border-emerald-100 bg-emerald-50/50 p-3.5 text-xs text-emerald-800">
                                 <div className="flex items-center gap-1.5 font-semibold text-emerald-700">
-                                    <span className="flex h-4 w-4 border border-emerald-300 items-center justify-center rounded-full bg-emerald-200 text-[10px]">✓</span> 
+                                    <span className="flex h-4 w-4 border border-emerald-300 items-center justify-center  bg-emerald-200 text-[10px]">✓</span> 
                                     Approved
                                 </div>
                                 {sample.approved_by_name && (
@@ -222,7 +222,7 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
                         )}
                     </div>
 
-                    <div className="rounded-lg border border-slate-200 bg-white p-6">
+                    <div className=" border border-slate-200 bg-white p-6">
                         <h2 className="mb-4 border-b border-slate-100 pb-3 text-base font-semibold text-slate-800">Test Parameters & Results</h2>
                         <div className="overflow-x-auto">
                             <table className="w-full min-w-[760px] text-left">
@@ -245,7 +245,7 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
                                             <td className="px-2 py-2">
                                                 <div className="relative">
                                                     <input
-                                                        className={`h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500 ${rangeStatus !== 'normal' ? 'font-bold text-red-700 pr-8' : ''}`}
+                                                        className={`h-9 w-full  border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500 ${rangeStatus !== 'normal' ? 'font-bold text-red-700 pr-8' : ''}`}
                                                         value={row.value}
                                                         disabled={isCompleted}
                                                         onChange={(event) => {
@@ -260,7 +260,7 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
                                             </td>
                                             <td className="px-2 py-2">
                                                 <input
-                                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
+                                                    className="h-9 w-full  border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
                                                     value={row.unit}
                                                     disabled={isCompleted}
                                                     onChange={(event) => {
@@ -272,7 +272,7 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
                                             </td>
                                             <td className="px-2 py-2">
                                                 <input
-                                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
+                                                    className="h-9 w-full  border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
                                                     value={row.normal_range}
                                                     disabled={isCompleted}
                                                     onChange={(event) => {
@@ -284,7 +284,7 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
                                             </td>
                                             <td className="px-2 py-2">
                                                 <input
-                                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
+                                                    className="h-9 w-full  border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
                                                     value={row.remarks}
                                                     disabled={isCompleted}
                                                     onChange={(event) => {
@@ -306,7 +306,7 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
                                 <label className="mb-1 block text-sm font-semibold text-slate-700">Technician Remarks</label>
                                 <textarea
                                     rows={3}
-                                    className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
+                                    className="w-full  border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
                                     value={form.data.technical_remarks}
                                     disabled={isCompleted}
                                     onChange={(event) => form.setData('technical_remarks', event.target.value)}
@@ -316,7 +316,7 @@ export default function ResultEntryForm({ sample, parameters, userRole }: Props)
                                 <label className="mb-1 block text-sm font-semibold text-slate-700">Approval Date</label>
                                 <input
                                     type="date"
-                                    className="h-9 w-full rounded-md border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
+                                    className="h-9 w-full  border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 disabled:bg-slate-50 disabled:text-slate-500"
                                     value={form.data.approval_date}
                                     disabled={isCompleted || !isDoctor}
                                     onChange={(event) => form.setData('approval_date', event.target.value)}

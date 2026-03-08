@@ -126,7 +126,7 @@ function SearchableSelect({
                     setSearch('');
                     setTimeout(() => inputRef.current?.focus(), 0);
                 }}
-                className="flex h-9 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                className="flex h-9 w-full items-center justify-between  border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
             >
                 <span className={selectedLabel ? 'text-slate-700' : 'text-slate-400'}>
                     {selectedLabel || placeholder}
@@ -135,11 +135,11 @@ function SearchableSelect({
             </button>
 
             {open && (
-                <div className="absolute inset-x-0 z-30 mt-1 rounded-md border border-slate-200 bg-white shadow-lg">
+                <div className="absolute inset-x-0 z-30 mt-1  border border-slate-200 bg-white shadow-lg">
                     <div className="border-b border-slate-100 p-1.5">
                         <input
                             ref={inputRef}
-                            className="h-8 w-full rounded border-0 bg-slate-50 px-2.5 text-sm outline-none placeholder:text-slate-400"
+                            className="h-8 w-full border-0 bg-slate-50 px-2.5 text-sm outline-none placeholder:text-slate-400"
                             placeholder="Type to search…"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -174,7 +174,7 @@ function SearchableSelect({
 
 /* ─── Consistent styling constants ─── */
 const inputClasses =
-    'h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20';
+    'h-9 w-full  border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20';
 
 export default function BillingCreate({
     tests,
@@ -422,7 +422,7 @@ export default function BillingCreate({
                 state: patient.state ?? '',
                 pin_code: patient.pin_code ?? '',
                 uhid: patient.uhid ?? '',
-                id_type: patient.id_type ?? 'ABHA / Aadhar',
+                id_type: patient.id_type ?? '',
             },
         }));
 
@@ -530,7 +530,7 @@ export default function BillingCreate({
 
             <div className="min-h-full bg-slate-50/80 p-0">
                 {flash?.success && (
-                    <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                    <div className="mb-4  border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
                         {flash.success}
                     </div>
                 )}
@@ -539,7 +539,7 @@ export default function BillingCreate({
                     {/* ─── Patient Info Row ─── */}
                     <div className="grid xl:grid-cols-2">
                         {/* Patient Basic */}
-                        <div className="sawtooth bg-white border-t p-5 border-x border-b border-slate-200">
+                        <div className="sawtooth bg-white border-0 p-5 border-r border-b border-slate-200">
                             <h2 className="mb-1 text-base font-semibold text-slate-800">Patient Basic Information</h2>
                             <p className="mb-4 text-xs text-slate-400">Search existing or add new patient details</p>
 
@@ -564,7 +564,7 @@ export default function BillingCreate({
                                 </div>
 
                                 {showPatientSuggestions && patientSearch !== '' && (
-                                    <div className="absolute inset-x-0 z-20 mt-1 max-h-44 overflow-auto rounded-md border border-slate-200 bg-white py-1">
+                                    <div className="absolute inset-x-0 z-20 mt-1 max-h-44 overflow-auto  border border-slate-200 bg-white py-1">
                                         {matchedPatients.map((patient) => (
                                             <button type="button" key={patient.id} onClick={() => selectExistingPatient(patient)} className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-slate-50">
                                                 <span className="font-medium text-slate-700">{patient.name}</span>
@@ -581,11 +581,11 @@ export default function BillingCreate({
                             </div>
 
                             {selectedPatientLabel !== null && (
-                                <div className="mb-4 flex items-center justify-between rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                                <div className="mb-4 flex items-center justify-between  border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
                                     <span>Selected: <strong>{selectedPatientLabel}</strong></span>
                                     <button
                                         type="button"
-                                        className="rounded border border-emerald-300 px-2 py-0.5 text-xs font-medium hover:bg-emerald-100"
+                                        className="border border-emerald-300 px-2 py-0.5 text-xs font-medium hover:bg-emerald-100"
                                         onClick={() => {
                                             setSelectedPatientLabel(null);
                                             form.setData('patient_id', '');
@@ -644,7 +644,7 @@ export default function BillingCreate({
                         </div>
 
                         {/* Patient Additional */}
-                        <div className="sawtooth bg-white p-5 border-r border-t border-b border-slate-200">
+                        <div className="sawtooth bg-white p-5 border-r border-b border-slate-200">
                             <h2 className="mb-1 text-base font-semibold text-slate-800">Patient Additional Information</h2>
                             <p className="mb-4 text-xs text-slate-400">Address, identification & body metrics</p>
 
@@ -690,7 +690,7 @@ export default function BillingCreate({
                     </div>
 
                     {/* ─── Tests / Packages / Others ─── */}
-                    <div className="sawtooth bg-white p-5 border-x border-b border-slate-200">
+                    <div className="sawtooth bg-white p-5 border-r border-b border-slate-200">
                         <div className="mb-4 flex items-center gap-1">
                             {form.errors.test_ids && <span className="mr-2 text-xs font-medium text-rose-500">{form.errors.test_ids}</span>}
                             {(['tests', 'packages', 'others'] as const).map((t) => (
@@ -698,7 +698,7 @@ export default function BillingCreate({
                                     key={t}
                                     type="button"
                                     onClick={() => setTab(t)}
-                                    className={`rounded-md px-4 py-2 text-sm font-medium capitalize transition-colors ${
+                                    className={` px-4 py-2 text-sm font-medium capitalize transition-colors ${
                                         tab === t
                                             ? 'bg-[#147da2] text-white'
                                             : 'bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-700'
@@ -716,9 +716,9 @@ export default function BillingCreate({
                                         <Search className="pointer-events-none absolute left-3  top-2.5 h-4 w-4 text-slate-400" />
                                         <input className={`${inputClasses} pl-9`} placeholder="Search tests…" value={testSearch} onChange={(e) => setTestSearch(e.target.value)} />
                                     </div>
-                                    <div className="max-h-72 space-y-1 overflow-auto rounded-md border border-slate-200 p-2">
+                                    <div className="max-h-72 space-y-1 overflow-auto  border border-slate-200 p-2">
                                         {filteredTests.map((test) => (
-                                            <button key={test.id} type="button" onClick={() => addTest(test.id)} className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition hover:bg-slate-50">
+                                            <button key={test.id} type="button" onClick={() => addTest(test.id)} className="flex w-full items-center justify-between  px-3 py-2 text-left text-sm transition hover:bg-slate-50">
                                                 <span className="text-slate-700">{test.name}</span>
                                                 <span className="font-semibold text-slate-500">₹{test.price}</span>
                                             </button>
@@ -730,12 +730,12 @@ export default function BillingCreate({
                                 </div>
                                 <div>
                                     <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500">Selected Tests ({selectedTests.length})</p>
-                                    <div className="max-h-80 space-y-1.5 overflow-auto rounded-md border border-slate-200 p-2">
+                                    <div className="max-h-80 space-y-1.5 overflow-auto  border border-slate-200 p-2">
                                         {selectedTests.length === 0 && (
                                             <p className="py-6 text-center text-sm text-slate-400">No tests selected yet</p>
                                         )}
                                         {selectedTests.map((test) => (
-                                            <div key={test.id} className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50 px-3 py-2">
+                                            <div key={test.id} className="flex items-center justify-between  border border-slate-100 bg-slate-50 px-3 py-2">
                                                 <span className="text-sm font-medium text-slate-700">{test.name}</span>
                                                 <button type="button" onClick={() => removeTest(test.id)} className="text-xs font-medium text-rose-500 hover:text-rose-700">Remove</button>
                                             </div>
@@ -752,9 +752,9 @@ export default function BillingCreate({
                                         <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                                         <input className={`${inputClasses} pl-9`} placeholder="Search packages…" value={packageSearch} onChange={(e) => setPackageSearch(e.target.value)} />
                                     </div>
-                                    <div className="max-h-72 space-y-1 overflow-auto rounded-md border border-slate-200 p-2">
+                                    <div className="max-h-72 space-y-1 overflow-auto  border border-slate-200 p-2">
                                         {filteredPackages.map((pack) => (
-                                            <button key={pack.id} type="button" onClick={() => addPackage(pack.id)} className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition hover:bg-slate-50">
+                                            <button key={pack.id} type="button" onClick={() => addPackage(pack.id)} className="flex w-full items-center justify-between  px-3 py-2 text-left text-sm transition hover:bg-slate-50">
                                                 <span className="text-slate-700">{pack.name}</span>
                                                 <span className="font-semibold text-slate-500">₹{pack.price}</span>
                                             </button>
@@ -766,12 +766,12 @@ export default function BillingCreate({
                                 </div>
                                 <div>
                                     <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500">Selected Packages ({selectedPackages.length})</p>
-                                    <div className="max-h-80 space-y-1.5 overflow-auto rounded-md border border-slate-200 p-2">
+                                    <div className="max-h-80 space-y-1.5 overflow-auto  border border-slate-200 p-2">
                                         {selectedPackages.length === 0 && (
                                             <p className="py-6 text-center text-sm text-slate-400">No packages selected yet</p>
                                         )}
                                         {selectedPackages.map((pack) => (
-                                            <button key={pack.id} type="button" onClick={() => form.setData('package_ids', form.data.package_ids.filter((id) => id !== pack.id))} className="flex w-full items-center justify-between rounded-md border border-slate-100 bg-slate-50 px-3 py-2 text-left text-sm">
+                                            <button key={pack.id} type="button" onClick={() => form.setData('package_ids', form.data.package_ids.filter((id) => id !== pack.id))} className="flex w-full items-center justify-between  border border-slate-100 bg-slate-50 px-3 py-2 text-left text-sm">
                                                 <span className="font-medium text-slate-700">{pack.name}</span>
                                                 <span className="font-semibold text-slate-500">₹{pack.price}</span>
                                             </button>
@@ -786,23 +786,23 @@ export default function BillingCreate({
                                 <div className="grid gap-3 grid-cols-1 xs:grid-cols-[1fr_auto] md:grid-cols-[1fr_140px_auto]">
                                     <input className={inputClasses} placeholder="Charge name" value={newServiceName} onChange={(e) => setNewServiceName(e.target.value)} />
                                     <input type="number" min={0} step="0.01" className={inputClasses} placeholder="Amount" value={newServiceAmount} onChange={(e) => setNewServiceAmount(Number(e.target.value))} />
-                                    <button type="button" onClick={() => addCharge()} className="h-9 w-full xs:w-auto rounded-md bg-[#147da2] px-4 text-sm font-medium text-white transition hover:bg-[#106385]">+ Add</button>
+                                    <button type="button" onClick={() => addCharge()} className="h-9 w-full xs:w-auto  bg-[#147da2] px-4 text-sm font-medium text-white transition hover:bg-[#106385]">+ Add</button>
                                 </div>
                                 {serviceChargeMasters.length > 0 && (
                                     <div className="flex flex-wrap gap-2">
                                         {serviceChargeMasters.map((master) => (
-                                            <button key={master.id} type="button" onClick={() => addCharge(master.name, Number(master.amount))} className="rounded-md border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50">
+                                            <button key={master.id} type="button" onClick={() => addCharge(master.name, Number(master.amount))} className=" border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50">
                                                 {master.name} – ₹{master.amount}
                                             </button>
                                         ))}
                                     </div>
                                 )}
-                                <div className="rounded-md border border-slate-200 p-2">
+                                <div className=" border border-slate-200 p-2">
                                     {form.data.service_other_charges.length === 0 && (
                                         <p className="py-4 text-center text-sm text-slate-400">No additional charges added</p>
                                     )}
                                     {form.data.service_other_charges.map((charge, index) => (
-                                        <div key={`${charge.name}-${index}`} className="mb-1 flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 text-sm">
+                                        <div key={`${charge.name}-${index}`} className="mb-1 flex items-center justify-between  bg-slate-50 px-3 py-2 text-sm">
                                             <span className="text-slate-700">{charge.name}</span>
                                             <div className="flex items-center gap-3">
                                                 <span className="font-semibold text-slate-600">₹{charge.amount.toFixed(2)}</span>
@@ -816,7 +816,7 @@ export default function BillingCreate({
                     </div>
 
                     {/* ─── Billing & Payment Section ─── */}
-                    <div className="sawtooth bg-white border-x border-b border-slate-200">
+                    <div className="sawtooth bg-white border-r border-b border-slate-200">
                         <div className="border-b border-slate-100 bg-slate-50/50 px-5 py-3">
                             <div className="flex items-center gap-3 text-sm">
                                 <Badge className="bg-[#147da2] text-white">1</Badge>
@@ -868,9 +868,9 @@ export default function BillingCreate({
                                     {form.data.service_other_charges.length > 0 && (
                                         <div>
                                             <FieldLabel>Selected Charges</FieldLabel>
-                                            <div className="space-y-1.5 rounded-md border border-slate-200 p-2">
+                                            <div className="space-y-1.5  border border-slate-200 p-2">
                                                 {form.data.service_other_charges.map((charge, index) => (
-                                                    <div key={`${charge.name}-${index}`} className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 text-sm">
+                                                    <div key={`${charge.name}-${index}`} className="flex items-center justify-between  bg-slate-50 px-3 py-2 text-sm">
                                                         <span className="text-slate-700">{charge.name}</span>
                                                         <div className="flex items-center gap-3">
                                                             <span className="font-medium text-slate-600">₹{charge.amount.toFixed(2)}</span>
@@ -905,7 +905,7 @@ export default function BillingCreate({
 
                                     <div>
                                         <FieldLabel>Comment / Clinical Notes</FieldLabel>
-                                        <textarea className="min-h-20 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.notes} onChange={(e) => form.setData('notes', e.target.value)} />
+                                        <textarea className="min-h-20 w-full  border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.notes} onChange={(e) => form.setData('notes', e.target.value)} />
                                     </div>
 
                                     <div>
@@ -943,7 +943,7 @@ export default function BillingCreate({
                                     </div>
 
                                     {/* Bill summary */}
-                                    <div className="space-y-2 rounded-md border border-slate-200 bg-slate-50/50 p-4 text-sm">
+                                    <div className="space-y-2  border border-slate-200 bg-slate-50/50 p-4 text-sm">
                                         <div className="flex justify-between py-1"><span className="text-slate-500">Test Total</span><span className="font-medium text-slate-700">₹{testTotal.toFixed(2)}</span></div>
                                         <div className="flex justify-between py-1"><span className="text-slate-500">Package Total</span><span className="font-medium text-slate-700">₹{packageTotal.toFixed(2)}</span></div>
                                         <Separator />

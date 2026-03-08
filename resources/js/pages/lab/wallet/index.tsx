@@ -99,7 +99,7 @@ export default function WalletIndex({ wallet, transactions, razorpayKey }: Props
             <div className="mx-auto max-w-5xl p-4 md:p-6 space-y-6">
                 <div className="grid gap-6 md:grid-cols-3">
                     {/* Balance Card */}
-                    <div className="md:col-span-2 rounded-xl border border-slate-200 bg-white p-6 shadow-sm overflow-hidden relative">
+                    <div className="md:col-span-2  border border-slate-200 bg-white p-6 overflow-hidden relative">
                         <div className="absolute top-0 right-0 p-8 opacity-10">
                             <IndianRupee size={120} />
                         </div>
@@ -116,7 +116,7 @@ export default function WalletIndex({ wallet, transactions, razorpayKey }: Props
                                         type="number"
                                         value={amount}
                                         onChange={(e) => setAmount(e.target.value)}
-                                        className="w-full h-10 pl-7 pr-3 rounded-lg border border-slate-200 outline-none focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 transition"
+                                        className="w-full h-10 pl-7 pr-3  border border-slate-200 outline-none focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 transition"
                                         placeholder="Enter amount"
                                     />
                                 </div>
@@ -133,9 +133,9 @@ export default function WalletIndex({ wallet, transactions, razorpayKey }: Props
                     </div>
 
                     {/* Quick Stats */}
-                    <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-6 shadow-sm flex flex-col justify-center gap-4">
+                    <div className=" border border-slate-200 bg-slate-50/50 p-6 shadow-sm flex flex-col justify-center gap-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600">
+                            <div className="p-2  bg-emerald-100 text-emerald-600">
                                 <Landmark size={20} />
                             </div>
                             <div>
@@ -144,7 +144,7 @@ export default function WalletIndex({ wallet, transactions, razorpayKey }: Props
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+                            <div className="p-2  bg-blue-100 text-blue-600">
                                 <CreditCard size={20} />
                             </div>
                             <div>
@@ -156,7 +156,7 @@ export default function WalletIndex({ wallet, transactions, razorpayKey }: Props
                 </div>
 
                 {/* Transactions Table */}
-                <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                <div className=" border border-slate-200 bg-white shadow-sm overflow-hidden">
                     <div className="flex items-center gap-2 border-b border-slate-200 px-6 py-4">
                         <History size={20} className="text-[#147da2]" />
                         <h3 className="font-semibold text-slate-800">Transaction History</h3>
@@ -183,7 +183,7 @@ export default function WalletIndex({ wallet, transactions, razorpayKey }: Props
                                             {tx.description}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-600">
+                                            <span className="bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-600">
                                                 {tx.reference_type}: {tx.reference_id}
                                             </span>
                                         </td>

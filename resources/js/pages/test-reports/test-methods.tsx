@@ -37,30 +37,25 @@ export default function TestMethods({ methods, totals }: Props) {
             <Head title="Manage Test Methods" />
 
             <div className="min-h-full bg-slate-50/80 p-0">
-                <div className="mb-4">
-                    <h1 className="text-xl font-semibold text-slate-800">Manage Test Methods</h1>
-                    <p className="mt-1 text-sm text-slate-500">Create and manage test methods for laboratory procedures</p>
-                </div>
-
-                <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4">
+               <div className="sawtooth border-b border-slate-200 bg-white p-4">
                     <label className="relative block">
                         <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                        <input className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" placeholder="Search test methods by name..." value={search} onChange={(e) => setSearch(e.target.value)} />
+                        <input className="h-9 w-full  border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" placeholder="Search test methods by name..." value={search} onChange={(e) => setSearch(e.target.value)} />
                     </label>
                 </div>
 
-                <div className="mb-4 grid gap-3 md:grid-cols-2">
-                    <div className="rounded-lg border border-slate-200 bg-white p-4">
+                <div className="grid md:grid-cols-2">
+                    <div className="sawtooth border-r border-slate-200 bg-white p-4">
                         <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Total Test Methods</p>
                         <p className="mt-1 text-2xl font-bold text-slate-800">{totals.total_methods}</p>
                     </div>
-                    <div className="rounded-lg border border-slate-200 bg-white p-4">
+                    <div className="sawtooth border-slate-200 bg-white p-4">
                         <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Methods Available</p>
                         <p className="mt-1 text-2xl font-bold text-slate-800">{totals.available_methods}</p>
                     </div>
                 </div>
 
-                <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+                <div className="overflow-hidden sawtooth border-y border-slate-200 bg-white">
                     <table className="w-full min-w-[700px] text-left">
                         <thead className="border-b border-slate-200 bg-slate-50/80 text-xs font-semibold uppercase tracking-wide text-slate-500">
                             <tr>

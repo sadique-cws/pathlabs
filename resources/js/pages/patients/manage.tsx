@@ -65,7 +65,7 @@ export default function ManagePatients({ patients }: Props) {
             <Head title="Manage Patients" />
 
             <div className="min-h-full bg-slate-50/80 p-0">
-                <div className="sawtooth border border-slate-200 bg-white">
+                <div className="sawtooth border-b border-slate-200 bg-white">
                     <div className="flex flex-col gap-4 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
                         <label className="relative w-full sm:max-w-md">
                             <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
@@ -76,11 +76,11 @@ export default function ManagePatients({ patients }: Props) {
                                     setPage(1);
                                 }}
                                 placeholder="Search patients by name, phone, etc..."
-                                className="h-9 w-full rounded-md border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 shadow-sm"
+                                className="h-9 w-full  border border-slate-200 pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                             />
                         </label>
 
-                        <Link href="/lab/patients/add" className="inline-flex items-center justify-center rounded-lg bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385] w-full sm:w-auto">
+                        <Link href="/lab/patients/add" className="inline-flex items-center justify-center  bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385] w-full sm:w-auto">
                             + Add Patient
                         </Link>
                     </div>
@@ -115,8 +115,8 @@ export default function ManagePatients({ patients }: Props) {
                                         <td className="px-3 py-3">{patient.package}</td>
                                         <td className="px-3 py-3">
                                             <div className="flex items-center gap-2">
-                                                <button type="button" className="rounded p-1 text-slate-400 hover:bg-slate-100"><Eye className="h-4 w-4" /></button>
-                                                <Link href={`/lab/patients/${patient.id}/edit`} className="rounded p-1 text-slate-400 hover:bg-slate-100"><Pencil className="h-4 w-4" /></Link>
+                                                <button type="button" className="p-1 text-slate-400 hover:bg-slate-100"><Eye className="h-4 w-4" /></button>
+                                                <Link href={`/lab/patients/${patient.id}/edit`} className="p-1 text-slate-400 hover:bg-slate-100"><Pencil className="h-4 w-4" /></Link>
                                             </div>
                                         </td>
                                     </tr>
@@ -142,7 +142,7 @@ export default function ManagePatients({ patients }: Props) {
                                         setPageSize(Number(event.target.value));
                                         setPage(1);
                                     }}
-                                    className="rounded-md border border-slate-200 px-2 py-1"
+                                    className=" border border-slate-200 px-2 py-1"
                                 >
                                     {pageSizeOptions.map((size) => <option key={size} value={size}>{size}</option>)}
                                 </select>
@@ -150,13 +150,13 @@ export default function ManagePatients({ patients }: Props) {
                         </div>
 
                         <div className="flex items-center gap-1">
-                            <button type="button" disabled={currentPage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))} className="rounded-md border border-slate-200 px-3 py-1.5 transition hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-50">Previous</button>
+                            <button type="button" disabled={currentPage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))} className=" border border-slate-200 px-3 py-1.5 transition hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-50">Previous</button>
                             {Array.from({ length: Math.min(totalPages, 4) }, (_, index) => index + 1).map((pageNo) => (
-                                <button key={pageNo} type="button" onClick={() => setPage(pageNo)} className={`rounded-md border px-3 py-1.5 transition ${currentPage === pageNo ? 'border-[#147da2] bg-[#147da2] text-white font-medium' : 'border-slate-200 hover:bg-slate-50'}`}>
+                                <button key={pageNo} type="button" onClick={() => setPage(pageNo)} className={` border px-3 py-1.5 transition ${currentPage === pageNo ? 'border-[#147da2] bg-[#147da2] text-white font-medium' : 'border-slate-200 hover:bg-slate-50'}`}>
                                     {pageNo}
                                 </button>
                             ))}
-                            <button type="button" disabled={currentPage >= totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} className="rounded-md border border-slate-200 px-3 py-1.5 transition hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-50">Next</button>
+                            <button type="button" disabled={currentPage >= totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} className=" border border-slate-200 px-3 py-1.5 transition hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-50">Next</button>
                         </div>
                     </div>
                 </div>

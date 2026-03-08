@@ -93,7 +93,7 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
             </div>
 
             <div className="flex items-center gap-2 md:gap-5">
-                <div className="hidden md:flex items-center bg-white/10 hover:bg-white/20 transition-all border border-white/10 rounded-full px-3 py-1.5 w-64 group">
+                <div className="hidden md:flex items-center bg-white/10 hover:bg-white/20 transition-all border border-white/10  px-3 py-1.5 w-64 group">
                     <Search className="h-4 w-4 text-white/60 group-hover:text-white/80" />
                     <span className="ml-2 text-xs text-white/60 group-hover:text-white/80">Search everything...</span>
                 </div>
@@ -102,9 +102,9 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
                     {permissions?.includes('wallet.view') && (
                         <Link 
                             href="/lab/wallet" 
-                            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 transition-all border border-white/10 rounded-full px-3 py-1 text-xs md:text-sm font-semibold"
+                            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 transition-all border border-white/10  px-3 py-1 text-xs md:text-sm font-semibold"
                         >
-                            <div className="p-1 bg-emerald-500 rounded-lg">
+                            <div className="p-1 bg-emerald-500 ">
                                 <Wallet className="h-3.5 w-3.5 text-white" />
                             </div>
                             <div className="flex flex-col items-start leading-none mr-2">
@@ -114,21 +114,21 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
                         </Link>
                     )}
                     
-                    <button className="relative p-2 rounded-full hover:bg-white/10 transition-colors">
+                    <button className="relative p-2  hover:bg-white/10 transition-colors">
                         <Bell className="h-5 w-5" />
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-[#147da2]"></span>
+                        <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500  border-2 border-[#147da2]"></span>
                     </button>
 
                     <div className="h-6 w-[1px] bg-white/20 hidden md:block"></div>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <button className="flex items-center gap-2 p-1 pl-2 rounded-full hover:bg-white/10 transition-all outline-none">
+                            <button className="flex items-center gap-2 p-1 pl-2  hover:bg-white/10 transition-all outline-none">
                                 <div className="hidden md:block text-right mr-1">
                                     <p className="text-[12px] font-bold leading-tight truncate max-w-[120px]">{auth?.user?.name}</p>
                                     <p className="text-[10px] text-white/70 leading-tight">Lab Executive</p>
                                 </div>
-                                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border border-white/30 text-white font-bold shrink-0">
+                                <div className="w-8 h-8  bg-white/20 flex items-center justify-center border border-white/30 text-white font-bold shrink-0">
                                     {auth?.user?.name?.charAt(0)}
                                 </div>
                                 <ChevronDown className="h-4 w-4 text-white/60" />
@@ -155,7 +155,7 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
 
                     <div className="hidden md:flex items-center gap-2 ml-1">
                         <ConnectivityIcon 
-                            className={cn('h-5 w-5 transition-colors drop-shadow-sm', connectionColor)} 
+                            className={cn('h-5 w-5 transition-colors', connectionColor)} 
                         />
                     </div>
                 </div>

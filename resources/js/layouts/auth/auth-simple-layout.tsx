@@ -17,7 +17,7 @@ export default function AuthSimpleLayout({
                     <div className="flex flex-col items-center gap-6 text-center">
                         <Link
                             href={home()}
-                            className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#147da2] transition-colors hover:bg-[#106385]"
+                            className="flex h-12 w-12 items-center justify-center  bg-[#147da2] transition-colors hover:bg-[#106385]"
                         >
                             <AppLogoIcon className="size-6 fill-current text-white" />
                         </Link>
@@ -53,7 +53,7 @@ export default function AuthSimpleLayout({
 
                 <div className="p-8 bg-white border-t border-slate-200 shadow-sm z-10">
                     <div className="max-w-md space-y-3">
-                        <div className="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                        <div className="inline-flex items-center  bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600">
                             Advanced Healthcare Management
                         </div>
                         <h2 className="text-2xl font-bold tracking-tight text-slate-900">

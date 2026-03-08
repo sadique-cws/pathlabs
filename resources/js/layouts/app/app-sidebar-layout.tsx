@@ -41,7 +41,7 @@ export default function AppSidebarLayout({
                         </div>
                     )}
                     
-                    <div className="flex-1 p-2 sm:p-4 md:p-6 overflow-x-hidden">
+                    <div className="flex-1 overflow-x-hidden">
                         {children}
                     </div>
                 </main>

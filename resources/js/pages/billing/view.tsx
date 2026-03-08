@@ -69,32 +69,32 @@ export default function BillView({ bill }: Props) {
             <div className="min-h-full bg-slate-50/80 p-0 lg:p-8">
                 <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <Link href="/lab/billing/manage" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900">
+                        <Link href="/lab/billing/manage" className="inline-flex h-9 w-9 items-center justify-center  border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900">
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                         <h1 className="text-xl font-semibold text-slate-800">Invoice #{bill.bill_number}</h1>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                        <Link href={`/lab/billing/${bill.id}/edit`} className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                        <Link href={`/lab/billing/${bill.id}/edit`} className="inline-flex items-center gap-2  border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                             <Pencil className="h-4 w-4" />
                             Edit Bill
                         </Link>
-                        <button type="button" className="inline-flex items-center gap-2 rounded-md bg-[#147da2] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
+                        <button type="button" className="inline-flex items-center gap-2  bg-[#147da2] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
                             <Download className="h-4 w-4" />
                             Download PDF
                         </button>
-                        <button type="button" className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                        <button type="button" className="inline-flex items-center gap-2  border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                             <Printer className="h-4 w-4" />
                             Print
                         </button>
-                        <a href={`/lab/billing/${bill.id}/barcodes`} className="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100">
+                        <a href={`/lab/billing/${bill.id}/barcodes`} className="inline-flex items-center gap-2  border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100">
                             <Printer className="h-4 w-4" />
                             Barcode Preview
                         </a>
                     </div>
                 </div>
 
-                <div className="mx-auto max-w-5xl rounded-lg border border-slate-200 bg-white p-6 md:p-8 lg:p-10">
+                <div className="mx-auto max-w-5xl  border border-slate-200 bg-white p-6 md:p-8 lg:p-10">
                     <div className="mb-8 flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-6">
                         <div>
                             <h2 className="text-3xl font-bold tracking-tight text-[#147da2]">PathLab</h2>
@@ -108,7 +108,7 @@ export default function BillView({ bill }: Props) {
                     </div>
 
                     <div className="mb-8 grid gap-6 md:grid-cols-2">
-                        <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-5">
+                        <div className=" border border-slate-100 bg-slate-50/50 p-5">
                             <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-400">Patient Information</h3>
                             <div className="space-y-2 text-sm text-slate-700">
                                 <p><span className="font-semibold text-slate-800">Name:</span> {bill.patient.name}</p>
@@ -117,7 +117,7 @@ export default function BillView({ bill }: Props) {
                                 <p><span className="font-semibold text-slate-800">Address:</span> {bill.patient.address}</p>
                             </div>
                         </div>
-                        <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-5">
+                        <div className=" border border-slate-100 bg-slate-50/50 p-5">
                             <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-400">Bill Information</h3>
                             <div className="space-y-2 text-sm text-slate-700">
                                 <p><span className="font-semibold text-slate-800">Status:</span> {bill.status}</p>
@@ -129,7 +129,7 @@ export default function BillView({ bill }: Props) {
                     </div>
 
                     <h3 className="mb-4 text-base font-semibold text-slate-800">Tests & Packages</h3>
-                    <div className="overflow-hidden rounded-lg border border-slate-200">
+                    <div className="overflow-hidden  border border-slate-200">
                         <table className="w-full min-w-[680px] text-left">
                             <thead className="border-b border-slate-200 bg-slate-50/80 text-xs font-semibold uppercase tracking-wide text-slate-500">
                                 <tr>
@@ -153,7 +153,7 @@ export default function BillView({ bill }: Props) {
                     </div>
 
                     <div className="mt-8 flex justify-end">
-                        <div className="w-full max-w-sm rounded-lg bg-slate-50 p-5 text-sm">
+                        <div className="w-full max-w-sm  bg-slate-50 p-5 text-sm">
                             <div className="space-y-3 pb-4">
                                 <div className="flex justify-between text-slate-600"><span>Subtotal:</span><span>₹{bill.summary.subtotal.toFixed(2)}</span></div>
                                 <div className="flex justify-between text-slate-600"><span>Doctor Discount:</span><span>-₹{bill.summary.doctor_discount.toFixed(2)}</span></div>
@@ -171,7 +171,7 @@ export default function BillView({ bill }: Props) {
                             <button
                                 type="button"
                                 onClick={() => window.print()}
-                                className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                                className="inline-flex items-center gap-2  border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                             >
                                 <Printer className="h-4 w-4" />
                                 Print Barcodes
@@ -179,7 +179,7 @@ export default function BillView({ bill }: Props) {
                         </div>
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {bill.barcodes.map((sample) => (
-                                <div key={sample.sample_id} className="flex flex-col items-center justify-center rounded-lg border border-slate-200 bg-white p-4 text-center">
+                                <div key={sample.sample_id} className="flex flex-col items-center justify-center  border border-slate-200 bg-white p-4 text-center">
                                     <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Sample #{sample.sample_id}</p>
                                     <p className="mt-1 mb-3 text-sm font-medium text-slate-700 line-clamp-1" title={sample.test_name}>{sample.test_name}</p>
                                     <Code39Barcode value={sample.barcode} className="h-auto w-full max-w-[200px]" height={48} />

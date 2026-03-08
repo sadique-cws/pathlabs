@@ -37,7 +37,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                                     autoComplete="off"
                                     autoFocus
                                     placeholder="your@email.com"
-                                    className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm transition-all focus:border-[#147da2] focus:ring-[#147da2]/10"
+                                    className="h-11  border-slate-200 bg-white px-4 text-sm transition-all focus:border-[#147da2] focus:ring-[#147da2]/10"
                                 />
 
                                 <InputError message={errors.email} />
@@ -45,7 +45,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
 
                             <div className="my-6 flex items-center justify-start">
                                 <Button
-                                    className="h-11 w-full rounded-xl bg-[#147da2] text-sm font-bold shadow-lg shadow-[#147da2]/20 transition-all hover:bg-[#106385] hover:shadow-xl hover:shadow-[#147da2]/30 active:scale-[0.98]"
+                                    className="h-11 w-full  bg-[#147da2] text-sm font-bold shadow-lg shadow-[#147da2]/20 transition-all hover:bg-[#106385] hover:shadow-xl hover:shadow-[#147da2]/30 active:scale-[0.98]"
                                     disabled={processing}
                                     data-test="email-password-reset-link-button"
                                 >

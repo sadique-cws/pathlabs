@@ -138,7 +138,7 @@ function PermissionGroup({
     const someSelected = selectedCount > 0 && selectedCount < allSlugs.length;
 
     return (
-        <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+        <div className=" border-b first:border-t border-slate-200 bg-white overflow-hidden">
             <button
                 type="button"
                 onClick={() => setExpanded(!expanded)}
@@ -160,7 +160,7 @@ function PermissionGroup({
                     />
                 </div>
                 <span className="text-sm font-medium text-slate-700 flex-1">{toLabel(groupKey)}</span>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                <span className={`text-xs font-medium px-2 py-0.5  ${
                     selectedCount === allSlugs.length
                         ? 'bg-[#147da2]/10 text-[#147da2]'
                         : selectedCount > 0
@@ -176,7 +176,7 @@ function PermissionGroup({
                         {permissions.map((permission) => (
                             <label
                                 key={permission.slug}
-                                className="flex items-center gap-2.5 rounded-md border border-slate-100 bg-slate-50/50 px-3 py-2 text-sm cursor-pointer transition hover:bg-slate-50"
+                                className="flex items-center gap-2.5  border border-slate-100 bg-slate-50/50 px-3 py-2 text-sm cursor-pointer transition hover:bg-slate-50"
                             >
                                 <Checkbox
                                     checked={selectedSlugs.includes(permission.slug)}
@@ -306,20 +306,14 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
             <Head title="Permission Management" />
 
             <div className="min-h-full bg-slate-50/80 p-0">
-                {/* Page header */}
-                <div className="mb-5">
-                    <h1 className="text-lg font-semibold text-slate-800">Permission Management</h1>
-                    <p className="mt-0.5 text-sm text-slate-500">Manage roles, lab features, and user access in one place</p>
-                </div>
-
                 {/* Tab bar */}
-                <div className="mb-5 flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
+                <div className="flex items-center border-b border-slate-200 bg-white">
                     {tabs.map((t) => (
                         <button
                             key={t.key}
                             type="button"
                             onClick={() => setActiveTab(t.key)}
-                            className={`flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                            className={`flex gap-1 items-center border-r border-slate-200 cursor-pointer px-4 py-2 text-sm font-medium transition-colors ${
                                 activeTab === t.key
                                     ? 'bg-[#147da2] text-white'
                                     : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
@@ -333,10 +327,10 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
 
                 {/* ═══════════ ROLE PERMISSIONS TAB ═══════════ */}
                 {activeTab === 'roles' && (
-                    <div className="grid gap-5 lg:grid-cols-[280px_1fr]">
+                    <div className="grid lg:grid-cols-[280px_1fr]">
                         {/* Role list sidebar */}
-                        <div className="rounded-lg border border-slate-200 bg-white p-3">
-                            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Roles</p>
+                        <div className=" border-b border-r border-slate-200 bg-white p-3">
+                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Roles</p>
                             <div className="space-y-1">
                                 {roles.map((role) => {
                                     const permCount = (rolePermissions[role.id] ?? []).length;
@@ -345,14 +339,14 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
                                             key={role.id}
                                             type="button"
                                             onClick={() => setSelectedRoleId(role.id)}
-                                            className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm transition ${
+                                            className={`cursor-pointer flex w-full items-center justify-between  px-3 py-2.5 text-left text-sm transition ${
                                                 selectedRoleId === role.id
                                                     ? 'bg-[#147da2]/10 text-[#147da2] font-medium'
                                                     : 'text-slate-700 hover:bg-slate-50'
                                             }`}
                                         >
                                             <span>{role.name}</span>
-                                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                                            <span className={`text-xs px-1.5 py-0.5  ${
                                                 permCount > 0 ? 'bg-[#147da2]/10 text-[#147da2]' : 'bg-slate-100 text-slate-400'
                                             }`}>
                                                 {permCount}
@@ -365,9 +359,9 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
 
                         {/* Role permission editor */}
                         {selectedRole && (
-                            <div className="space-y-4">
+                            <div className="space-y-0">
                                 {/* Header */}
-                                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-5 py-4">
+                                <div className="flex items-center justify-between  border-b border-slate-200 bg-white px-5 py-4">
                                     <div>
                                         <h2 className="text-base font-semibold text-slate-800">{selectedRole.name}</h2>
                                         <p className="text-xs text-slate-400">{selectedRole.slug} · {(rolePermissions[selectedRole.id] ?? []).length} permissions assigned</p>
@@ -378,15 +372,15 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
                                 </div>
 
                                 {/* Quick presets */}
-                                <div className="rounded-lg border border-slate-200 bg-white p-4">
-                                    <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500">Quick Presets</p>
-                                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                                <div className=" bg-white">
+                                    <p className="m-3 text-xs font-medium uppercase tracking-wide text-slate-500">Quick Presets</p>
+                                    <div className="grid sm:grid-cols-2 lg:grid-cols-4">
                                         {Object.entries(ROLE_PRESETS).map(([key, preset]) => (
                                             <button
                                                 key={key}
                                                 type="button"
                                                 onClick={() => applyPreset(selectedRole.id, key)}
-                                                className="rounded-md border border-slate-200 px-3 py-2.5 text-left transition hover:border-[#147da2] hover:bg-[#147da2]/5"
+                                                className=" cursor-pointer border-r border-t border-slate-200 px-3 py-2.5 text-left transition hover:bg-[#147da2]/5"
                                             >
                                                 <span className="block text-sm font-medium text-slate-700">{preset.label}</span>
                                                 <span className="block mt-0.5 text-xs text-slate-400">{preset.description}</span>
@@ -399,7 +393,7 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
                                 <div className="relative">
                                     <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                                     <input
-                                        className="h-9 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                        className="h-9 w-full  border-t border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                         placeholder="Search permissions…"
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
@@ -407,7 +401,7 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
                                 </div>
 
                                 {/* Permission groups */}
-                                <div className="space-y-2">
+                                <div className="space-y-0">
                                     {Object.entries(filteredGroups).map(([groupKey, perms]) => (
                                         <PermissionGroup
                                             key={`${selectedRole.id}-${groupKey}`}
@@ -431,7 +425,7 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
                 {activeTab === 'labs' && (
                     <div className="grid gap-5 lg:grid-cols-[280px_1fr]">
                         {/* Lab list sidebar */}
-                        <div className="rounded-lg border border-slate-200 bg-white p-3">
+                        <div className=" border border-slate-200 bg-white p-3">
                             <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Labs</p>
                             <div className="space-y-1">
                                 {labs.map((lab) => {
@@ -441,7 +435,7 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
                                             key={lab.id}
                                             type="button"
                                             onClick={() => setSelectedLabId(lab.id)}
-                                            className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm transition ${
+                                            className={`flex w-full items-center justify-between  px-3 py-2.5 text-left text-sm transition ${
                                                 selectedLabId === lab.id
                                                     ? 'bg-[#147da2]/10 text-[#147da2] font-medium'
                                                     : 'text-slate-700 hover:bg-slate-50'
@@ -451,7 +445,7 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
                                                 <span className="block">{lab.name}</span>
                                                 <span className="block text-xs text-slate-400">{lab.code}</span>
                                             </div>
-                                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                                            <span className={`text-xs px-1.5 py-0.5  ${
                                                 permCount > 0 ? 'bg-[#147da2]/10 text-[#147da2]' : 'bg-slate-100 text-slate-400'
                                             }`}>
                                                 {permCount}
@@ -465,7 +459,7 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
                         {/* Lab permission editor */}
                         {selectedLab && (
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-5 py-4">
+                                <div className="flex items-center justify-between  border border-slate-200 bg-white px-5 py-4">
                                     <div>
                                         <h2 className="text-base font-semibold text-slate-800">{selectedLab.name}</h2>
                                         <p className="text-xs text-slate-400">{selectedLab.code} · {(labPermissions[selectedLab.id] ?? []).length} features enabled</p>
@@ -491,7 +485,7 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
                                 <div className="relative">
                                     <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                                     <input
-                                        className="h-9 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                        className="h-9 w-full  border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                         placeholder="Search features…"
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
@@ -522,7 +516,7 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
                         <div className="relative">
                             <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                             <input
-                                className="h-9 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
+                                className="h-9 w-full  border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                 placeholder="Search users by name or email…"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
@@ -539,7 +533,7 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
                             if (labUsers.length === 0) return null;
 
                             return (
-                                <div key={lab.id} className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+                                <div key={lab.id} className=" border border-slate-200 bg-white overflow-hidden">
                                     <div className="border-b border-slate-100 bg-slate-50/50 px-5 py-3">
                                         <h3 className="text-sm font-semibold text-slate-700">{lab.name}</h3>
                                         <p className="text-xs text-slate-400">{lab.code} · {labUsers.length} user{labUsers.length !== 1 ? 's' : ''}</p>
@@ -556,7 +550,7 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
                                                         {roles.map((role) => (
                                                             <label
                                                                 key={`${user.id}-${role.slug}`}
-                                                                className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm cursor-pointer transition ${
+                                                                className={`flex items-center gap-2  border px-3 py-1.5 text-sm cursor-pointer transition ${
                                                                     (userRoles[user.id] ?? []).includes(role.slug)
                                                                         ? 'border-[#147da2] bg-[#147da2]/5 text-[#147da2]'
                                                                         : 'border-slate-200 text-slate-600 hover:bg-slate-50'

@@ -53,7 +53,7 @@ export default function Login({
             sidebar={
                 <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                        <div className="h-1 w-6 rounded-full bg-[#147da2]" />
+                        <div className="h-1 w-6  bg-[#147da2]" />
                         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Quick Fill Profiles</p>
                     </div>
                     <div className="grid gap-3">
@@ -62,11 +62,11 @@ export default function Login({
                                 key={profile.panel}
                                 type="button"
                                 onClick={() => fillCredentials(profile.email, profile.password)}
-                                className="group flex flex-col rounded-xl border border-slate-200 bg-white/80 p-4 text-left shadow-sm transition-all hover:border-[#147da2] hover:bg-white hover:shadow-md"
+                                className="group flex flex-col  border border-slate-200 bg-white/80 p-4 text-left shadow-sm transition-all hover:border-[#147da2] hover:bg-white hover:shadow-md"
                             >
                                 <div className="flex items-center justify-between mb-1">
                                     <p className="text-sm font-bold text-slate-800 group-hover:text-[#147da2]">{profile.panel}</p>
-                                    <div className="rounded-md bg-cyan-50 px-2 py-0.5 text-[10px] font-medium text-cyan-700">
+                                    <div className=" bg-cyan-50 px-2 py-0.5 text-[10px] font-medium text-cyan-700">
                                         {profile.hint}
                                     </div>
                                 </div>
@@ -98,7 +98,7 @@ export default function Login({
                                     tabIndex={1}
                                     autoComplete="email"
                                     placeholder="your@email.com"
-                                    className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm transition-all focus:border-[#147da2] focus:ring-[#147da2]/10"
+                                    className="h-11  border-slate-200 bg-white px-4 text-sm transition-all focus:border-[#147da2] focus:ring-[#147da2]/10"
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -124,7 +124,7 @@ export default function Login({
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder="••••••••"
-                                    className="h-11 rounded-xl border-slate-200 bg-white px-4 text-sm transition-all focus:border-[#147da2] focus:ring-[#147da2]/10"
+                                    className="h-11  border-slate-200 bg-white px-4 text-sm transition-all focus:border-[#147da2] focus:ring-[#147da2]/10"
                                 />
                                 <InputError message={errors.password} />
                             </div>
@@ -134,14 +134,14 @@ export default function Login({
                                     id="remember"
                                     name="remember"
                                     tabIndex={3}
-                                    className="h-4 w-4 rounded-md border-slate-300 text-[#147da2] transition focus:ring-[#147da2]/20"
+                                    className="h-4 w-4  border-slate-300 text-[#147da2] transition focus:ring-[#147da2]/20"
                                 />
                                 <Label htmlFor="remember" className="text-sm font-medium text-slate-600">Keep me logged in</Label>
                             </div>
 
                             <Button
                                 type="submit"
-                                className="h-10 w-full rounded-xl bg-[#147da2] text-sm font-bold transition-all hover:bg-[#106385] active:scale-[0.98]"
+                                className="h-10 w-full  bg-[#147da2] text-sm font-bold transition-all hover:bg-[#106385] active:scale-[0.98]"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"

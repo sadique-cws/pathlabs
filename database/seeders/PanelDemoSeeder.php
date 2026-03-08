@@ -152,6 +152,7 @@ class PanelDemoSeeder extends Seeder
         if (! Bill::query()->where('lab_id', $lab->id)->exists()) {
             /** @var BillingService $billingService */
             $billingService = app(BillingService::class);
+            $adminUser = User::query()->where('email', 'admin@pathlabs.test')->firstOrFail();
 
             $billingService->createBill($lab->id, [
                 'patient' => [
@@ -166,7 +167,7 @@ class PanelDemoSeeder extends Seeder
                 'test_ids' => [$tests->firstWhere('code', 'CBC')->id, $tests->firstWhere('code', 'KFT')->id],
                 'package_ids' => [$executivePackage->id],
                 'discount_amount' => 150,
-            ]);
+            ], $adminUser);
 
             $billingService->createBill($lab->id, [
                 'patient' => [
@@ -180,7 +181,7 @@ class PanelDemoSeeder extends Seeder
                 'test_ids' => [$tests->firstWhere('code', 'XRCH')->id],
                 'package_ids' => [$radiologyPackage->id],
                 'discount_amount' => 100,
-            ]);
+            ], $adminUser);
         }
     }
 
@@ -276,6 +277,7 @@ class PanelDemoSeeder extends Seeder
                 'wallet.view',
                 'wallet.topup',
                 'clinical_master.manage_tests',
+                'clinical_master.manage_packages',
             ],
             'collection_center' => ['dashboard.view', 'front_desk.access', 'billing.create', 'billing.view', 'billing.manage'],
             'doctor' => [
@@ -311,6 +313,7 @@ class PanelDemoSeeder extends Seeder
                 'reports.sample_management',
                 'reports.result_entry',
                 'clinical_master.manage_tests',
+                'clinical_master.manage_packages',
             ],
         ];
 
@@ -386,6 +389,8 @@ class PanelDemoSeeder extends Seeder
             'wallet.view',
             'wallet.topup',
             'clinical_master.manage_tests',
+            'clinical_master.manage_packages',
+            'clinical_master.manage_groups',
         ];
 
         $syncData = [];

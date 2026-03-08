@@ -48,7 +48,7 @@ function FieldLabel({ children, htmlFor, required }: { children: React.ReactNode
 }
 
 const inputClasses =
-    'h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20';
+    'h-9 w-full  border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20';
 
 export default function EditBill({ bill }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -178,7 +178,7 @@ export default function EditBill({ bill }: Props) {
                                 </div>
                                 <div className="md:col-span-2">
                                     <FieldLabel>Notes & Remarks</FieldLabel>
-                                    <textarea className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" rows={2} value={form.data.notes} onChange={(e) => form.setData('notes', e.target.value)} placeholder="Any special notes..." />
+                                    <textarea className="w-full  border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" rows={2} value={form.data.notes} onChange={(e) => form.setData('notes', e.target.value)} placeholder="Any special notes..." />
                                 </div>
                             </div>
                         </div>

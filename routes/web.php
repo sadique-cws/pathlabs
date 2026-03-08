@@ -157,6 +157,9 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
 
         Route::get('subscription', [\App\Http\Controllers\Lab\SubscriptionController::class, 'index'])->name('subscription.index');
         Route::post('subscription', [\App\Http\Controllers\Lab\SubscriptionController::class, 'subscribe'])->name('subscription.store');
+
+        Route::get('configuration', [\App\Http\Controllers\Lab\LabConfigurationController::class, 'show'])->name('configuration.show');
+        Route::post('configuration', [\App\Http\Controllers\Lab\LabConfigurationController::class, 'update'])->name('configuration.update');
     });
 
     Route::prefix('admin')->name('admin.')->middleware('ensure.admin')->group(function (): void {

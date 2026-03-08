@@ -107,6 +107,7 @@ const frontDeskSections: MenuSection[] = [
         title: 'Settings & Plan',
         icon: Building2,
         items: [
+            { title: 'Configuration', href: '/lab/configuration', permission: 'front_desk.access', matchPrefix: '/lab/configuration' },
             { title: 'My Subscription', href: '/lab/subscription', permission: 'front_desk.access', matchPrefix: '/lab/subscription' },
             { title: 'Lab Appearance', href: '/settings/appearance', permission: 'front_desk.access', matchPrefix: '/settings/appearance' },
         ],

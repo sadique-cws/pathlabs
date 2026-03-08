@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Lab extends Model
 {
@@ -68,5 +69,17 @@ class Lab extends Model
         return $this->belongsToMany(Permission::class)
             ->withPivot('is_enabled')
             ->withTimestamps();
+    }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(LabSubscription::class);
+    }
+
+    public function currentSubscription(): HasOne
+    {
+        return $this->hasOne(LabSubscription::class)
+            ->where('is_current', true)
+            ->where('status', 'active');
     }
 }

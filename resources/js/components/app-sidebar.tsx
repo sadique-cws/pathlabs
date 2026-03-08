@@ -102,17 +102,30 @@ const frontDeskSections: MenuSection[] = [
             { title: 'Purchase Orders', href: '/lab/coming-soon', permission: 'procurement.orders', matchPrefix: '/lab/procurement/orders' },
         ],
     },
+    {
+        key: 'settings-plan',
+        title: 'Settings & Plan',
+        icon: Building2,
+        items: [
+            { title: 'My Subscription', href: '/lab/subscription', permission: 'front_desk.access', matchPrefix: '/lab/subscription' },
+            { title: 'Lab Appearance', href: '/settings/appearance', permission: 'front_desk.access', matchPrefix: '/settings/appearance' },
+        ],
+    },
 ];
 
 function SidebarLogo() {
     return (
-        <div className="flex items-center gap-3 px-3 py-1">
-            <div className="flex h-9 w-9 items-center justify-center  bg-[#147da2]">
-                <AppLogoIcon className="h-5 w-5 fill-white" />
+        <div className="flex items-center gap-3 px-3 py-1.5 group cursor-default">
+            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center bg-[#147da2] transition-transform duration-500 group-hover:scale-105">
+                <AppLogoIcon className="h-6 w-6 fill-white" />
+                <div className="absolute -inset-0.5 animate-pulse rounded-none border border-white/20 opacity-0 transition-opacity group-hover:opacity-100" />
             </div>
-            <div>
-                <p className="text-[15px] font-semibold leading-tight text-slate-800">Pathlog</p>
-                <p className="text-[11px] font-medium text-slate-400">Healthcare Management</p>
+            <div className="flex flex-col">
+                <p className="text-[16px] font-bold tracking-tight text-[#147da2]">PATH<span className="text-slate-900">LABS</span></p>
+                <div className="flex items-center gap-1">
+                    <div className="h-1 w-1 rounded-full bg-emerald-500" />
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-400">Diagnostic Suite</p>
+                </div>
             </div>
         </div>
     );
@@ -125,7 +138,8 @@ function PermissionMenuSection({ section, permissions }: { section: MenuSection;
     const visibleItems = section.items.filter((item) => permissions.includes(item.permission));
 
     useEffect(() => {
-        setOpen(visibleItems.some((item) => currentUrl.startsWith(item.matchPrefix)));
+        const isChildActive = visibleItems.some((item) => currentUrl.startsWith(item.matchPrefix));
+        if (isChildActive) setOpen(true);
     }, [currentUrl]);
 
     if (visibleItems.length === 0) {
@@ -135,42 +149,52 @@ function PermissionMenuSection({ section, permissions }: { section: MenuSection;
     const isActive = visibleItems.some((item) => currentUrl.startsWith(item.matchPrefix));
 
     return (
-        <div className="px-3">
+        <div className="mb-1 px-3">
             <button
                 type="button"
                 onClick={() => setOpen((current) => !current)}
-                className={` cursor-pointer flex w-full items-center justify-between  px-3 py-2 transition-colors ${
-                    isActive
-                        ? 'bg-[#eef6f9] text-[#147da2]'
-                        : 'text-slate-600 hover:bg-slate-50'
-                }`}
+                className={cn(
+                    "group flex w-full items-center justify-between px-3 py-2.5 transition-all duration-200 border border-transparent",
+                    isActive 
+                        ? "bg-[#147da2]/5 text-[#147da2] border-[#147da2]/10" 
+                        : "text-slate-600 hover:bg-slate-50 hover:text-[#147da2]"
+                )}
             >
                 <div className="flex items-center gap-2.5">
-                    <SectionIcon className={`h-[18px] w-[18px] ${isActive ? 'text-[#147da2]' : 'text-slate-400'}`} />
-                    <span className="text-[13px] font-medium">{section.title}</span>
+                    <div className={cn(
+                        "flex h-7 w-7 items-center justify-center transition-transform duration-200 group-hover:scale-110",
+                        isActive ? "text-[#147da2]" : "text-slate-400"
+                    )}>
+                        <SectionIcon className="h-[18px] w-[18px]" />
+                    </div>
+                    <span className="text-[13px] font-semibold tracking-tight">{section.title}</span>
                 </div>
                 <ChevronDown
-                    className={`h-3.5 w-3.5 transition-transform ${
-                        open ? 'rotate-0' : '-rotate-90'
-                    } ${isActive ? 'text-[#147da2]' : 'text-slate-400'}`}
+                    className={cn(
+                        "h-3.5 w-3.5 transition-all duration-300",
+                        open ? "rotate-0" : "-rotate-90",
+                        isActive ? "text-[#147da2]" : "text-slate-400"
+                    )}
                 />
             </button>
 
             {open && (
-                <div className="ml-4 mt-0.5 border-l border-slate-200 pl-4">
-                    <ul className="space-y-0.5 py-1">
+                <div className="ml-[1.7rem] overflow-hidden border-l border-slate-100 mt-0.5">
+                    <ul className="space-y-0.5 py-1.5 pl-3">
                         {visibleItems.map((item) => {
                             const itemActive = currentUrl.startsWith(item.matchPrefix);
                             return (
                                 <li key={item.href}>
                                     <Link
                                         href={item.href}
-                                        className={`block  px-2.5 py-1.5 text-[13px] transition-colors ${
+                                        className={cn(
+                                            "relative flex items-center px-3 py-1.5 text-[12.5px] transition-all duration-200",
                                             itemActive
-                                                ? 'bg-[#147da2] font-medium text-white'
-                                                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
-                                        }`}
+                                                ? "bg-[#147da2] font-semibold text-white shadow-sm"
+                                                : "text-slate-500 hover:text-[#147da2] hover:bg-[#147da2]/5"
+                                        )}
                                     >
+                                        {itemActive && <div className="absolute left-0 top-0 h-full w-1 bg-white/30" />}
                                         {item.title}
                                     </Link>
                                 </li>
@@ -187,28 +211,32 @@ function SidebarUserFooter() {
     const { auth } = usePage().props as { auth: { user: User } };
 
     return (
-        <div className="flex items-center gap-3 border-t border-slate-100 px-4 py-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center  bg-[#147da2] text-white">
-                <UserRound className="h-4 w-4" />
+        <div className="sawtooth relative mt-auto border-t border-slate-200 bg-slate-50/50 p-4 transition-colors hover:bg-white">
+            <div className="flex items-center gap-3">
+                <div className="relative flex h-10 w-10 shrink-0 items-center justify-center bg-[#147da2] shadow-sm overflow-hidden group">
+                    <UserRound className="h-5 w-5 text-white transition-transform duration-300 group-hover:scale-110" />
+                    <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20" />
+                </div>
+                <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13.5px] font-bold text-slate-800 leading-none mb-1">{auth.user.name}</p>
+                    <p className="truncate text-[10.5px] font-medium text-slate-400 uppercase tracking-tighter">{auth.user.email}</p>
+                </div>
+                <Link
+                    href={logout()}
+                    as="button"
+                    className="flex h-9 w-9 items-center justify-center text-slate-400 transition-all duration-200 hover:bg-red-50 hover:text-red-500 hover:scale-105 active:scale-95"
+                    title="Logout"
+                >
+                    <LogOut className="h-4 w-4" />
+                </Link>
             </div>
-            <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-semibold text-slate-700">{auth.user.name}</p>
-                <p className="truncate text-[11px] text-slate-400">{auth.user.email}</p>
-            </div>
-            <Link
-                href={logout()}
-                as="button"
-                className="flex h-8 w-8 items-center justify-center  text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
-                title="Logout"
-            >
-                <LogOut className="h-4 w-4" />
-            </Link>
         </div>
     );
 }
 
 export function AppSidebar() {
     const page = usePage();
+    const { currentUrl } = useCurrentUrl();
     const permissions = (page.props.access as { permissions?: string[] } | undefined)?.permissions ?? [];
     const canAccessAdmin = permissions.includes('admin.labs.features');
     const canAccessFrontDesk = permissions.includes('front_desk.access') || frontDeskSections.some((section) => section.items.some((item) => permissions.includes(item.permission)));
@@ -227,43 +255,91 @@ export function AppSidebar() {
             collapsible="offcanvas" 
             variant="sidebar" 
             className={cn(
-                "transition-all duration-300 border-r border-slate-100 bg-white",
+                "transition-all duration-300 border-r border-slate-200 bg-white",
                 scrolled ? "top-12 h-[calc(100svh-3rem)]" : "top-14 h-[calc(100svh-3.5rem)]"
             )}
         >
-            <SidebarHeader className="border-b border-slate-100 pb-3">
+            <SidebarHeader className="border-b border-slate-100 bg-slate-50/30 pb-3 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#147da2]/5 rounded-full -mr-16 -mt-16 blur-3xl pointer-events-none" />
                 <SidebarLogo />
                 {canAccessFrontDesk && (
-                    <div className="mt-2 px-3">
-                        <div className="flex items-center gap-2">
-                            <Building2 className="h-3.5 w-3.5 text-[#147da2]" />
-                            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#147da2]">
-                                Front Desk
+                    <div className="mt-2 px-[1.1rem]">
+                        <div className="flex items-center gap-2 py-1 px-2 bg-[#147da2]/5 border border-[#147da2]/10 rounded-none w-fit">
+                            <Building2 className="h-3 w-3 text-[#147da2]" />
+                            <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#147da2]">
+                                Front Desk Operations
                             </span>
                         </div>
                     </div>
                 )}
             </SidebarHeader>
 
-            <SidebarContent className="space-y-1 py-3">
+            <SidebarContent className="space-y-1.5 py-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
                 {canAccessFrontDesk && frontDeskSections.map((section) => (
                     <PermissionMenuSection key={section.key} section={section} permissions={permissions} />
                 ))}
 
                 {canAccessAdmin && (
-                    <div className="px-3">
+                    <div className="mt-4 px-3">
+                        <div className="mb-2 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Admin Controls</div>
+                        <Link
+                            href="/admin/labs"
+                            className={cn(
+                                "flex items-center justify-between px-3 py-2.5 text-[13px] font-semibold text-slate-600 transition-all duration-200 border border-transparent",
+                                currentUrl.startsWith('/admin/labs') && !currentUrl.includes('/features')
+                                    ? "bg-[#147da2]/5 text-[#147da2] border-[#147da2]/10"
+                                    : "hover:bg-slate-50 hover:text-[#147da2]"
+                            )}
+                        >
+                            <div className="flex items-center gap-2.5">
+                                <div className="flex h-7 w-7 items-center justify-center text-slate-400 group-hover:text-[#147da2]">
+                                    <Building2 className="h-[18px] w-[18px]" />
+                                </div>
+                                <span>Manage Laboratories</span>
+                            </div>
+                            <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                        </Link>
+
                         <Link
                             href="/admin/labs/features"
-                            className="flex items-center justify-between  px-3 py-2 text-[13px] font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                            className={cn(
+                                "flex items-center justify-between px-3 py-2.5 text-[13px] font-semibold text-slate-600 transition-all duration-200 border border-transparent",
+                                currentUrl.startsWith('/admin/labs/features')
+                                    ? "bg-[#147da2]/5 text-[#147da2] border-[#147da2]/10"
+                                    : "hover:bg-slate-50 hover:text-[#147da2]"
+                            )}
                         >
-                            <span>Admin Feature Control</span>
-                            <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                            <div className="flex items-center gap-2.5">
+                                <div className="flex h-7 w-7 items-center justify-center text-slate-400 group-hover:text-[#147da2]">
+                                    <FileCheck2 className="h-[18px] w-[18px]" />
+                                </div>
+                                <span>Lab Feature Matrix</span>
+                            </div>
+                            <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                        </Link>
+
+                        <Link
+                            href="/admin/plans"
+                            className={cn(
+                                "flex items-center justify-between px-3 py-2.5 text-[13px] font-semibold text-slate-600 transition-all duration-200 border border-transparent",
+                                currentUrl.startsWith('/admin/plans')
+                                    ? "bg-[#147da2]/5 text-[#147da2] border-[#147da2]/10"
+                                    : "hover:bg-slate-50 hover:text-[#147da2]"
+                            )}
+                        >
+                            <div className="flex items-center gap-2.5">
+                                <div className="flex h-7 w-7 items-center justify-center text-slate-400 group-hover:text-[#147da2]">
+                                    <CreditCard className="h-[18px] w-[18px]" />
+                                </div>
+                                <span>Subscription Plans</span>
+                            </div>
+                            <ChevronRight className="h-3.5 w-3.5 opacity-50" />
                         </Link>
                     </div>
                 )}
             </SidebarContent>
 
-            <SidebarFooter className="p-0">
+            <SidebarFooter className="p-0 mt-auto">
                 <SidebarUserFooter />
             </SidebarFooter>
         </Sidebar>

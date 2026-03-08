@@ -92,15 +92,14 @@ class BillingService
                 'notes' => $this->buildBillNotes($payload, $serviceOtherCharges),
             ]);
 
+            $this->processSubscriptionUsage($labId, $bill, $user);
+
             $directTestItems = $this->createBillItems($bill, $tests, $packages);
             $expandedTests = $this->expandPackageTests($tests, $packages);
             $sampleQuantity = max(1, min(20, (int) ($payload['sample_quantity'] ?? 1)));
             $this->createSamples($bill, $expandedTests, $directTestItems, $sampleQuantity);
 
             $this->persistSampleCollectionSource($labId, $payload['sample_collected_from'] ?? null);
-
-            $userWallet = $this->walletService->ensureWallet($user, $labId);
-            $this->walletService->debit($userWallet, $baseServiceCharge, $bill, 'Billing service charge deducted');
 
             $commissionBase = round($netWithoutService, 2);
             $this->commissionService->creditDoctorCommission($bill, $commissionBase);
@@ -111,6 +110,44 @@ class BillingService
 
             return $bill;
         }, 3);
+    }
+
+    private function processSubscriptionUsage(int $labId, Bill $bill, \App\Models\User $user): void
+    {
+        $lab = Lab::findOrFail($labId);
+        $sub = $lab->currentSubscription;
+
+        if (!$sub) {
+            throw new \Exception("Lab does not have an active subscription plan. Please subscribe to continue.");
+        }
+
+        $plan = $sub->plan;
+
+        if ($plan->type === 'pay_as_you_go') {
+            // Deduct per bill price from user's wallet
+            $userWallet = $this->walletService->ensureWallet($user, $labId);
+            $this->walletService->debit($userWallet, (float)$plan->price, $bill, "Usage fee for plan: {$plan->name}");
+
+            $sub->increment('bills_used');
+        } else {
+            // Subscription based plan
+            if ($sub->ends_at && $sub->ends_at->isPast()) {
+                $sub->update(['status' => 'expired', 'is_current' => false]);
+                throw new \Exception("Subscription plan has expired. Please renew to continue.");
+            }
+
+            if ($sub->bill_limit !== null && $sub->bills_used >= $sub->bill_limit) {
+                throw new \Exception("Bill limit reached for current subscription. Please upgrade your plan.");
+            }
+
+            $sub->increment('bills_used');
+
+            // Optional: Also debit something if the plan has additional per-bill costs
+            if ((float)$plan->price > 0 && $plan->type === 'subscription') {
+                // Some subscription plans might have a monthly fee + small per bill fee?
+                // For now assuming subscription price is purely for the limit.
+            }
+        }
     }
 
     public function completeBill(int $labId, int $billId): Bill

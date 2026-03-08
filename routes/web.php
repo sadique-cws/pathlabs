@@ -21,6 +21,8 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
         ->name('dashboard');
 
     Route::prefix('lab')->name('lab.')->group(function (): void {
+        Route::get('search', [\App\Http\Controllers\SearchController::class, 'globalSearch'])->name('search');
+
         Route::get('coming-soon', function () {
             return inertia('coming-soon');
         })->name('coming-soon');
@@ -152,13 +154,27 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
                 ->middleware('feature:clinical_master.manage_packages')
                 ->name('packages.destroy');
         });
+
+        Route::get('subscription', [\App\Http\Controllers\Lab\SubscriptionController::class, 'index'])->name('subscription.index');
+        Route::post('subscription', [\App\Http\Controllers\Lab\SubscriptionController::class, 'subscribe'])->name('subscription.store');
     });
 
     Route::prefix('admin')->name('admin.')->middleware('ensure.admin')->group(function (): void {
+        Route::get('labs', [\App\Http\Controllers\Admin\LabController::class, 'index'])->name('labs.index');
+        Route::post('labs', [\App\Http\Controllers\Admin\LabController::class, 'store'])->name('labs.store');
+        Route::put('labs/{lab}', [\App\Http\Controllers\Admin\LabController::class, 'update'])->name('labs.update');
+        Route::delete('labs/{lab}', [\App\Http\Controllers\Admin\LabController::class, 'destroy'])->name('labs.destroy');
+        Route::post('labs/{lab}/assign-plan', [\App\Http\Controllers\Admin\LabController::class, 'assignPlan'])->name('labs.assign-plan');
+
         Route::get('labs/features', [LabFeatureController::class, 'index'])->name('labs.features');
         Route::put('labs/{lab}/features', [LabFeatureController::class, 'updateLabPermissions'])->name('labs.features.update');
         Route::put('users/{user}/roles', [LabFeatureController::class, 'updateUserRoles'])->name('users.roles.update');
         Route::put('roles/{role}/permissions', [LabFeatureController::class, 'updateRolePermissions'])->name('roles.permissions.update');
+
+        Route::get('plans', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'index'])->name('plans.index');
+        Route::post('plans', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'store'])->name('plans.store');
+        Route::put('plans/{plan}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'update'])->name('plans.update');
+        Route::delete('plans/{plan}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'destroy'])->name('plans.destroy');
     });
 });
 

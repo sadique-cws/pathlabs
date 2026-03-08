@@ -7,6 +7,7 @@ import {
     PlusCircle, 
     LayoutDashboard,
     Search,
+    Stethoscope,
     Wallet,
     ChevronDown,
     UserCircle,
@@ -52,6 +53,61 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showResults, setShowResults] = useState(false);
+
+    useEffect(() => {
+        if (!searchQuery.trim() || searchQuery.length < 2) {
+            setSearchResults([]);
+            setShowResults(false);
+            return;
+        }
+
+        const delayDebounceFn = setTimeout(async () => {
+            setIsSearching(true);
+            try {
+                const response = await fetch(`/lab/search?query=${encodeURIComponent(searchQuery)}`);
+                const data = await response.json();
+                setSearchResults(data);
+                setShowResults(true);
+            } catch (error) {
+                console.error('Search failed', error);
+            } finally {
+                setIsSearching(false);
+            }
+        }, 500);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchQuery]);
+
+    // Handle outside click
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (!target.closest('.search-container')) {
+                setShowResults(false);
+            }
+        };
+
+        if (showResults) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showResults]);
+
+    const getResultIcon = (type: string) => {
+        switch (type) {
+            case 'Patient': return <UserCircle className="h-4 w-4" />;
+            case 'Bill': return <LayoutDashboard className="h-4 w-4" />;
+            case 'Test': return <Search className="h-4 w-4" />;
+            case 'Package': return <PlusCircle className="h-4 w-4" />;
+            case 'Doctor': return <Stethoscope className="h-4 w-4" />;
+            default: return <Search className="h-4 w-4" />;
+        }
+    };
+
     const ConnectivityIcon = connectivity === 'Strong' ? Wifi : connectivity === 'Weak' ? WifiLow : WifiOff;
     const connectionColor = connectivity === 'Strong' 
         ? 'text-emerald-400' 
@@ -61,11 +117,11 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
 
     return (
         <header className={cn(
-            "fixed top-0 right-0 z-50 flex items-center justify-between px-4 transition-all duration-300",
+            "fixed top-0 right-0 z-[60] flex items-center justify-between px-4 transition-all duration-300",
             "bg-[#147da2] text-white w-full",
             scrolled ? "h-12 shadow-md" : "h-14"
         )}>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-1">
                 {withSidebarToggle && (
                     <SidebarTrigger className="text-white hover:bg-white/10 shrink-0" />
                 )}
@@ -83,19 +139,60 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
                             <span>Manage Bills</span>
                         </Link>
                     )}
-                    {permissions?.includes('reports.result_entry') && (
-                        <Link href="/lab/test-reports/result-entry" className="flex items-center gap-2 text-sm font-medium hover:text-white/80 transition-colors">
-                            <Search className="h-4 w-4" />
-                            <span>Result Entry</span>
-                        </Link>
-                    )}
                 </div>
             </div>
 
-            <div className="flex items-center gap-2 md:gap-5">
-                <div className="hidden md:flex items-center bg-white/10 hover:bg-white/20 transition-all border border-white/10  px-3 py-1.5 w-64 group">
-                    <Search className="h-4 w-4 text-white/60 group-hover:text-white/80" />
-                    <span className="ml-2 text-xs text-white/60 group-hover:text-white/80">Search everything...</span>
+            <div className="flex items-center gap-2 md:gap-5 flex-1 justify-end lg:justify-center">
+                <div className="search-container relative w-full max-w-[400px]">
+                    <div className="flex items-center bg-white/10 hover:bg-white/20 transition-all border border-white/20 px-3 py-1.5 group w-full">
+                        <Search className={cn("h-4 w-4 text-white/60 group-hover:text-white/80 transition-colors", isSearching && "animate-pulse")} />
+                        <input
+                            type="text"
+                            placeholder="Find Patient, Bill, Test, Doctor..."
+                            className="bg-transparent border-none outline-none ml-2 text-xs text-white placeholder:text-white/40 w-full"
+                            value={searchQuery}
+                            onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+
+                    {showResults && (
+                        <div className="absolute top-full left-0 w-full mt-1 bg-white shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="max-h-80 overflow-y-auto">
+                                {searchResults.length > 0 ? (
+                                    <div className="py-2">
+                                        {searchResults.map((result, index) => (
+                                            <Link
+                                                key={index}
+                                                href={result.url}
+                                                className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-b border-slate-50 last:border-0 transition-colors group"
+                                                onClick={() => setShowResults(false)}
+                                            >
+                                                <div className="flex h-8 w-8 items-center justify-center bg-[#147da2]/10 text-[#147da2] group-hover:bg-[#147da2] group-hover:text-white transition-colors">
+                                                    {getResultIcon(result.type)}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{result.type}</span>
+                                                        <span className="text-[13px] font-bold text-slate-800 truncate">{result.title}</span>
+                                                    </div>
+                                                    <p className="text-[11px] text-slate-500 truncate">{result.subtitle}</p>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="p-8 text-center bg-white">
+                                        <div className="flex justify-center mb-2">
+                                            <Search className="h-8 w-8 text-slate-200" />
+                                        </div>
+                                        <p className="text-sm font-semibold text-slate-500">No results for "{searchQuery}"</p>
+                                        <p className="text-xs text-slate-400 mt-1">Try another keyword</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-3">

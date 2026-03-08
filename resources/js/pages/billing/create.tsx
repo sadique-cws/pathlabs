@@ -215,6 +215,8 @@ export default function BillingCreate({
     const [dobYear, setDobYear] = useState('');
     const [dobMonth, setDobMonth] = useState('');
     const [dobDay, setDobDay] = useState('');
+    const [serviceChargeModalOpen, setServiceChargeModalOpen] = useState(false);
+    const [newServiceChargeForm, setNewServiceChargeForm] = useState({ name: '', amount: '' });
     const patientSearchRef = useRef<HTMLDivElement | null>(null);
     const deferredPatientSearch = useDeferredValue(patientSearch);
     const deferredTestSearch = useDeferredValue(testSearch);
@@ -257,7 +259,7 @@ export default function BillingCreate({
         sample_collected_from: sampleCollectionSources[0]?.name ?? 'Labs',
         insurance_details: '',
         offer: 'No Offer',
-        previous_reports: '',
+        previous_reports: [] as File[],
         agent_referrer: '',
         payment_amount: 0,
         urgent: false,
@@ -889,93 +891,151 @@ export default function BillingCreate({
                         <div className="p-0">
                             <div className="grid grid-cols-1 lg:grid-cols-2">
                                 {/* Left — Billing Info */}
-                                <div className="space-y-4 border-b border-slate-200 p-5 lg:border-b-0 lg:border-r">
-                                    <h3 className="text-base font-semibold text-slate-800">Billing Information</h3>
+                                <div className="border-b border-slate-200 p-6 lg:border-b-0 lg:border-r bg-white">
+                                    <h3 className="mb-6 text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Billing Information</h3>
 
-                                    <div>
-                                        <FieldLabel>Billing Time</FieldLabel>
-                                        <div className="relative">
-                                            <Input type="datetime-local" value={form.data.billing_at} onChange={(e) => form.setData('billing_at', e.target.value)} />
-                                            <CalendarDays className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-slate-400" />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <FieldLabel>Sample Collected From</FieldLabel>
-                                        <div className="grid grid-cols-[1fr_auto] gap-2">
-                                            <Input list="sample-sources" value={form.data.sample_collected_from} onChange={(e) => form.setData('sample_collected_from', e.target.value)} />
-                                            <Button type="button" variant="outline" size="sm" className="h-9" onClick={addSampleSource}>+ Add</Button>
-                                            <datalist id="sample-sources">{sampleSources.map((source) => <option key={source} value={source} />)}</datalist>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <FieldLabel>Insurance</FieldLabel>
-                                        <Input placeholder="Insurance details" value={form.data.insurance_details} onChange={(e) => form.setData('insurance_details', e.target.value)} />
-                                    </div>
-
-                                    <div>
-                                        <FieldLabel>Service / Other Charges</FieldLabel>
-                                        <div className="grid grid-cols-[1fr_auto] gap-2">
-                                            <SearchableSelect options={serviceChargeOptions} value={selectedServiceMasterId} onChange={setSelectedServiceMasterId} placeholder="Select service charge" />
-                                            <Button type="button" variant="outline" size="sm" className="h-9" onClick={addSelectedServiceCharge}>+ Add</Button>
-                                        </div>
-                                    </div>
-
-                                    {form.data.service_other_charges.length > 0 && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
+                                        {/* Row 1 */}
                                         <div>
-                                            <FieldLabel>Selected Charges</FieldLabel>
-                                            <div className="space-y-1.5  border border-slate-200 p-2">
-                                                {form.data.service_other_charges.map((charge, index) => (
-                                                    <div key={`${charge.name}-${index}`} className="flex items-center justify-between  bg-slate-50 px-3 py-2 text-sm">
-                                                        <span className="text-slate-700">{charge.name}</span>
-                                                        <div className="flex items-center gap-3">
-                                                            <span className="font-medium text-slate-600">₹{charge.amount.toFixed(2)}</span>
-                                                            <Button type="button" size="sm" variant="ghost" className="h-auto px-1 py-0 text-xs text-rose-500 hover:text-rose-700" onClick={() => form.setData('service_other_charges', form.data.service_other_charges.filter((_, i) => i !== index))}>Remove</Button>
+                                            <FieldLabel>Billing Time</FieldLabel>
+                                            <Input type="datetime-local" className="h-10 border-slate-300" value={form.data.billing_at} onChange={(e) => form.setData('billing_at', e.target.value)} />
+                                        </div>
+
+                                        <div>
+                                            <FieldLabel>Offer</FieldLabel>
+                                            <SearchableSelect options={offerOptions} value={form.data.offer} onChange={(v) => form.setData('offer', v)} placeholder="Select offer" className="h-10" />
+                                        </div>
+
+                                        {/* Row 2 */}
+                                        <div>
+                                            <FieldLabel>Sample Collected From</FieldLabel>
+                                            <div className="grid grid-cols-[1fr_auto] gap-2">
+                                                <SearchableSelect 
+                                                    options={sampleSources.map(s => ({ value: s, label: s }))} 
+                                                    value={form.data.sample_collected_from} 
+                                                    onChange={(v) => form.setData('sample_collected_from', v)} 
+                                                    placeholder="Select source" 
+                                                    className="h-10"
+                                                />
+                                                <Button type="button" variant="outline" className="h-10 px-4 border-slate-300 font-semibold" onClick={() => {
+                                                    const name = prompt('Enter new sample collection source name:');
+                                                    if (name && !sampleSources.includes(name)) {
+                                                        setSampleSources([...sampleSources, name]);
+                                                        form.setData('sample_collected_from', name);
+                                                    }
+                                                }}>+ Add</Button>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <FieldLabel>Doctor Discount</FieldLabel>
+                                            <div className="grid grid-cols-[1fr_130px] gap-2">
+                                                <div className="relative">
+                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-medium text-sm">₹</span>
+                                                    <Input type="number" min={0} step="0.01" className="h-10 pl-7 border-slate-300" value={form.data.doctor_discount} onChange={(e) => form.setData('doctor_discount', Number(e.target.value))} />
+                                                </div>
+                                                <SearchableSelect options={discountTypeOptions} value={form.data.doctor_discount_type} onChange={(v) => form.setData('doctor_discount_type', v)} className="h-10" />
+                                            </div>
+                                        </div>
+
+                                        {/* Row 3 */}
+                                        <div>
+                                            <FieldLabel>Insurance</FieldLabel>
+                                            <Input placeholder="Insurance details" className="h-10 border-slate-300" value={form.data.insurance_details} onChange={(e) => form.setData('insurance_details', e.target.value)} />
+                                        </div>
+
+                                        <div>
+                                            <FieldLabel>Center Discount</FieldLabel>
+                                            <div className="grid grid-cols-[1fr_130px] gap-2">
+                                                <div className="relative">
+                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-medium text-sm">₹</span>
+                                                    <Input type="number" min={0} step="0.01" className="h-10 pl-7 border-slate-300" value={form.data.center_discount} onChange={(e) => form.setData('center_discount', Number(e.target.value))} />
+                                                </div>
+                                                <SearchableSelect options={discountTypeOptions} value={form.data.center_discount_type} onChange={(v) => form.setData('center_discount_type', v)} className="h-10" />
+                                            </div>
+                                        </div>
+
+                                        {/* Row 4 */}
+                                        <div>
+                                            <FieldLabel>Service / Other Charges</FieldLabel>
+                                            <div className="grid grid-cols-[1fr_auto] gap-2">
+                                                <SearchableSelect options={serviceChargeOptions} value={selectedServiceMasterId} onChange={setSelectedServiceMasterId} placeholder="Select service charge" className="h-10" />
+                                                <Button type="button" className="h-10 px-4 bg-[#147da2] hover:bg-[#106385] border-0 font-semibold text-white" onClick={() => setServiceChargeModalOpen(true)}>New</Button>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <FieldLabel>Agent / Referrer</FieldLabel>
+                                            <Input placeholder="Search and select agent…" className="h-10 border-slate-300" value={form.data.agent_referrer} onChange={(e) => form.setData('agent_referrer', e.target.value)} />
+                                        </div>
+
+                                        {/* Row 5: Previous Reports (Span) */}
+                                        <div className="md:col-span-2 space-y-3">
+                                            <div className="flex items-center justify-between border-b border-slate-50 pb-1">
+                                                <FieldLabel>Previous Reports</FieldLabel>
+                                                <Button 
+                                                    type="button" 
+                                                    size="sm" 
+                                                    className="h-8 px-4 bg-[#147da2] text-white hover:bg-[#106385] border-0 text-xs font-bold"
+                                                    onClick={() => {
+                                                        const fileInput = document.createElement('input');
+                                                        fileInput.type = 'file';
+                                                        fileInput.onchange = (e) => {
+                                                            const files = (e.target as HTMLInputElement).files;
+                                                            if (files && files.length > 0) {
+                                                                form.setData('previous_reports', [...form.data.previous_reports, files[0]]);
+                                                            }
+                                                        };
+                                                        fileInput.click();
+                                                    }}
+                                                >+ Add</Button>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {form.data.previous_reports.length === 0 && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Input 
+                                                            type="file" 
+                                                            className="flex-1 h-10 border-slate-300"
+                                                            onChange={(e) => {
+                                                                const files = e.target.files;
+                                                                if (files && files.length > 0) {
+                                                                    form.setData('previous_reports', [files[0]]);
+                                                                }
+                                                            }}
+                                                        />
+                                                        <Button type="button" variant="destructive" className="h-10 bg-rose-500 hover:bg-rose-600 border-0" disabled>Remove</Button>
+                                                    </div>
+                                                )}
+                                                {form.data.previous_reports.map((file, index) => (
+                                                    <div key={index} className="flex items-center gap-2 animate-in fade-in slide-in-from-left-1 duration-200">
+                                                        <div className="flex-1 h-10 flex items-center px-4 border border-slate-300 bg-slate-50/50 text-sm text-slate-700 font-medium truncate">
+                                                            {file.name}
                                                         </div>
+                                                        <Button 
+                                                            type="button" 
+                                                            variant="destructive" 
+                                                            className="h-10 bg-rose-500 hover:bg-rose-600 border-0"
+                                                            onClick={() => {
+                                                                const next = [...form.data.previous_reports];
+                                                                next.splice(index, 1);
+                                                                form.setData('previous_reports', next);
+                                                            }}
+                                                        >Remove</Button>
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
-                                    )}
 
-                                    <div>
-                                        <FieldLabel>Offer</FieldLabel>
-                                        <SearchableSelect options={offerOptions} value={form.data.offer} onChange={(v) => form.setData('offer', v)} placeholder="Select offer" />
-                                    </div>
-
-                                    <div>
-                                        <FieldLabel>Doctor Discount</FieldLabel>
-                                        <div className="grid grid-cols-[1fr_140px] gap-2">
-                                            <Input type="number" min={0} step="0.01" value={form.data.doctor_discount} onChange={(e) => form.setData('doctor_discount', Number(e.target.value))} />
-                                            <SearchableSelect options={discountTypeOptions} value={form.data.doctor_discount_type} onChange={(v) => form.setData('doctor_discount_type', v)} />
+                                        {/* Row 6: Notes (Span) */}
+                                        <div className="md:col-span-2 space-y-2 pt-2">
+                                            <FieldLabel>Comment / Clinical Notes</FieldLabel>
+                                            <textarea 
+                                                className="min-h-24 w-full border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20 shadow-sm" 
+                                                placeholder="Write any additional clinical notes or bill comments here..."
+                                                value={form.data.notes} 
+                                                onChange={(e) => form.setData('notes', e.target.value)} 
+                                            />
                                         </div>
-                                    </div>
-
-                                    <div>
-                                        <FieldLabel>Center Discount</FieldLabel>
-                                        <div className="grid grid-cols-[1fr_140px] gap-2">
-                                            <Input type="number" min={0} step="0.01" value={form.data.center_discount} onChange={(e) => form.setData('center_discount', Number(e.target.value))} />
-                                            <SearchableSelect options={discountTypeOptions} value={form.data.center_discount_type} onChange={(v) => form.setData('center_discount_type', v)} />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <FieldLabel>Comment / Clinical Notes</FieldLabel>
-                                        <textarea className="min-h-20 w-full  border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" value={form.data.notes} onChange={(e) => form.setData('notes', e.target.value)} />
-                                    </div>
-
-                                    <div>
-                                        <div className="mb-1 flex items-center justify-between">
-                                            <FieldLabel>Previous Reports</FieldLabel>
-                                            <Button type="button" size="sm" variant="outline" className="h-7 text-xs">+ Add</Button>
-                                        </div>
-                                        <Input value={form.data.previous_reports} onChange={(e) => form.setData('previous_reports', e.target.value)} />
-                                    </div>
-
-                                    <div>
-                                        <FieldLabel>Agent / Referrer</FieldLabel>
-                                        <Input placeholder="Search and select agent…" value={form.data.agent_referrer} onChange={(e) => form.setData('agent_referrer', e.target.value)} />
                                     </div>
                                 </div>
 
@@ -1084,6 +1144,87 @@ export default function BillingCreate({
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setDoctorModalOpen(false)}>Cancel</Button>
                         <Button type="button" onClick={saveNewDoctor} className="bg-[#147da2] hover:bg-[#106385]">Save Doctor</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={serviceChargeModalOpen} onOpenChange={setServiceChargeModalOpen}>
+                <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-0 shadow-2xl">
+                    <DialogHeader className="bg-[#147da2] p-6 text-white relative">
+                        <div className="flex items-center gap-4">
+                            <div className="bg-white/20 p-2.5 rounded-lg">
+                                <span className="text-xl font-bold">₹</span>
+                            </div>
+                            <div>
+                                <DialogTitle className="text-xl font-bold text-white">Add New Service Charge</DialogTitle>
+                                <DialogDescription className="text-[#e2f3f9] mt-1">Add a custom administrative or facility charge</DialogDescription>
+                            </div>
+                        </div>
+                    </DialogHeader>
+                    
+                    <div className="p-6 space-y-6 bg-white">
+                        <div className="space-y-2">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Service Name <span className="text-rose-500">*</span></Label>
+                            <Input 
+                                placeholder="Enter service name" 
+                                className="h-11 border-slate-200 focus:ring-[#147da2]/20 focus:border-[#147da2]"
+                                value={newServiceChargeForm.name} 
+                                onChange={(e) => setNewServiceChargeForm(prev => ({ ...prev, name: e.target.value }))} 
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Payment Style <span className="text-rose-500">*</span></Label>
+                            <SearchableSelect 
+                                placeholder="Select style"
+                                options={[{ value: 'flat', label: 'Flat Rate' }]} 
+                                value="flat" 
+                                onChange={() => {}} 
+                                className="h-11"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Amount <span className="text-rose-500">*</span></Label>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">₹</span>
+                                <Input 
+                                    type="number"
+                                    placeholder="Enter amount" 
+                                    className="h-11 pl-8 border-slate-200 focus:ring-[#147da2]/20 focus:border-[#147da2]"
+                                    value={newServiceChargeForm.amount} 
+                                    onChange={(e) => setNewServiceChargeForm(prev => ({ ...prev, amount: e.target.value }))}
+                                />
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-1">Enter the flat rate amount in currency</p>
+                        </div>
+                    </div>
+
+                    <DialogFooter className="p-6 pt-0 bg-white grid grid-cols-2 gap-3">
+                        <Button 
+                            type="button" 
+                            variant="outline" 
+                            className="h-11 border-slate-200 text-slate-600 font-semibold hover:bg-slate-50"
+                            onClick={() => setServiceChargeModalOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button 
+                            type="button" 
+                            className="h-11 bg-[#147da2] hover:bg-[#106385] text-white font-semibold"
+                            onClick={() => {
+                                if (newServiceChargeForm.name && newServiceChargeForm.amount) {
+                                    form.setData('service_other_charges', [
+                                        ...form.data.service_other_charges, 
+                                        { name: newServiceChargeForm.name, amount: Number(newServiceChargeForm.amount) }
+                                    ]);
+                                    setServiceChargeModalOpen(false);
+                                    setNewServiceChargeForm({ name: '', amount: '' });
+                                }
+                            }}
+                        >
+                            Add Service Charge
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

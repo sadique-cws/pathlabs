@@ -74,6 +74,7 @@ const frontDeskSections: MenuSection[] = [
         title: 'Clinical Master',
         icon: CreditCard,
         items: [
+            { title: 'Test Groups', href: '/lab/clinical-master/test-groups', permission: 'clinical_master.manage_tests', matchPrefix: '/lab/clinical-master/test-groups' },
             { title: 'Manage Tests', href: '/lab/clinical-master/tests', permission: 'clinical_master.manage_tests', matchPrefix: '/lab/clinical-master/tests' },
             { title: 'Manage Packages', href: '/lab/clinical-master/packages', permission: 'clinical_master.manage_packages', matchPrefix: '/lab/clinical-master/packages' },
         ],

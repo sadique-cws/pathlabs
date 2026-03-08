@@ -141,6 +141,19 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
                 ->middleware('feature:clinical_master.manage_tests')
                 ->name('tests.destroy');
 
+            Route::get('test-groups', [\App\Http\Controllers\Lab\ClinicalMasterController::class, 'manageTestGroups'])
+                ->middleware('feature:clinical_master.manage_tests')
+                ->name('test_groups');
+            Route::post('test-groups', [\App\Http\Controllers\Lab\ClinicalMasterController::class, 'storeTestGroup'])
+                ->middleware('feature:clinical_master.manage_tests')
+                ->name('test_groups.store');
+            Route::put('test-groups/{testGroup}', [\App\Http\Controllers\Lab\ClinicalMasterController::class, 'updateTestGroup'])
+                ->middleware('feature:clinical_master.manage_tests')
+                ->name('test_groups.update');
+            Route::delete('test-groups/{testGroup}', [\App\Http\Controllers\Lab\ClinicalMasterController::class, 'destroyTestGroup'])
+                ->middleware('feature:clinical_master.manage_tests')
+                ->name('test_groups.destroy');
+
             Route::get('packages', [\App\Http\Controllers\Lab\ClinicalMasterController::class, 'managePackages'])
                 ->middleware('feature:clinical_master.manage_packages')
                 ->name('packages');

@@ -21,6 +21,7 @@ class LabTest extends Model
         'lab_id',
         'name',
         'code',
+        'test_group_id',
         'sample_type',
         'department',
         'price',
@@ -60,5 +61,10 @@ class LabTest extends Model
     public function parameters(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(TestParameter::class, 'test_id');
+    }
+
+    public function testGroup(): BelongsTo
+    {
+        return $this->belongsTo(TestGroup::class, 'test_group_id');
     }
 }

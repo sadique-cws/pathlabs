@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Lab;
 
 use App\Http\Controllers\Controller;
 use App\Models\LabTest;
+use App\Models\TestGroup;
 use App\Models\TestPackage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ class ClinicalMasterController extends Controller
         $search = $request->input('search');
 
         $query = LabTest::query()
+            ->with('testGroup:id,name')
             ->where(function ($q) use ($labId): void {
                 $q->where('lab_id', $labId)
                     ->orWhere('is_system', true);
@@ -41,7 +43,8 @@ class ClinicalMasterController extends Controller
                 'name' => $t->name,
                 'code' => $t->code,
                 'sample_type' => $t->sample_type ?? '-',
-                'department' => $t->department ?? '-',
+                'department' => $t->testGroup?->name ?? $t->department ?? '-',
+                'test_group_id' => $t->test_group_id,
                 'price' => (float) $t->price,
                 'is_system' => $t->is_system,
                 'is_active' => $t->is_active,
@@ -55,6 +58,11 @@ class ClinicalMasterController extends Controller
             'filters' => [
                 'search' => $search ?? '',
             ],
+            'testGroups' => TestGroup::query()
+                ->where('lab_id', $labId)
+                ->orWhere('is_system', true)
+                ->orderBy('name')
+                ->get(['id', 'name']),
         ]);
     }
 
@@ -66,6 +74,7 @@ class ClinicalMasterController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50',
+            'test_group_id' => 'nullable|exists:test_groups,id',
             'sample_type' => 'nullable|string|max:100',
             'department' => 'nullable|string|max:100',
             'price' => 'required|numeric|min:0',
@@ -101,6 +110,7 @@ class ClinicalMasterController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50',
+            'test_group_id' => 'nullable|exists:test_groups,id',
             'sample_type' => 'nullable|string|max:100',
             'department' => 'nullable|string|max:100',
             'price' => 'required|numeric|min:0',
@@ -127,6 +137,114 @@ class ClinicalMasterController extends Controller
         $test->delete();
 
         return back()->with('success', 'Test deleted successfully.');
+    }
+
+    public function manageTestGroups(Request $request): Response
+    {
+        $labId = (int) $request->attributes->get('lab_id');
+        $search = $request->input('search');
+
+        $query = TestGroup::query()
+            ->where(function ($q) use ($labId): void {
+                $q->where('lab_id', $labId)
+                    ->orWhere('is_system', true);
+            });
+
+        if ($search !== null && $search !== '') {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $testGroups = $query->orderBy('is_system', 'desc')
+            ->orderBy('name')
+            ->paginate(50)
+            ->withQueryString();
+
+        return Inertia::render('lab/clinical-master/test-groups', [
+            'testGroups' => collect($testGroups->items())->map(fn(TestGroup $g): array => [
+                'id' => $g->id,
+                'name' => $g->name,
+                'is_system' => $g->is_system,
+                'is_active' => $g->is_active,
+                'created_at' => $g->created_at?->format('M d, Y'),
+                'can_edit' => !$g->is_system || $request->user()->hasRole('admin'),
+            ])->all(),
+            'pagination' => [
+                'current_page' => $testGroups->currentPage(),
+                'last_page' => $testGroups->lastPage(),
+                'total' => $testGroups->total(),
+            ],
+            'filters' => [
+                'search' => $search ?? '',
+            ],
+        ]);
+    }
+
+    public function storeTestGroup(Request $request): RedirectResponse
+    {
+        $labId = (int) $request->attributes->get('lab_id');
+        $isAdmin = $request->user()->hasRole('admin') || $request->user()->hasRole('super_admin');
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $data = $validated;
+        if ($isAdmin) {
+            $data['is_system'] = true;
+            $data['lab_id'] = null;
+        } else {
+            $data['is_system'] = false;
+            $data['lab_id'] = $labId;
+        }
+
+        TestGroup::query()->create($data);
+
+        return back()->with('success', 'Test Group created successfully.');
+    }
+
+    public function updateTestGroup(Request $request, TestGroup $testGroup): RedirectResponse
+    {
+        $labId = (int) $request->attributes->get('lab_id');
+        $isAdmin = $request->user()->hasRole('admin') || $request->user()->hasRole('super_admin');
+
+        if ($testGroup->is_system && !$isAdmin) {
+            abort(403, 'You cannot modify system test groups.');
+        }
+
+        if (!$testGroup->is_system && $testGroup->lab_id !== $labId && !$isAdmin) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'is_active' => 'boolean',
+        ]);
+
+        $testGroup->update($validated);
+
+        return back()->with('success', 'Test Group updated successfully.');
+    }
+
+    public function destroyTestGroup(Request $request, TestGroup $testGroup): RedirectResponse
+    {
+        $labId = (int) $request->attributes->get('lab_id');
+        $isAdmin = $request->user()->hasRole('admin') || $request->user()->hasRole('super_admin');
+
+        if ($testGroup->is_system && !$isAdmin) {
+            abort(403, 'You cannot delete system test groups.');
+        }
+
+        if (!$testGroup->is_system && $testGroup->lab_id !== $labId && !$isAdmin) {
+            abort(403);
+        }
+
+        if ($testGroup->tests()->exists()) {
+            return back()->withErrors(['error' => 'Cannot delete test group because it has tests assigned to it.']);
+        }
+
+        $testGroup->delete();
+
+        return back()->with('success', 'Test Group deleted successfully.');
     }
 
     public function managePackages(Request $request): Response

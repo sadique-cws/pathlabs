@@ -5,24 +5,14 @@ import AppLayout from '@/layouts/app-layout';
 import { Pagination } from '@/components/pagination';
 import type { BreadcrumbItem } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
-
-type TestRow = {
-    id: number;
-    name: string;
-    code: string;
-    sample_type: string;
-    department: string;
-    price: number;
-    is_system: boolean;
-    is_active: boolean;
-    can_edit: boolean;
-    test_group_id: number | null;
-};
 
 type TestGroupRow = {
     id: number;
     name: string;
+    is_system: boolean;
+    is_active: boolean;
+    created_at: string;
+    can_edit: boolean;
 };
 
 type PaginationData = {
@@ -32,35 +22,30 @@ type PaginationData = {
 };
 
 type Props = {
-    tests: TestRow[];
     testGroups: TestGroupRow[];
     pagination: PaginationData;
     filters: { search: string };
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Clinical Master', href: '/lab/clinical-master/tests' },
-    { title: 'Manage Tests', href: '/lab/clinical-master/tests' },
+    { title: 'Clinical Master', href: '/lab/clinical-master/test-groups' },
+    { title: 'Manage Test Groups', href: '/lab/clinical-master/test-groups' },
 ];
 
-export default function ManageTests({ tests, testGroups, pagination, filters }: Props) {
+export default function ManageTestGroups({ testGroups, pagination, filters }: Props) {
     const page = usePage();
-    const flash = page.props.flash as { success?: string };
+    const flash = page.props.flash as { success?: string; error?: string };
     
     const [search, setSearch] = useState(filters.search || '');
     const [isFilterChanged, setIsFilterChanged] = useState(false);
 
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingTest, setEditingTest] = useState<TestRow | null>(null);
+    const [editingGroup, setEditingGroup] = useState<TestGroupRow | null>(null);
 
     const form = useForm({
         name: '',
-        code: '',
-        sample_type: '',
-        department: '',
-        test_group_id: '',
-        price: 0,
+        is_active: true,
     });
 
     useEffect(() => {
@@ -79,23 +64,19 @@ export default function ManageTests({ tests, testGroups, pagination, filters }: 
 
     const applyFilters = () => {
         router.get(
-            '/lab/clinical-master/tests',
+            '/lab/clinical-master/test-groups',
             { search },
             { preserveState: true, replace: true }
         );
         setIsFilterChanged(false);
     };
 
-    const openModal = (test: TestRow | null = null) => {
-        setEditingTest(test);
-        if (test) {
+    const openModal = (group: TestGroupRow | null = null) => {
+        setEditingGroup(group);
+        if (group) {
             form.setData({
-                name: test.name,
-                code: test.code,
-                sample_type: test.sample_type === '-' ? '' : test.sample_type,
-                department: test.department === '-' ? '' : test.department,
-                test_group_id: test.test_group_id?.toString() || '',
-                price: test.price,
+                name: group.name,
+                is_active: group.is_active,
             });
         } else {
             form.reset();
@@ -106,27 +87,27 @@ export default function ManageTests({ tests, testGroups, pagination, filters }: 
 
     const closeModal = () => {
         setIsModalOpen(false);
-        setEditingTest(null);
+        setEditingGroup(null);
         form.reset();
     };
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
         
-        if (editingTest) {
-            form.put(`/lab/clinical-master/tests/${editingTest.id}`, {
+        if (editingGroup) {
+            form.put(`/lab/clinical-master/test-groups/${editingGroup.id}`, {
                 onSuccess: () => closeModal(),
             });
         } else {
-            form.post('/lab/clinical-master/tests', {
+            form.post('/lab/clinical-master/test-groups', {
                 onSuccess: () => closeModal(),
             });
         }
     };
 
-    const deleteTest = (test: TestRow) => {
-        if (confirm(`Are you sure you want to delete test: ${test.name}?`)) {
-            router.delete(`/lab/clinical-master/tests/${test.id}`, {
+    const deleteGroup = (group: TestGroupRow) => {
+        if (confirm(`Are you sure you want to delete test group: ${group.name}?`)) {
+            router.delete(`/lab/clinical-master/test-groups/${group.id}`, {
                 preserveScroll: true,
             });
         }
@@ -134,12 +115,22 @@ export default function ManageTests({ tests, testGroups, pagination, filters }: 
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Manage Tests" />
+            <Head title="Manage Test Groups" />
 
             <div className="min-h-full bg-slate-50/80 p-0">
                 {flash?.success && (
                     <div className="mb-0 sawtooth border-b border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
                         {flash.success}
+                    </div>
+                )}
+                {flash?.error && (
+                    <div className="mb-0 sawtooth border-b border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                        {flash.error}
+                    </div>
+                )}
+                {Object.keys(page.props.errors || {}).length > 0 && (
+                    <div className="mb-0 sawtooth border-b border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                        {Object.values(page.props.errors)[0]}
                     </div>
                 )}
 
@@ -150,7 +141,7 @@ export default function ManageTests({ tests, testGroups, pagination, filters }: 
                                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                                 <input
                                     type="text"
-                                    placeholder="Search tests..."
+                                    placeholder="Search test groups..."
                                     className="h-9 w-full border border-slate-200 pl-9 pr-3 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
                                     value={search}
                                     onChange={handleSearchChange}
@@ -162,7 +153,7 @@ export default function ManageTests({ tests, testGroups, pagination, filters }: 
                                 className="flex items-center gap-1.5 bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]"
                             >
                                 <Plus className="h-4 w-4" />
-                                Add Test
+                                Add Test Group
                             </button>
                         </div>
                     </div>
@@ -171,26 +162,33 @@ export default function ManageTests({ tests, testGroups, pagination, filters }: 
                         <table className="min-w-full text-left text-sm">
                             <thead className="border-b border-slate-200 bg-slate-50/80 uppercase tracking-wide text-slate-500">
                                 <tr>
-                                    <th className="px-4 py-3 font-semibold">Test Name</th>
-                                    <th className="px-4 py-3 font-semibold">Code</th>
-                                    <th className="px-4 py-3 font-semibold">Department</th>
-                                    <th className="px-4 py-3 font-semibold">Sample</th>
-                                    <th className="px-4 py-3 font-semibold">Price</th>
-                                    <th className="px-4 py-3 font-semibold">Type</th>
+                                    <th className="px-4 py-3 font-semibold w-16 text-center">ID</th>
+                                    <th className="px-4 py-3 font-semibold">Name</th>
+                                    <th className="px-4 py-3 font-semibold text-center">Status</th>
+                                    <th className="px-4 py-3 font-semibold text-center">System</th>
+                                    <th className="px-4 py-3 font-semibold w-40">Created Date</th>
                                     <th className="w-[100px] px-4 py-3 text-right font-semibold">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {tests.length > 0 ? (
-                                    tests.map((t) => (
-                                        <tr key={t.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50">
-                                            <td className="px-4 py-3 font-medium text-slate-700">{t.name}</td>
-                                            <td className="px-4 py-3 text-slate-600 font-mono text-xs">{t.code}</td>
-                                            <td className="px-4 py-3 text-slate-600">{t.department}</td>
-                                            <td className="px-4 py-3 text-slate-600">{t.sample_type}</td>
-                                            <td className="px-4 py-3 text-slate-700 font-semibold">₹{t.price}</td>
-                                            <td className="px-4 py-3">
-                                                {t.is_system ? (
+                                {testGroups.length > 0 ? (
+                                    testGroups.map((g) => (
+                                        <tr key={g.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50">
+                                            <td className="px-4 py-3 text-center text-slate-500 text-xs">{g.id}</td>
+                                            <td className="px-4 py-3 font-medium text-slate-700">{g.name}</td>
+                                            <td className="px-4 py-3 text-center">
+                                                {g.is_active ? (
+                                                    <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+                                                        Active
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">
+                                                        Inactive
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-3 text-center">
+                                                {g.is_system ? (
                                                     <span className="inline-flex items-center gap-1 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold uppercase text-blue-600 border border-blue-100">
                                                         <Lock className="h-2.5 w-2.5" />
                                                         System
@@ -201,23 +199,26 @@ export default function ManageTests({ tests, testGroups, pagination, filters }: 
                                                     </span>
                                                 )}
                                             </td>
+                                            <td className="px-4 py-3 text-slate-500 text-sm whitespace-nowrap">
+                                                {g.created_at}
+                                            </td>
                                             <td className="px-4 py-3 text-right">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    {t.can_edit ? (
+                                                    {g.can_edit ? (
                                                         <>
                                                             <button
                                                                 type="button"
-                                                                onClick={() => openModal(t)}
+                                                                onClick={() => openModal(g)}
                                                                 className="text-slate-400 hover:text-[#147da2]"
-                                                                title="Edit test"
+                                                                title="Edit Group"
                                                             >
                                                                 <Edit2 className="h-4 w-4" />
                                                             </button>
                                                             <button
                                                                 type="button"
-                                                                onClick={() => deleteTest(t)}
+                                                                onClick={() => deleteGroup(g)}
                                                                 className="text-slate-400 hover:text-red-500"
-                                                                title="Delete test"
+                                                                title="Delete Group"
                                                             >
                                                                 <Trash2 className="h-4 w-4" />
                                                             </button>
@@ -233,8 +234,8 @@ export default function ManageTests({ tests, testGroups, pagination, filters }: 
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
-                                            No tests found.
+                                        <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                                            No test groups found.
                                         </td>
                                     </tr>
                                 )}
@@ -248,7 +249,7 @@ export default function ManageTests({ tests, testGroups, pagination, filters }: 
                             pageSize={50}
                             currentPage={pagination.current_page}
                             onPageChange={(p) =>
-                                router.get('/lab/clinical-master/tests', { page: p, search }, { preserveState: true })
+                                router.get('/lab/clinical-master/test-groups', { page: p, search }, { preserveState: true })
                             }
                             from={(pagination.current_page - 1) * 50 + 1}
                             to={Math.min(pagination.current_page * 50, pagination.total)}
@@ -260,12 +261,12 @@ export default function ManageTests({ tests, testGroups, pagination, filters }: 
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>{editingTest ? 'Edit Test' : 'Add Test'}</DialogTitle>
+                        <DialogTitle>{editingGroup ? 'Edit Test Group' : 'Add Test Group'}</DialogTitle>
                     </DialogHeader>
                     
                     <form onSubmit={submit} className="flex flex-col gap-4 mt-4">
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-sm font-semibold text-slate-700">Test Name <span className="text-red-500">*</span></label>
+                            <label className="text-sm font-semibold text-slate-700">Group Name <span className="text-red-500">*</span></label>
                             <input
                                 type="text"
                                 className="h-9 w-full border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
@@ -276,61 +277,19 @@ export default function ManageTests({ tests, testGroups, pagination, filters }: 
                             {form.errors.name && <p className="text-xs text-red-500">{form.errors.name}</p>}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-sm font-semibold text-slate-700">Test Code <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text"
-                                    className="h-9 w-full border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
-                                    value={form.data.code}
-                                    onChange={(e) => form.setData('code', e.target.value)}
-                                    required
-                                />
-                                {form.errors.code && <p className="text-xs text-red-500">{form.errors.code}</p>}
-                            </div>
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-sm font-semibold text-slate-700">Price (₹) <span className="text-red-500">*</span></label>
-                                <input
-                                    type="number"
-                                    className="h-9 w-full border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
-                                    value={form.data.price}
-                                    onChange={(e) => form.setData('price', parseFloat(e.target.value))}
-                                    required
-                                />
-                                {form.errors.price && <p className="text-xs text-red-500">{form.errors.price}</p>}
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-sm font-semibold text-slate-700">Test Group (Department)</label>
+                        {editingGroup && !editingGroup.is_system && (
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm font-semibold text-slate-700">Status</label>
                                 <select
                                     className="h-9 w-full border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
-                                    value={form.data.test_group_id || ''}
-                                    onChange={(e) => {
-                                        form.setData('test_group_id', e.target.value);
-                                        // Auto-fill department name for fallback/legacy logic
-                                        const group = testGroups.find(g => g.id.toString() === e.target.value);
-                                        if (group) form.setData('department', group.name);
-                                    }}
+                                    value={form.data.is_active ? '1' : '0'}
+                                    onChange={(e) => form.setData('is_active', e.target.value === '1')}
                                 >
-                                    <option value="">-- No Group Default --</option>
-                                    {testGroups.map((g) => (
-                                        <option key={g.id} value={g.id}>{g.name}</option>
-                                    ))}
+                                    <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
                                 </select>
                             </div>
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-sm font-semibold text-slate-700">Sample Type</label>
-                                <input
-                                    type="text"
-                                    className="h-9 w-full border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20"
-                                    value={form.data.sample_type}
-                                    placeholder="e.g. EDTA Blood"
-                                    onChange={(e) => form.setData('sample_type', e.target.value)}
-                                />
-                            </div>
-                        </div>
+                        )}
 
                         <div className="mt-2 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
                             <button
@@ -345,7 +304,7 @@ export default function ManageTests({ tests, testGroups, pagination, filters }: 
                                 disabled={form.processing}
                                 className="bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385] disabled:opacity-50"
                             >
-                                {editingTest ? 'Save Changes' : 'Add Test'}
+                                {editingGroup ? 'Save Changes' : 'Add Test Group'}
                             </button>
                         </div>
                     </form>

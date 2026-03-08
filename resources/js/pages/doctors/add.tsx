@@ -17,8 +17,8 @@ type Props = {
 
 export default function AddDoctor({ existingDoctors }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Doctor List', href: '/lab/doctors/manage' },
-        { title: 'Add Doctor', href: '/lab/doctors/add' },
+        { title: 'Referral Doctor List', href: '/lab/doctors/manage' },
+        { title: 'Add Referral Doctor', href: '/lab/doctors/add' },
     ];
 
     const [searchName, setSearchName] = useState('');
@@ -54,12 +54,12 @@ export default function AddDoctor({ existingDoctors }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Add Doctor" />
+            <Head title="Add Referral Doctor" />
 
             <div className="min-h-full bg-slate-50/80 p-0">
                 <div className="sawtooth border-b border-slate-200 bg-white p-6">
-                    <h1 className="border-b border-slate-100 pb-3 text-lg font-semibold text-slate-800">Add Doctor</h1>
-                    <p className="mt-3 text-sm text-slate-500">First search by name and mobile. If doctor not found, then create new.</p>
+                    <h1 className="border-b border-slate-100 pb-3 text-lg font-semibold text-slate-800">Add Referral Doctor</h1>
+                    <p className="mt-3 text-sm text-slate-500">First search by name and mobile. If referral doctor not found, then create new.</p>
 
                     <div className="mt-4 grid gap-3 md:grid-cols-2">
                         <label className="relative">
@@ -90,7 +90,7 @@ export default function AddDoctor({ existingDoctors }: Props) {
 
                     {selectedDoctorId !== null && (
                         <div className="mt-3  border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-                            Doctor already exists. <Link href={`/lab/doctors/${selectedDoctorId}/edit`} className="font-semibold underline">Open edit doctor</Link>
+                            Referral doctor already exists. <Link href={`/lab/doctors/${selectedDoctorId}/edit`} className="font-semibold underline">Open edit referral doctor</Link>
                         </div>
                     )}
 
@@ -113,7 +113,7 @@ export default function AddDoctor({ existingDoctors }: Props) {
                         <div className="md:col-span-2 flex justify-end gap-3 border-t border-slate-100 pt-5">
                             <button type="button" onClick={() => history.back()} className=" border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Cancel</button>
                             <button type="submit" className=" bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
-                                Create Doctor
+                                Create Referral Doctor
                             </button>
                         </div>
                     </form>

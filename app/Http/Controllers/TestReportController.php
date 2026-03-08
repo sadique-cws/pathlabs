@@ -310,10 +310,16 @@ class TestReportController extends Controller
             ];
         })->all();
 
-        $approvedByName = null;
+        $approverData = null;
         if ($sample->approved_by) {
             $approver = \App\Models\User::query()->find($sample->approved_by);
-            $approvedByName = $approver?->name;
+            if ($approver) {
+                $approverData = [
+                    'name' => $approver->name,
+                    'qualification' => $approver->qualification,
+                    'signature_url' => $approver->signature_path ? \Illuminate\Support\Facades\Storage::url($approver->signature_path) : null,
+                ];
+            }
         }
 
         return Inertia::render('test-reports/print-report', [
@@ -329,8 +335,8 @@ class TestReportController extends Controller
                 'bill_date' => $sample->bill?->billing_at?->format('d M Y') ?? '-',
                 'approval_date' => $sample->approval_date?->format('d M Y') ?? '-',
                 'technical_remarks' => $sample->result_remarks ?? '',
-                'approved_by_name' => $approvedByName,
             ],
+            'approver' => $approverData,
             'patient' => [
                 'name' => $sample->bill?->patient?->name ?? '-',
                 'phone' => $sample->bill?->patient?->phone ?? '-',

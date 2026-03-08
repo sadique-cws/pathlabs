@@ -11,7 +11,8 @@ import {
     Trash2,
     Calendar,
     ChevronDown,
-    CheckCircle2
+    CheckCircle2,
+    UserPlus
 } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import AppLayout from '@/layouts/app-layout';
@@ -66,10 +67,17 @@ type Permission = {
     slug: string;
 };
 
+type Role = {
+    id: number;
+    name: string;
+    slug: string;
+};
+
 type Props = {
     labs: Lab[];
     plans: Plan[];
     permissionGroups: Record<string, Permission[]>;
+    roles: Role[];
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -77,10 +85,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Manage Laboratories', href: '/admin/labs' },
 ];
 
-export default function ManageLabs({ labs, plans, permissionGroups }: Props) {
+export default function ManageLabs({ labs, plans, permissionGroups, roles }: Props) {
     const [searchQuery, setSearchQuery] = useState('');
     const [isAssignPlanOpen, setIsAssignPlanOpen] = useState(false);
     const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
+    const [isAddStaffOpen, setIsAddStaffOpen] = useState(false);
     const [selectedLab, setSelectedLab] = useState<Lab | null>(null);
 
     const { data: planData, setData: setPlanData, post: postPlan, processing: planProcessing } = useForm({
@@ -89,6 +98,13 @@ export default function ManageLabs({ labs, plans, permissionGroups }: Props) {
 
     const { data: featureData, setData: setFeatureData, put: putFeatures, processing: featuresProcessing } = useForm({
         permission_slugs: [] as string[],
+    });
+
+    const { data: staffData, setData: setStaffData, post: postStaff, processing: staffProcessing, reset: resetStaff, errors: staffErrors, clearErrors: clearStaffErrors } = useForm({
+        name: '',
+        email: '',
+        password: '',
+        role_ids: [] as number[],
     });
 
     const filteredLabs = useMemo(() => {
@@ -110,6 +126,13 @@ export default function ManageLabs({ labs, plans, permissionGroups }: Props) {
         setSelectedLab(lab);
         setFeatureData('permission_slugs', lab.permissions || []);
         setIsFeaturesOpen(true);
+    };
+
+    const handleAddStaff = (lab: Lab) => {
+        setSelectedLab(lab);
+        resetStaff();
+        clearStaffErrors();
+        setIsAddStaffOpen(true);
     };
 
     const togglePermission = (slug: string) => {
@@ -135,6 +158,14 @@ export default function ManageLabs({ labs, plans, permissionGroups }: Props) {
         putFeatures(`/admin/labs/${selectedLab?.id}/features`, {
             preserveScroll: true,
             onSuccess: () => setIsFeaturesOpen(false),
+        });
+    };
+
+    const submitAddStaff = (e: React.FormEvent) => {
+        e.preventDefault();
+        postStaff(`/admin/labs/${selectedLab?.id}/staff`, {
+            preserveScroll: true,
+            onSuccess: () => setIsAddStaffOpen(false),
         });
     };
 
@@ -279,6 +310,10 @@ export default function ManageLabs({ labs, plans, permissionGroups }: Props) {
                                                              <Settings className="mr-2 h-4 w-4 text-amber-500" />
                                                              Manage Features
                                                          </DropdownMenuItem>
+                                                         <DropdownMenuItem onClick={() => handleAddStaff(lab)} className="cursor-pointer text-xs font-bold">
+                                                            <UserPlus className="mr-2 h-4 w-4 text-purple-500" />
+                                                            Add Staff Member
+                                                        </DropdownMenuItem>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem className="text-rose-600 cursor-pointer text-xs font-bold focus:bg-rose-50">
                                                             <Trash2 className="mr-2 h-4 w-4 text-rose-500" />
@@ -429,6 +464,85 @@ export default function ManageLabs({ labs, plans, permissionGroups }: Props) {
                                         {featuresProcessing ? 'Updating...' : 'Save Configuration'}
                                     </Button>
                                 </div>
+                            </div>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Add Staff Dialog */}
+                <Dialog open={isAddStaffOpen} onOpenChange={setIsAddStaffOpen}>
+                    <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden border-none shadow-3xl">
+                        <div className="bg-[#147da2] p-6 text-white relative">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl" />
+                            <DialogTitle className="text-xl font-bold tracking-tight">Add Staff Member</DialogTitle>
+                            <DialogDescription className="text-white/70 text-xs mt-1">
+                                Create a new user account for <span className="font-bold text-white uppercase">{selectedLab?.name}</span>.
+                            </DialogDescription>
+                        </div>
+
+                        <form onSubmit={submitAddStaff} className="p-6 bg-white space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="staff_name" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Full Name</Label>
+                                <Input 
+                                    id="staff_name" 
+                                    placeholder="Enter full name" 
+                                    className="h-10 border-slate-200 focus:border-[#147da2] bg-slate-50/50"
+                                    value={staffData.name}
+                                    onChange={(e) => setStaffData('name', e.target.value)}
+                                />
+                                {staffErrors.name && <p className="text-xs text-rose-500">{staffErrors.name}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="staff_email" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Email Address</Label>
+                                <Input 
+                                    id="staff_email" 
+                                    type="email"
+                                    placeholder="Enter email address" 
+                                    className="h-10 border-slate-200 focus:border-[#147da2] bg-slate-50/50"
+                                    value={staffData.email}
+                                    onChange={(e) => setStaffData('email', e.target.value)}
+                                />
+                                {staffErrors.email && <p className="text-xs text-rose-500">{staffErrors.email}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="staff_password" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Password</Label>
+                                <Input 
+                                    id="staff_password" 
+                                    type="password"
+                                    placeholder="Create password" 
+                                    className="h-10 border-slate-200 focus:border-[#147da2] bg-slate-50/50"
+                                    value={staffData.password}
+                                    onChange={(e) => setStaffData('password', e.target.value)}
+                                />
+                                {staffErrors.password && <p className="text-xs text-rose-500">{staffErrors.password}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="staff_role" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Primary Role</Label>
+                                <Select 
+                                    value={staffData.role_ids[0]?.toString() || ''} 
+                                    onValueChange={(val) => setStaffData('role_ids', [parseInt(val)])}
+                                >
+                                    <SelectTrigger id="staff_role" className="h-10 border-slate-200 bg-slate-50/50">
+                                        <SelectValue placeholder="Assign a role..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {roles.map(role => (
+                                            <SelectItem key={role.id} value={role.id.toString()}>
+                                                <span className="font-bold">{role.name}</span>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {staffErrors.role_ids && <p className="text-xs text-rose-500">{staffErrors.role_ids}</p>}
+                            </div>
+
+                            <div className="mt-8 flex gap-3">
+                                <Button type="button" variant="ghost" onClick={() => setIsAddStaffOpen(false)} className="flex-1 font-bold text-xs uppercase tracking-widest text-slate-400">
+                                    Cancel
+                                </Button>
+                                <Button type="submit" disabled={staffProcessing} className="flex-1 bg-[#147da2] hover:bg-[#106385] font-bold text-xs uppercase tracking-widest shadow-xl">
+                                    {staffProcessing ? 'Creating...' : 'Create Account'}
+                                </Button>
                             </div>
                         </form>
                     </DialogContent>

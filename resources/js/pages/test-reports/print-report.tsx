@@ -37,8 +37,12 @@ type Props = {
         bill_date: string;
         approval_date: string;
         technical_remarks: string;
-        approved_by_name: string | null;
     };
+    approver: {
+        name: string;
+        qualification: string | null;
+        signature_url: string | null;
+    } | null;
     patient: {
         name: string;
         phone: string;
@@ -49,7 +53,7 @@ type Props = {
     labConfig: LabConfig | null;
 };
 
-export default function PrintReport({ sample, patient, parameters, labConfig }: Props) {
+export default function PrintReport({ sample, patient, parameters, labConfig, approver }: Props) {
     const labName = labConfig?.name || 'PathLab Diagnostics';
 
     return (
@@ -210,24 +214,27 @@ export default function PrintReport({ sample, patient, parameters, labConfig }: 
                                 <p>This is a computer-generated report.</p>
                             </div>
                             <div className="text-center">
-                                {labConfig?.technician_signature_url && (
+                                {(approver?.signature_url || labConfig?.technician_signature_url) && (
                                     <img
-                                        src={labConfig.technician_signature_url}
+                                        src={approver?.signature_url || labConfig?.technician_signature_url || undefined}
                                         alt="Signature"
                                         className="mx-auto mb-1 h-12 max-w-[160px] object-contain"
                                     />
                                 )}
-                                {sample.approved_by_name && (
-                                    <p className="mb-2 text-base font-bold text-slate-800">Dr. {sample.approved_by_name}</p>
-                                )}
-                                {labConfig?.lab_director_name && !sample.approved_by_name && (
-                                    <p className="mb-2 text-base font-bold text-slate-800">{labConfig.lab_director_name}</p>
-                                )}
+                                {approver ? (
+                                    <p className="mb-2 text-base font-bold text-slate-800">
+                                        Dr. {approver.name}
+                                    </p>
+                                ) : labConfig?.lab_director_name ? (
+                                    <p className="mb-2 text-base font-bold text-slate-800">
+                                        {labConfig.lab_director_name}
+                                    </p>
+                                ) : null}
                                 <div className="mb-1 h-px w-48 bg-slate-400" />
                                 <p className="text-sm font-semibold text-slate-700">
-                                    {sample.department === 'Pathology' ? 'Pathologist' : sample.department === 'Radiology' ? 'Radiologist' : 'Authorized Signatory'}
+                                    {approver?.qualification || (sample.department === 'Pathology' ? 'Pathologist' : sample.department === 'Radiology' ? 'Radiologist' : 'Authorized Signatory')}
                                 </p>
-                                {labConfig?.technician_name && (
+                                {!approver && labConfig?.technician_name && (
                                     <p className="text-xs text-slate-500">
                                         Lab Tech: {labConfig.technician_name}
                                         {labConfig.technician_qualification && ` (${labConfig.technician_qualification})`}

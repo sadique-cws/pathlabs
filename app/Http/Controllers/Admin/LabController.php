@@ -6,8 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Lab;
 use App\Models\LabSubscription;
 use App\Models\SubscriptionPlan;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -61,6 +65,7 @@ class LabController extends Controller
             'labs' => $labs,
             'plans' => SubscriptionPlan::where('is_active', true)->get(),
             'permissionGroups' => $permissionGroups,
+            'roles' => Role::all(['id', 'name', 'slug']),
         ]);
     }
 
@@ -139,5 +144,28 @@ class LabController extends Controller
     {
         $lab->delete();
         return back()->with('success', 'Laboratory deleted successfully.');
+    }
+
+    public function addStaff(Request $request, Lab $lab): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => ['required', Password::defaults()],
+            'role_ids' => 'required|array',
+            'role_ids.*' => 'exists:roles,id',
+        ]);
+
+        $user = User::create([
+            'lab_id' => $lab->id,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'is_approver' => false,
+        ]);
+
+        $user->roles()->sync($validated['role_ids']);
+
+        return back()->with('success', 'Staff account created successfully.');
     }
 }

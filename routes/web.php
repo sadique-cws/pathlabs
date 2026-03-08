@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\LabFeatureController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\Lab\WalletController;
+use App\Http\Controllers\Lab\StaffController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\TestReportController;
 use App\Http\Controllers\TestParameterController;
@@ -173,6 +174,9 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
 
         Route::get('configuration', [\App\Http\Controllers\Lab\LabConfigurationController::class, 'show'])->name('configuration.show');
         Route::post('configuration', [\App\Http\Controllers\Lab\LabConfigurationController::class, 'update'])->name('configuration.update');
+
+        Route::get('staff', [StaffController::class, 'index'])->name('staff.index');
+        Route::post('staff/{staffMember}', [StaffController::class, 'update'])->name('staff.update');
     });
 
     Route::prefix('admin')->name('admin.')->middleware('ensure.admin')->group(function (): void {
@@ -180,6 +184,7 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
         Route::post('labs', [\App\Http\Controllers\Admin\LabController::class, 'store'])->name('labs.store');
         Route::get('labs/{lab}', [\App\Http\Controllers\Admin\LabController::class, 'show'])->name('labs.show');
         Route::put('labs/{lab}', [\App\Http\Controllers\Admin\LabController::class, 'update'])->name('labs.update');
+        Route::post('labs/{lab}/staff', [\App\Http\Controllers\Admin\LabController::class, 'addStaff'])->name('labs.staff.store');
         Route::post('labs/{lab}/assign-plan', [\App\Http\Controllers\Admin\LabController::class, 'assignPlan'])->name('labs.assign-plan');
         Route::post('labs/{lab}/switch', [\App\Http\Controllers\Admin\LabController::class, 'switchContext'])->name('labs.switch');
         Route::get('switch-back', [\App\Http\Controllers\Admin\LabController::class, 'backToAdmin'])->name('switch-back');

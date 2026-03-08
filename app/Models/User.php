@@ -25,6 +25,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_approver',
+        'qualification',
+        'signature_path',
     ];
 
     /**
@@ -49,6 +52,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_approver' => 'boolean',
             'two_factor_confirmed_at' => 'datetime',
         ];
     }

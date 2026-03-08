@@ -60,12 +60,12 @@ const frontDeskSections: MenuSection[] = [
         ],
     },
     {
-        key: 'lab-doctor-desk',
-        title: 'Lab Doctor Desk',
+        key: 'referral-doctors',
+        title: 'Referral Doctors',
         icon: Stethoscope,
         items: [
             { title: 'Add Doctor', href: '/lab/doctors/add', permission: 'doctors.manage', matchPrefix: '/lab/doctors/add' },
-            { title: 'Doctor List', href: '/lab/doctors/manage', permission: 'doctors.manage', matchPrefix: '/lab/doctors/manage' },
+            { title: 'Manage Doctors', href: '/lab/doctors/manage', permission: 'doctors.manage', matchPrefix: '/lab/doctors/manage' },
             { title: 'Doctor Records', href: '/lab/coming-soon', permission: 'doctor_desk.records', matchPrefix: '/lab/doctor-desk/records' },
         ],
     },
@@ -109,6 +109,7 @@ const frontDeskSections: MenuSection[] = [
         icon: Building2,
         items: [
             { title: 'Configuration', href: '/lab/configuration', permission: 'front_desk.access', matchPrefix: '/lab/configuration' },
+            { title: 'Lab Staff & Approvers', href: '/lab/staff', permission: 'front_desk.access', matchPrefix: '/lab/staff' },
             { title: 'My Subscription', href: '/lab/subscription', permission: 'front_desk.access', matchPrefix: '/lab/subscription' },
             { title: 'Lab Appearance', href: '/settings/appearance', permission: 'front_desk.access', matchPrefix: '/settings/appearance' },
         ],

@@ -19,7 +19,7 @@ type Props = {
 
 export default function EditDoctor({ doctor }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Doctor List', href: '/lab/doctors/manage' },
+        { title: 'Referral Doctor List', href: '/lab/doctors/manage' },
         { title: `Edit ${doctor.name}`, href: `/lab/doctors/${doctor.id}/edit` },
     ];
 
@@ -45,7 +45,7 @@ export default function EditDoctor({ doctor }: Props) {
                     className=" border border-slate-200 bg-white p-6"
                 >
                     <div className="border-b border-slate-100 pb-4">
-                        <h1 className="text-lg font-semibold text-slate-800">Edit Doctor</h1>
+                        <h1 className="text-lg font-semibold text-slate-800">Edit Referral Doctor</h1>
                         <p className="mt-1 text-sm text-slate-500">Gift credited to doctor wallet: ₹{doctor.gift_total.toFixed(2)}</p>
                     </div>
 
@@ -62,13 +62,13 @@ export default function EditDoctor({ doctor }: Props) {
 
                     <label className="mt-4 flex items-center gap-2 text-sm text-slate-700">
                         <input type="checkbox" className="h-4 w-4 border-slate-300 text-[#147da2] focus:ring-[#147da2]" checked={form.data.is_active} onChange={(e) => form.setData('is_active', e.target.checked)} />
-                        Active Doctor
+                        Active Referral Doctor
                     </label>
 
                     <div className="mt-6 flex justify-end gap-3 border-t border-slate-100 pt-5">
                         <button type="button" onClick={() => history.back()} className=" border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Cancel</button>
                         <button type="submit" className=" bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]" disabled={form.processing}>
-                            Save Doctor
+                            Save Referral Doctor
                         </button>
                     </div>
                 </form>

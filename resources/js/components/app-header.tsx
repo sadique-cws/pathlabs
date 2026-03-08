@@ -127,6 +127,15 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
                 )}
                 
                 <div className="hidden lg:flex items-center gap-6 ml-2">
+                    {props.access?.is_impersonating && (
+                        <Link 
+                            href="/admin/switch-back" 
+                            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-3 py-1 text-sm font-bold shadow-sm"
+                        >
+                            <UserCircle className="h-4 w-4" />
+                            <span>Back to Admin Panel</span>
+                        </Link>
+                    )}
                     {permissions?.includes('billing.create') && (
                         <Link href="/lab/billing/create" className="flex items-center gap-2 text-sm font-medium hover:text-white/80 transition-colors">
                             <PlusCircle className="h-4 w-4" />

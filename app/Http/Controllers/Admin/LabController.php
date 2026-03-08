@@ -43,6 +43,11 @@ class LabController extends Controller
         ]);
     }
 
+    public function show(Lab $lab): RedirectResponse
+    {
+        return $this->switchContext($lab);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -95,6 +100,18 @@ class LabController extends Controller
         ]);
 
         return back()->with('success', "Assigned plan '{$plan->name}' to {$lab->name}.");
+    }
+
+    public function switchContext(Lab $lab): RedirectResponse
+    {
+        session(['switched_lab_id' => $lab->id]);
+        return to_route('dashboard')->with('success', "Now viewing as '{$lab->name}'");
+    }
+
+    public function backToAdmin(): RedirectResponse
+    {
+        session()->forget('switched_lab_id');
+        return to_route('admin.labs.index')->with('success', 'Back to admin mode');
     }
 
     public function destroy(Lab $lab): RedirectResponse

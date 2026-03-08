@@ -2,7 +2,6 @@ import { Head, useForm, Link } from '@inertiajs/react';
 import { 
     Plus, 
     Search, 
-    MoreVertical, 
     Building2, 
     Users, 
     CreditCard, 
@@ -11,13 +10,11 @@ import {
     Pencil, 
     Trash2,
     Calendar,
-    ArrowUpRight,
-    MapPin
+    ChevronDown
 } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
     DropdownMenu,
@@ -67,8 +64,8 @@ type Props = {
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Admin', href: '#' },
-    { title: 'Manage Labs', href: '/admin/labs' },
+    { title: 'Admin Master', href: '#' },
+    { title: 'Manage Laboratories', href: '/admin/labs' },
 ];
 
 export default function ManageLabs({ labs, plans }: Props) {
@@ -106,133 +103,144 @@ export default function ManageLabs({ labs, plans }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage Laboratories" />
 
-            <div className="p-6">
-                <div className="flex items-center justify-between mb-8">
-                    <div>
-                        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                            <Building2 className="h-7 w-7 text-[#147da2]" />
-                            Manage Laboratories
-                        </h1>
-                        <p className="text-slate-500 mt-1">View and manage all registered laboratories</p>
+            <div className="flex h-full flex-1 flex-col bg-slate-50/50">
+                {/* Modern Header Section */}
+                <div className="sawtooth bg-white border-b border-slate-200 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 bg-[#147da2]/10 flex items-center justify-center text-[#147da2]">
+                            <Building2 className="h-6 w-6" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Manage Laboratories</h1>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total registered labs and clinics</p>
+                        </div>
                     </div>
-                    <Button className="bg-[#147da2] hover:bg-[#106385]">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Laboratory
-                    </Button>
-                </div>
-
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <StatCard title="Total Labs" value={labs.length.toString()} icon={Building2} />
-                    <StatCard title="Active Labs" value={activeLabsCount.toString()} icon={Users} color="text-emerald-500" />
-                    <StatCard title="Inactive Labs" value={inactiveLabsCount.toString()} icon={Building2} color="text-rose-500" />
-                </div>
-
-                {/* Filters */}
-                <div className="bg-white border border-slate-200 p-4 mb-6">
-                    <div className="relative max-w-xl">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                        <Input 
-                            placeholder="Search labs by name, code, or phone..." 
-                            className="pl-10 h-10 border-slate-200 focus:border-[#147da2]"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
+                    
+                    <div className="flex items-center gap-2">
+                        <div className="relative w-full md:w-64">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Input 
+                                placeholder="Quick Search..." 
+                                className="pl-9 h-10 border-slate-200 focus:border-[#147da2] bg-slate-50/50"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                        <Button className="h-10 bg-[#147da2] hover:bg-[#106385] font-bold text-xs uppercase tracking-widest shadow-none">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Lab
+                        </Button>
                     </div>
                 </div>
 
-                {/* Labs Table */}
-                <div className="bg-white border border-slate-200 overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+                    <StatBox title="Total Labs" value={labs.length.toString()} icon={Building2} />
+                    <StatBox title="Active Labs" value={activeLabsCount.toString()} icon={Users} color="text-emerald-600" />
+                    <StatBox title="Inactive Labs" value={inactiveLabsCount.toString()} icon={Building2} color="text-rose-600" isLast />
+                </div>
+
+                {/* Main Content Area */}
+                <div className="sawtooth bg-white p-5 border-y border-slate-200">
+                    <div className="mb-4 flex items-center justify-between">
+                        <h2 className="text-[13px] font-bold uppercase tracking-widest text-slate-800 flex items-center gap-2">
+                            <div className="h-1.5 w-1.5 rounded-full bg-[#147da2]" />
+                            Laboratory Directory
+                        </h2>
+                    </div>
+
+                    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200">
+                        <table className="w-full text-left text-sm border-collapse">
                             <thead>
-                                <tr className="bg-slate-50/50 border-b border-slate-200">
-                                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500">Lab Name</th>
-                                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500">Plan & Subscription</th>
-                                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500">Usage</th>
-                                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500">Created On</th>
-                                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500">Status</th>
-                                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 text-right">Actions</th>
+                                <tr className="text-[10px] uppercase tracking-widest text-slate-400 font-bold border-b border-slate-100">
+                                    <th className="px-3 py-3">Lab Details</th>
+                                    <th className="px-3 py-3">Subscription Plan</th>
+                                    <th className="px-3 py-3">Usage Stats</th>
+                                    <th className="px-3 py-3">Status</th>
+                                    <th className="px-3 py-3 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody>
                                 {filteredLabs.map((lab) => (
-                                    <tr key={lab.id} className="hover:bg-slate-50/50 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div>
-                                                <div className="font-bold text-slate-800">{lab.name}</div>
-                                                <div className="text-xs text-slate-400 font-medium">CODE: {lab.code}</div>
+                                    <tr key={lab.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors group">
+                                        <td className="px-3 py-4">
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-slate-800">{lab.name}</span>
+                                                <span className="text-[10px] font-bold uppercase tracking-tighter text-slate-400 italic">ID: {lab.code}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-3 py-4">
                                             <div className="flex flex-col">
-                                                <span className="text-sm font-semibold text-slate-700">{lab.current_plan}</span>
-                                                <Badge variant="outline" className={cn(
-                                                    "w-fit text-[10px] h-5 mt-1 capitalize",
-                                                    lab.subscription_status === 'active' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-slate-400 bg-slate-50'
+                                                <span className="text-xs font-bold text-slate-700">{lab.current_plan}</span>
+                                                <span className={cn(
+                                                    "text-[10px] font-black uppercase tracking-widest mt-0.5",
+                                                    lab.subscription_status === 'active' ? 'text-emerald-500' : 'text-slate-400'
                                                 )}>
-                                                    {lab.subscription_status}
-                                                </Badge>
+                                                    • {lab.subscription_status}
+                                                </span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-3 py-4">
                                             <div className="flex flex-col">
-                                                <div className="text-sm font-bold text-slate-700">
+                                                <span className="text-xs font-bold text-slate-800 italic">
                                                     {lab.bills_used} / {lab.bill_limit || '∞'}
-                                                </div>
-                                                <div className="text-[10px] text-slate-400 font-medium">Bills Processed</div>
+                                                </span>
+                                                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-tighter">Bills Processed</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2 text-sm text-slate-600">
-                                                <Calendar className="h-3.5 w-3.5 opacity-40" />
-                                                {lab.created_at}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <Badge className={cn(
-                                                "rounded-none px-2 py-0.5 text-[10px] font-bold uppercase",
-                                                lab.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                                        <td className="px-3 py-4">
+                                            <span className={cn(
+                                                "px-2 py-0.5 text-[9px] font-black uppercase tracking-widest inline-flex",
+                                                lab.is_active ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'
                                             )}>
                                                 {lab.is_active ? 'Active' : 'Inactive'}
-                                            </Badge>
+                                            </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#147da2]">
-                                                    <Eye className="h-4 w-4" />
-                                                </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#147da2]">
-                                                    <Pencil className="h-4 w-4" />
+                                        <td className="px-3 py-4 text-right">
+                                            <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Link href={`/admin/labs/${lab.id}/switch`} method="post" as="button">
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-[#147da2] hover:bg-[#147da2]/5">
+                                                        <Eye className="h-4 w-4" />
+                                                    </Button>
+                                                </Link>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50">
+                                                    <Pencil className="h-3.5 w-3.5" />
                                                 </Button>
                                                 
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="outline" className="h-8 w-8 p-0 border-slate-200">
-                                                            <Settings className="h-4 w-4 text-[#147da2]" />
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900">
+                                                            <Settings className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-56">
-                                                        <DropdownMenuLabel>Laboratory Settings</DropdownMenuLabel>
+                                                    <DropdownMenuContent align="end" className="w-56 shadow-2xl border-slate-200">
+                                                        <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Settings</DropdownMenuLabel>
                                                         <DropdownMenuSeparator />
-                                                        <DropdownMenuItem onClick={() => handleAssignPlan(lab)}>
-                                                            <CreditCard className="mr-2 h-4 w-4" />
-                                                            <span>Assign/Upgrade Plan</span>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem asChild>
-                                                            <Link href="/admin/labs/features">
-                                                                <Settings className="mr-2 h-4 w-4" />
-                                                                <span>Manage Features</span>
+                                                        <DropdownMenuItem asChild className="cursor-pointer">
+                                                            <Link 
+                                                                href={`/admin/labs/${lab.id}/switch`} 
+                                                                method="post" 
+                                                                as="button"
+                                                                className="w-full flex items-center text-xs font-bold"
+                                                            >
+                                                                <Eye className="mr-2 h-4 w-4 text-[#147da2]" />
+                                                                View Lab Interface
                                                             </Link>
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem>
-                                                            <Users className="mr-2 h-4 w-4" />
-                                                            <span>Manage Users</span>
+                                                        <DropdownMenuItem onClick={() => handleAssignPlan(lab)} className="cursor-pointer text-xs font-bold">
+                                                            <CreditCard className="mr-2 h-4 w-4 text-emerald-500" />
+                                                            Assign/Upgrade Plan
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem asChild className="cursor-pointer text-xs font-bold">
+                                                            <Link href="/admin/labs/features">
+                                                                <Settings className="mr-2 h-4 w-4 text-amber-500" />
+                                                                Manage Features
+                                                            </Link>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuSeparator />
-                                                        <DropdownMenuItem className="text-rose-600">
-                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                            <span>Delete Laboratory</span>
+                                                        <DropdownMenuItem className="text-rose-600 cursor-pointer text-xs font-bold focus:bg-rose-50">
+                                                            <Trash2 className="mr-2 h-4 w-4 text-rose-500" />
+                                                            Delete Laboratory
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
@@ -244,66 +252,74 @@ export default function ManageLabs({ labs, plans }: Props) {
                         </table>
                     </div>
                 </div>
-
-                {/* Assign Plan Dialog */}
-                <Dialog open={isAssignPlanOpen} onOpenChange={setIsAssignPlanOpen}>
-                    <DialogContent className="sm:max-w-[450px]">
-                        <form onSubmit={submitAssignPlan}>
-                            <DialogHeader>
-                                <DialogTitle>Assign Subscription Plan</DialogTitle>
-                                <DialogDescription>
-                                    Assign a new billing plan to <span className="font-bold text-slate-900">{selectedLab?.name}</span>.
-                                    This will override any existing active plan.
-                                </DialogDescription>
-                            </DialogHeader>
-
-                            <div className="grid gap-4 py-4">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="plan">Select Plan</Label>
-                                    <Select 
-                                        value={planData.subscription_plan_id} 
-                                        onValueChange={(val) => setPlanData('subscription_plan_id', val)}
-                                    >
-                                        <SelectTrigger id="plan">
-                                            <SelectValue placeholder="Choose a plan..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {plans.map(plan => (
-                                                <SelectItem key={plan.id} value={plan.id.toString()}>
-                                                    {plan.name} ({plan.type === 'subscription' ? 'Prepaid' : 'Usage Based'})
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-
-                            <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setIsAssignPlanOpen(false)}>
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={planProcessing} className="bg-[#147da2] hover:bg-[#106385]">
-                                    Assign Plan Now
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
             </div>
+
+            {/* Assign Plan Dialog - Modernized */}
+            <Dialog open={isAssignPlanOpen} onOpenChange={setIsAssignPlanOpen}>
+                <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden border-none shadow-3xl">
+                    <div className="bg-[#147da2] p-6 text-white relative">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl" />
+                        <DialogTitle className="text-xl font-bold tracking-tight">Assign Subscription Plan</DialogTitle>
+                        <DialogDescription className="text-white/70 text-xs mt-1">
+                            Set or upgrade the billing plan for <span className="font-bold text-white uppercase italic">{selectedLab?.name}</span>.
+                        </DialogDescription>
+                    </div>
+
+                    <form onSubmit={submitAssignPlan} className="p-6 bg-white">
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="plan" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Available Plans</Label>
+                                <Select 
+                                    value={planData.subscription_plan_id} 
+                                    onValueChange={(val) => setPlanData('subscription_plan_id', val)}
+                                >
+                                    <SelectTrigger id="plan" className="h-11 border-slate-200 bg-slate-50/50">
+                                        <SelectValue placeholder="Choose a strategic plan..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {plans.map(plan => (
+                                            <SelectItem key={plan.id} value={plan.id.toString()}>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-bold">{plan.name}</span>
+                                                    <span className="text-[9px] font-black uppercase text-slate-400 italic px-1.5 py-0.5 bg-slate-100">
+                                                        {plan.type === 'subscription' ? 'Prepaid' : 'Per Bill'}
+                                                    </span>
+                                                </div>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 flex gap-3">
+                            <Button type="button" variant="ghost" onClick={() => setIsAssignPlanOpen(false)} className="flex-1 font-bold text-xs uppercase tracking-widest text-slate-400">
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={planProcessing} className="flex-1 bg-[#147da2] hover:bg-[#106385] font-bold text-xs uppercase tracking-widest shadow-xl">
+                                {planProcessing ? 'Processing...' : 'Apply Plan'}
+                            </Button>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }
 
-function StatCard({ title, value, icon: Icon, color = "text-slate-900" }: { title: string, value: string, icon: any, color?: string }) {
+function StatBox({ title, value, icon: Icon, color = "text-slate-900", isLast = false }: { title: string, value: string, icon: any, color?: string, isLast?: boolean }) {
     return (
-        <div className="bg-white border border-slate-200 p-6 flex items-center justify-between group hover:border-[#147da2] transition-colors">
-            <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">{title}</p>
-                <h4 className={cn("text-2xl font-black", color)}>{value}</h4>
+        <div className={cn(
+            "sawtooth bg-white p-5 border-y border-r border-t-0 border-slate-200",
+            isLast && "border-r-0"
+        )}>
+            <div className="flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{title}</p>
+                <div className="h-8 w-8 flex items-center justify-center bg-slate-50 text-slate-400">
+                    <Icon className="h-4 w-4" />
+                </div>
             </div>
-            <div className="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center text-[#147da2] group-hover:bg-[#147da2] group-hover:text-white transition-all">
-                <Icon className="h-6 w-6" />
-            </div>
+            <p className={cn("mt-2 text-2xl font-black italic", color)}>{value}</p>
         </div>
     );
 }

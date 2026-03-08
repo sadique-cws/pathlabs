@@ -16,7 +16,10 @@ class EnsureLabContext
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $labId = $request->user()?->lab_id;
+        // Check session first (for impersonation)
+        $switchedLabId = session('switched_lab_id');
+
+        $labId = $switchedLabId ?? $request->user()?->lab_id;
 
         if ($labId === null || (int) $labId <= 0) {
             $labId = $request->integer('lab_id');
@@ -26,7 +29,7 @@ class EnsureLabContext
             $labId = (int) $request->header('X-Lab-Id', 0);
         }
 
-        if ((int) $labId <= 0 && ($request->user()?->hasRole('admin') || $request->user()?->hasRole('super_admin'))) {
+        if ((int) $labId <= 0 && $request->user()?->hasRole('admin')) {
             $labId = (int) Lab::query()->value('id');
         }
 

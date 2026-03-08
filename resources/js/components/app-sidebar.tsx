@@ -113,7 +113,7 @@ const frontDeskSections: MenuSection[] = [
     },
 ];
 
-function SidebarLogo() {
+function SidebarLogo({ currentLabName }: { currentLabName?: string | null }) {
     return (
         <div className="flex items-center gap-3 px-3 py-1.5 group cursor-default">
             <div className="relative flex h-10 w-10 shrink-0 items-center justify-center bg-[#147da2] transition-transform duration-500 group-hover:scale-105">
@@ -124,18 +124,30 @@ function SidebarLogo() {
                 <p className="text-[16px] font-bold tracking-tight text-[#147da2]">PATH<span className="text-slate-900">LABS</span></p>
                 <div className="flex items-center gap-1">
                     <div className="h-1 w-1 rounded-full bg-emerald-500" />
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-400">Diagnostic Suite</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.05em] text-slate-400 max-w-[120px] truncate">
+                        {currentLabName || 'Diagnostic Suite'}
+                    </p>
                 </div>
             </div>
         </div>
     );
 }
 
-function PermissionMenuSection({ section, permissions }: { section: MenuSection; permissions: string[] }) {
+function PermissionMenuSection({ section, permissions, isAdmin }: { section: MenuSection; permissions: string[]; isAdmin: boolean }) {
     const { currentUrl } = useCurrentUrl();
     const [open, setOpen] = useState(false);
     const SectionIcon = section.icon;
-    const visibleItems = section.items.filter((item) => permissions.includes(item.permission));
+    
+    // Filter items based on permissions AND exclude specific items for admins if needed
+    const visibleItems = section.items.filter((item) => {
+        const hasPermission = permissions.includes(item.permission);
+        if (!hasPermission) return false;
+
+        // Hide "My Subscription" for total admins as they manage plans globally
+        if (isAdmin && item.title === 'My Subscription') return false;
+
+        return true;
+    });
 
     useEffect(() => {
         const isChildActive = visibleItems.some((item) => currentUrl.startsWith(item.matchPrefix));
@@ -237,8 +249,10 @@ function SidebarUserFooter() {
 export function AppSidebar() {
     const page = usePage();
     const { currentUrl } = useCurrentUrl();
-    const permissions = (page.props.access as { permissions?: string[] } | undefined)?.permissions ?? [];
-    const canAccessAdmin = permissions.includes('admin.labs.features');
+    const access = (page.props.access as { permissions?: string[]; is_admin?: boolean } | undefined);
+    const permissions = access?.permissions ?? [];
+    const isAdmin = access?.is_admin ?? false;
+    const canAccessAdmin = permissions.includes('admin.labs.features') || isAdmin;
     const canAccessFrontDesk = permissions.includes('front_desk.access') || frontDeskSections.some((section) => section.items.some((item) => permissions.includes(item.permission)));
 
     const [scrolled, setScrolled] = useState(false);
@@ -249,6 +263,8 @@ export function AppSidebar() {
         handleScroll();
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    const currentLab = (page.props.currentLab as { id: number; name: string | null } | undefined);
 
     return (
         <Sidebar 
@@ -261,7 +277,7 @@ export function AppSidebar() {
         >
             <SidebarHeader className="border-b border-slate-100 bg-slate-50/30 pb-3 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#147da2]/5 rounded-full -mr-16 -mt-16 blur-3xl pointer-events-none" />
-                <SidebarLogo />
+                <SidebarLogo currentLabName={currentLab?.name} />
                 {canAccessFrontDesk && (
                     <div className="mt-2 px-[1.1rem]">
                         <div className="flex items-center gap-2 py-1 px-2 bg-[#147da2]/5 border border-[#147da2]/10 rounded-none w-fit">
@@ -276,7 +292,7 @@ export function AppSidebar() {
 
             <SidebarContent className="space-y-1.5 py-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
                 {canAccessFrontDesk && frontDeskSections.map((section) => (
-                    <PermissionMenuSection key={section.key} section={section} permissions={permissions} />
+                    <PermissionMenuSection key={section.key} section={section} permissions={permissions} isAdmin={isAdmin} />
                 ))}
 
                 {canAccessAdmin && (

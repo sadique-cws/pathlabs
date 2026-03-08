@@ -71,6 +71,11 @@ class HandleInertiaRequests extends Middleware
                 'permissions' => $accessPermissions,
                 'roles' => $accessRoles,
                 'is_admin' => $isAdmin,
+                'is_impersonating' => $request->session()->has('switched_lab_id'),
+            ],
+            'currentLab' => [
+                'id' => $labId,
+                'name' => $labId > 0 ? Lab::where('id', $labId)->value('name') : null,
             ],
             'flash' => [
                 'success' => fn(): ?string => $request->session()->get('success'),

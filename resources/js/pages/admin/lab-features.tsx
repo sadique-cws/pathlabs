@@ -62,6 +62,7 @@ const labelMap: Record<string, string> = {
     admin: 'Admin',
     samples: 'Samples',
     test_result: 'Test Results',
+    doctor_portal: 'Doctor Portal',
 };
 
 function toLabel(value: string): string {
@@ -95,6 +96,12 @@ const ROLE_PRESETS: Record<string, { label: string; description: string; slugs: 
         description: 'View reports, approve results, manage patients',
         slugs: [
             'dashboard.view',
+            'doctor_portal.access',
+            'doctor_portal.referred_patients',
+            'doctor_portal.appointments',
+            'doctor_portal.leave_management',
+            'doctor_portal.commissions',
+            'doctor_portal.reports',
             'patients.view', 'patients.manage',
             'test_result.entry', 'reports.result_entry',
             'reports.test_units', 'reports.test_methods',

@@ -9,7 +9,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 it('loads doctor list with gift totals for current lab', function () {
     $lab = Lab::factory()->create();
     $user = User::factory()->create(['lab_id' => $lab->id]);
-    $doctor = Doctor::factory()->create(['lab_id' => $lab->id, 'name' => 'Dr. Gift']);
+    $doctor = Doctor::factory()->create(['lab_id' => $lab->id, 'name' => 'Dr. Gift', 'doctor_type' => 'lab_doctor']);
 
     DoctorCommission::query()->create([
         'lab_id' => $lab->id,
@@ -33,7 +33,7 @@ it('loads doctor list with gift totals for current lab', function () {
 it('searches existing doctor on add page and creates only if not exists', function () {
     $lab = Lab::factory()->create();
     $user = User::factory()->create(['lab_id' => $lab->id]);
-    $existing = Doctor::factory()->create(['lab_id' => $lab->id, 'name' => 'Dr. Existing', 'phone' => '9000011111']);
+    $existing = Doctor::factory()->create(['lab_id' => $lab->id, 'name' => 'Dr. Existing', 'phone' => '9000011111', 'doctor_type' => 'lab_doctor']);
 
     $this->actingAs($user)
         ->post('/lab/doctors', [
@@ -63,7 +63,7 @@ it('searches existing doctor on add page and creates only if not exists', functi
 it('updates doctor created by the same lab', function () {
     $lab = Lab::factory()->create();
     $user = User::factory()->create(['lab_id' => $lab->id]);
-    $doctor = Doctor::factory()->create(['lab_id' => $lab->id, 'name' => 'Dr. Old']);
+    $doctor = Doctor::factory()->create(['lab_id' => $lab->id, 'name' => 'Dr. Old', 'doctor_type' => 'lab_doctor']);
 
     $this->actingAs($user)
         ->put("/lab/doctors/{$doctor->id}", [

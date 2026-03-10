@@ -9,6 +9,8 @@ type DoctorRow = {
     name: string;
     email: string | null;
     phone: string | null;
+    specialization: string | null;
+    consultation_fee: number;
     gift_total: number;
     status: string;
     created_date: string | null;
@@ -25,7 +27,7 @@ type Props = {
 
 export default function ManageDoctors({ doctors, stats }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Doctor List', href: '/lab/doctors/manage' },
+        { title: 'Lab Doctors', href: '/lab/doctors/manage' },
     ];
     const [search, setSearch] = useState('');
 
@@ -42,7 +44,7 @@ export default function ManageDoctors({ doctors, stats }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Referral Doctors List" />
+            <Head title="Lab Doctors List" />
 
             <div className="min-h-full bg-slate-50/80 p-0">
                 <div className="sawtooth flex justify-between border-b-0 border-slate-200 bg-white p-3 sm:p-4 border-b">
@@ -51,20 +53,20 @@ export default function ManageDoctors({ doctors, stats }: Props) {
                         <input 
                             value={search} 
                             onChange={(e) => setSearch(e.target.value)} 
-                            placeholder="Search referral doctors by name, email, or phone..." 
+                            placeholder="Search lab doctors by name, email, or phone..." 
                             className="h-10 w-full  border border-slate-200 bg-slate-50/20 pl-10 pr-3 text-sm outline-none transition focus:bg-white focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" 
                         />
                     </label>
 
                     {/* add doctor */}
                     <Link href="/lab/doctors/add" className="inline-flex items-center justify-center  bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385] w-full sm:w-auto">
-                        + Add Referral Doctor
+                        + Add Lab Doctor
                     </Link>
                 </div>
 
                 <div className="sawtooth grid grid-cols-2 sm:grid-cols-3">
                     <div className="sawtooth border-r border-t border-slate-200 bg-white p-3 sm:p-4">
-                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">Total Referral Doctors</p>
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">Total Lab Doctors</p>
                         <p className="mt-1 text-xl sm:text-2xl font-bold text-slate-800">{stats.total}</p>
                     </div>
                     <div className="sawtooth border-r border-t border-slate-200 bg-white p-3 sm:p-4">
@@ -85,6 +87,8 @@ export default function ManageDoctors({ doctors, stats }: Props) {
                                     <th className="px-3 py-3">Username</th>
                                     <th className="px-3 py-3">Email</th>
                                     <th className="px-3 py-3">Phone</th>
+                                    <th className="px-3 py-3">Specialization</th>
+                                    <th className="px-3 py-3">Fee</th>
                                     <th className="px-3 py-3">Gift</th>
                                     <th className="px-3 py-3">Status</th>
                                     <th className="px-3 py-3">Created Date</th>
@@ -97,6 +101,8 @@ export default function ManageDoctors({ doctors, stats }: Props) {
                                         <td className="px-3 py-3 font-medium text-slate-800">{doctor.name}</td>
                                         <td className="px-3 py-3">{doctor.email ?? '-'}</td>
                                         <td className="px-3 py-3">{doctor.phone ?? '-'}</td>
+                                        <td className="px-3 py-3">{doctor.specialization ?? '-'}</td>
+                                        <td className="px-3 py-3">₹{doctor.consultation_fee.toFixed(2)}</td>
                                         <td className="px-3 py-3 font-mono text-xs">{doctor.gift_total > 0 ? `₹${doctor.gift_total.toFixed(2)}` : 'Not Assigned'}</td>
                                         <td className="px-3 py-3">
                                             <span className={`inline-flex items-center  px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${doctor.status === 'Accepted' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
@@ -113,8 +119,8 @@ export default function ManageDoctors({ doctors, stats }: Props) {
                                 ))}
                                 {filtered.length === 0 && (
                                     <tr>
-                                        <td colSpan={7} className="px-3 py-8 text-center text-sm text-slate-500">
-                                            No referral doctors found.
+                                        <td colSpan={9} className="px-3 py-8 text-center text-sm text-slate-500">
+                                            No lab doctors found.
                                         </td>
                                     </tr>
                                 )}

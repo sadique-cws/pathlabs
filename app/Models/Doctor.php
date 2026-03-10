@@ -21,6 +21,10 @@ class Doctor extends Model
         'name',
         'phone',
         'email',
+        'doctor_type',
+        'specialization',
+        'can_approve_reports',
+        'consultation_fee',
         'commission_type',
         'commission_value',
         'is_active',
@@ -33,6 +37,8 @@ class Doctor extends Model
     {
         return [
             'commission_value' => 'decimal:2',
+            'consultation_fee' => 'decimal:2',
+            'can_approve_reports' => 'boolean',
             'is_active' => 'boolean',
         ];
     }
@@ -50,5 +56,15 @@ class Doctor extends Model
     public function commissions(): HasMany
     {
         return $this->hasMany(DoctorCommission::class);
+    }
+
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(DoctorAppointment::class);
+    }
+
+    public function leaves(): HasMany
+    {
+        return $this->hasMany(DoctorLeave::class);
     }
 }

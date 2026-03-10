@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Bill;
+use App\Models\Doctor;
 use App\Models\Lab;
 use Database\Seeders\PanelDemoSeeder;
 
@@ -19,6 +20,7 @@ it('seeds panel accounts and billing demo data', function () {
     expect(Bill::query()->where('lab_id', $lab->id)->count())->toBeGreaterThan(0);
     expect($lab->tests()->count())->toBeGreaterThan(0);
     expect($lab->packages()->count())->toBeGreaterThan(0);
-    expect($lab->doctors()->count())->toBeGreaterThan(0);
+    expect($lab->doctors()->count())->toBeGreaterThanOrEqual(10);
     expect($lab->collectionCenters()->count())->toBeGreaterThan(0);
+    expect(Doctor::query()->where('lab_id', $lab->id)->where('doctor_type', 'lab_doctor')->where('can_approve_reports', true)->count())->toBeGreaterThan(0);
 });

@@ -88,7 +88,7 @@ class User extends Authenticatable
 
             return array_values(array_filter(
                 $defaults,
-                fn(string $slug): bool => $slug !== 'admin.labs.features',
+                fn (string $slug): bool => $slug !== 'admin.labs.features',
             ));
         }
 
@@ -97,7 +97,7 @@ class User extends Authenticatable
         if ($this->hasRole('super_admin') || $this->hasRole('admin')) {
             return array_values(array_filter(
                 $allPermissions,
-                fn(string $slug): bool => $slug !== 'wallet.view' && $slug !== 'wallet.topup'
+                fn (string $slug): bool => $slug !== 'wallet.view' && $slug !== 'wallet.topup'
             ));
         }
 
@@ -167,6 +167,12 @@ class User extends Authenticatable
             'reports.test_methods',
             'reports.sample_management',
             'reports.result_entry',
+            'doctor_portal.access',
+            'doctor_portal.referred_patients',
+            'doctor_portal.appointments',
+            'doctor_portal.leave_management',
+            'doctor_portal.commissions',
+            'doctor_portal.reports',
             'wallet.view',
             'wallet.topup',
             'clinical_master.manage_tests',
@@ -177,7 +183,7 @@ class User extends Authenticatable
         if ($this->hasRole('admin') || $this->hasRole('super_admin')) {
             return array_values(array_filter(
                 $slugs,
-                fn(string $slug): bool => $slug !== 'wallet.view' && $slug !== 'wallet.topup'
+                fn (string $slug): bool => $slug !== 'wallet.view' && $slug !== 'wallet.topup'
             ));
         }
 

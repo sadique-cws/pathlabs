@@ -18,6 +18,7 @@ class DoctorController extends Controller
 
         $doctors = Doctor::query()
             ->where('lab_id', $labId)
+            ->where('doctor_type', 'lab_doctor')
             ->withSum('commissions as gifts_total', 'amount')
             ->latest('id')
             ->get()
@@ -26,6 +27,8 @@ class DoctorController extends Controller
                 'name' => $doctor->name,
                 'email' => $doctor->email,
                 'phone' => $doctor->phone,
+                'specialization' => $doctor->specialization,
+                'consultation_fee' => (float) $doctor->consultation_fee,
                 'gift_total' => round((float) ($doctor->gifts_total ?? 0), 2),
                 'status' => $doctor->is_active ? 'Accepted' : 'Inactive',
                 'created_date' => $doctor->created_at?->format('d/m/Y'),
@@ -49,6 +52,7 @@ class DoctorController extends Controller
         $labId = (int) $request->attributes->get('lab_id');
         $existingDoctors = Doctor::query()
             ->where('lab_id', $labId)
+            ->where('doctor_type', 'lab_doctor')
             ->orderBy('name')
             ->get(['id', 'name', 'phone', 'email'])
             ->values();
@@ -69,6 +73,7 @@ class DoctorController extends Controller
 
         $existingDoctor = Doctor::query()
             ->where('lab_id', $labId)
+            ->where('doctor_type', 'lab_doctor')
             ->whereRaw('LOWER(name) = ?', [mb_strtolower($name)])
             ->when($phone !== '', fn ($query) => $query->where('phone', $phone))
             ->first();
@@ -83,6 +88,10 @@ class DoctorController extends Controller
             'name' => $name,
             'phone' => $phone !== '' ? $phone : null,
             'email' => $email !== '' ? $email : null,
+            'doctor_type' => 'lab_doctor',
+            'specialization' => $data['specialization'] ?? null,
+            'can_approve_reports' => (bool) ($data['can_approve_reports'] ?? true),
+            'consultation_fee' => (float) ($data['consultation_fee'] ?? 500),
             'commission_type' => $data['commission_type'] ?? 'percent',
             'commission_value' => (float) ($data['commission_value'] ?? 0),
             'is_active' => (bool) ($data['is_active'] ?? true),
@@ -96,6 +105,7 @@ class DoctorController extends Controller
     {
         $labId = (int) $request->attributes->get('lab_id');
         abort_if($doctor->lab_id !== $labId, 404);
+        abort_if($doctor->doctor_type !== 'lab_doctor', 404);
 
         $doctor->loadSum('commissions as gifts_total', 'amount');
 
@@ -107,6 +117,9 @@ class DoctorController extends Controller
                 'email' => $doctor->email,
                 'commission_type' => $doctor->commission_type,
                 'commission_value' => (float) $doctor->commission_value,
+                'specialization' => $doctor->specialization,
+                'consultation_fee' => (float) $doctor->consultation_fee,
+                'can_approve_reports' => (bool) $doctor->can_approve_reports,
                 'is_active' => (bool) $doctor->is_active,
                 'gift_total' => round((float) ($doctor->gifts_total ?? 0), 2),
             ],
@@ -117,6 +130,7 @@ class DoctorController extends Controller
     {
         $labId = (int) $request->attributes->get('lab_id');
         abort_if($doctor->lab_id !== $labId, 404);
+        abort_if($doctor->doctor_type !== 'lab_doctor', 404);
 
         $data = $request->validated();
 
@@ -124,6 +138,9 @@ class DoctorController extends Controller
             'name' => trim((string) $data['name']),
             'phone' => isset($data['phone']) && trim((string) $data['phone']) !== '' ? trim((string) $data['phone']) : null,
             'email' => isset($data['email']) && trim((string) $data['email']) !== '' ? trim((string) $data['email']) : null,
+            'specialization' => $data['specialization'] ?? null,
+            'consultation_fee' => (float) ($data['consultation_fee'] ?? 500),
+            'can_approve_reports' => (bool) ($data['can_approve_reports'] ?? true),
             'commission_type' => $data['commission_type'] ?? 'percent',
             'commission_value' => (float) ($data['commission_value'] ?? 0),
             'is_active' => (bool) ($data['is_active'] ?? true),

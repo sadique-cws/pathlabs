@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreDoctorRequest extends FormRequest
+class UpdateAdminDoctorRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,11 +26,12 @@ class StoreDoctorRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:255'],
             'specialization' => ['nullable', 'string', 'max:120'],
-            'consultation_fee' => ['nullable', 'numeric', 'min:0'],
-            'can_approve_reports' => ['nullable', 'boolean'],
-            'commission_type' => ['nullable', 'in:fixed,percent'],
-            'commission_value' => ['nullable', 'numeric', 'min:0'],
-            'is_active' => ['nullable', 'boolean'],
+            'doctor_type' => ['required', 'in:lab_doctor,specialist'],
+            'consultation_fee' => ['required', 'numeric', 'min:0'],
+            'is_active' => ['required', 'boolean'],
+            'can_approve_reports' => ['required', 'boolean'],
+            'commission_type' => ['required', 'in:fixed,percent'],
+            'commission_value' => ['required', 'numeric', 'min:0'],
         ];
     }
 }

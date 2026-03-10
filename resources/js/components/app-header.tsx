@@ -179,6 +179,18 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
                             <span>Manage Bills</span>
                         </Link>
                     )}
+                    {permissions?.includes('doctor_portal.referred_patients') && (
+                        <Link href="/doctor/referred-patients" className="flex items-center gap-2 text-sm font-medium hover:text-white/80 transition-colors">
+                            <Stethoscope className="h-4 w-4" />
+                            <span>Referred Patients</span>
+                        </Link>
+                    )}
+                    {permissions?.includes('doctor_portal.appointments') && (
+                        <Link href="/doctor/appointments" className="flex items-center gap-2 text-sm font-medium hover:text-white/80 transition-colors">
+                            <PlusCircle className="h-4 w-4" />
+                            <span>Appointments</span>
+                        </Link>
+                    )}
                 </div>
             </div>
 

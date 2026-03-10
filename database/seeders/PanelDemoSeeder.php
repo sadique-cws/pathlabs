@@ -6,11 +6,13 @@ use App\Models\Bill;
 use App\Models\CollectionCenter;
 use App\Models\Doctor;
 use App\Models\Lab;
+use App\Models\LabSubscription;
 use App\Models\LabTest;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\SampleCollectionSource;
 use App\Models\ServiceCharge;
+use App\Models\SubscriptionPlan;
 use App\Models\TestPackage;
 use App\Models\User;
 use App\Models\Wallet;
@@ -35,20 +37,40 @@ class PanelDemoSeeder extends Seeder
                 'is_active' => true,
             ],
         );
-
-        $this->seedPanelUsers($lab, $rolesBySlug);
-        $this->seedLabFeatureAccess($lab, $permissionsBySlug);
-
-        $doctor = Doctor::query()->updateOrCreate(
-            ['lab_id' => $lab->id, 'email' => 'doctor@pathlabs.test'],
+        $payAsYouGoPlan = SubscriptionPlan::query()->updateOrCreate(
+            ['name' => 'Pay As You Go'],
             [
-                'name' => 'Dr. Aaryan Sharma',
-                'phone' => '9999992001',
-                'commission_type' => 'percent',
-                'commission_value' => 10,
+                'type' => 'pay_as_you_go',
+                'price' => 15.00,
+                'duration_months' => null,
+                'bill_limit' => null,
+                'description' => 'Pay per bill.',
                 'is_active' => true,
             ],
         );
+        LabSubscription::query()
+            ->where('lab_id', $lab->id)
+            ->update(['is_current' => false]);
+        LabSubscription::query()->updateOrCreate(
+            ['lab_id' => $lab->id, 'subscription_plan_id' => $payAsYouGoPlan->id],
+            [
+                'status' => 'active',
+                'starts_at' => now()->subDay(),
+                'ends_at' => null,
+                'bill_limit' => null,
+                'bills_used' => 0,
+                'is_current' => true,
+            ],
+        );
+
+        $this->seedPanelUsers($lab, $rolesBySlug);
+        $this->seedLabFeatureAccess($lab, $permissionsBySlug);
+        $this->seedDoctorPortalUsers($lab, $rolesBySlug);
+
+        $doctor = Doctor::query()
+            ->where('lab_id', $lab->id)
+            ->where('email', 'doctor@pathlabs.test')
+            ->firstOrFail();
 
         $collectionCenter = CollectionCenter::query()->updateOrCreate(
             ['lab_id' => $lab->id, 'name' => 'City Collection Hub'],
@@ -222,6 +244,12 @@ class PanelDemoSeeder extends Seeder
             ['slug' => 'doctor_desk.records', 'name' => 'Lab Doctor Desk - Doctor Records', 'group' => 'front_desk'],
             ['slug' => 'procurement.vendors', 'name' => 'Procurement - Vendor Directory', 'group' => 'front_desk'],
             ['slug' => 'procurement.orders', 'name' => 'Procurement - Purchase Orders', 'group' => 'front_desk'],
+            ['slug' => 'doctor_portal.access', 'name' => 'Doctor Portal Access', 'group' => 'doctor_portal'],
+            ['slug' => 'doctor_portal.referred_patients', 'name' => 'Doctor Portal - Referred Patients', 'group' => 'doctor_portal'],
+            ['slug' => 'doctor_portal.appointments', 'name' => 'Doctor Portal - Appointments', 'group' => 'doctor_portal'],
+            ['slug' => 'doctor_portal.leave_management', 'name' => 'Doctor Portal - Leave Management', 'group' => 'doctor_portal'],
+            ['slug' => 'doctor_portal.commissions', 'name' => 'Doctor Portal - Gift Commissions', 'group' => 'doctor_portal'],
+            ['slug' => 'doctor_portal.reports', 'name' => 'Doctor Portal - Reports', 'group' => 'doctor_portal'],
             ['slug' => 'wallet.view', 'name' => 'Wallet - View Balance', 'group' => 'billing'],
             ['slug' => 'wallet.topup', 'name' => 'Wallet - Add Funds', 'group' => 'billing'],
             ['slug' => 'admin.labs.features', 'name' => 'Admin Lab Features', 'group' => 'admin'],
@@ -290,6 +318,12 @@ class PanelDemoSeeder extends Seeder
                 'reports.test_methods',
                 'reports.sample_management',
                 'doctor_desk.records',
+                'doctor_portal.access',
+                'doctor_portal.referred_patients',
+                'doctor_portal.appointments',
+                'doctor_portal.leave_management',
+                'doctor_portal.commissions',
+                'doctor_portal.reports',
             ],
             'front_desk' => [
                 'dashboard.view',
@@ -319,7 +353,7 @@ class PanelDemoSeeder extends Seeder
 
         foreach ($rolePermissionMap as $roleSlug => $permissionSlugs) {
             $permissionIds = collect($permissionSlugs)
-                ->map(fn(string $slug): ?int => $permissionsBySlug[$slug]->id ?? null)
+                ->map(fn (string $slug): ?int => $permissionsBySlug[$slug]->id ?? null)
                 ->filter()
                 ->values();
 
@@ -357,6 +391,11 @@ class PanelDemoSeeder extends Seeder
             if ($role !== null) {
                 $user->roles()->sync([$role->id]);
             }
+
+            Wallet::query()->updateOrCreate(
+                ['walletable_type' => User::class, 'walletable_id' => $user->id],
+                ['lab_id' => $lab->id, 'currency' => 'INR', 'balance' => 10000],
+            );
         }
     }
 
@@ -391,6 +430,12 @@ class PanelDemoSeeder extends Seeder
             'clinical_master.manage_tests',
             'clinical_master.manage_packages',
             'clinical_master.manage_groups',
+            'doctor_portal.access',
+            'doctor_portal.referred_patients',
+            'doctor_portal.appointments',
+            'doctor_portal.leave_management',
+            'doctor_portal.commissions',
+            'doctor_portal.reports',
         ];
 
         $syncData = [];
@@ -406,7 +451,63 @@ class PanelDemoSeeder extends Seeder
     }
 
     /**
-     * @param \Illuminate\Support\Collection<int, LabTest> $tests
+     * @param  array<string, Role>  $rolesBySlug
+     */
+    private function seedDoctorPortalUsers(Lab $lab, array $rolesBySlug): void
+    {
+        $doctors = [
+            ['name' => 'Dr. Aaryan Sharma', 'email' => 'doctor@pathlabs.test', 'phone' => '9999992001', 'doctor_type' => 'lab_doctor', 'specialization' => 'Pathologist', 'can_approve_reports' => true, 'consultation_fee' => 600],
+            ['name' => 'Dr. Priya Sen', 'email' => 'doctor1@pathlabs.test', 'phone' => '9999992002', 'doctor_type' => 'lab_doctor', 'specialization' => 'Hematopathologist', 'can_approve_reports' => true, 'consultation_fee' => 700],
+            ['name' => 'Dr. Rohan Mehta', 'email' => 'doctor2@pathlabs.test', 'phone' => '9999992003', 'doctor_type' => 'lab_doctor', 'specialization' => 'Radiologist', 'can_approve_reports' => true, 'consultation_fee' => 800],
+            ['name' => 'Dr. Neha Kulkarni', 'email' => 'doctor3@pathlabs.test', 'phone' => '9999992004', 'doctor_type' => 'specialist', 'specialization' => 'Cardiologist', 'can_approve_reports' => false, 'consultation_fee' => 900],
+            ['name' => 'Dr. Sameer Khan', 'email' => 'doctor4@pathlabs.test', 'phone' => '9999992005', 'doctor_type' => 'specialist', 'specialization' => 'Gastroenterologist', 'can_approve_reports' => false, 'consultation_fee' => 850],
+            ['name' => 'Dr. Kavya Iyer', 'email' => 'doctor5@pathlabs.test', 'phone' => '9999992006', 'doctor_type' => 'specialist', 'specialization' => 'Neurologist', 'can_approve_reports' => false, 'consultation_fee' => 950],
+            ['name' => 'Dr. Arjun Rao', 'email' => 'doctor6@pathlabs.test', 'phone' => '9999992007', 'doctor_type' => 'specialist', 'specialization' => 'Orthopedic', 'can_approve_reports' => false, 'consultation_fee' => 750],
+            ['name' => 'Dr. Sana Qureshi', 'email' => 'doctor7@pathlabs.test', 'phone' => '9999992008', 'doctor_type' => 'specialist', 'specialization' => 'Pediatrician', 'can_approve_reports' => false, 'consultation_fee' => 650],
+            ['name' => 'Dr. Vikram Das', 'email' => 'doctor8@pathlabs.test', 'phone' => '9999992009', 'doctor_type' => 'specialist', 'specialization' => 'Oncologist', 'can_approve_reports' => false, 'consultation_fee' => 1000],
+            ['name' => 'Dr. Nisha Paul', 'email' => 'doctor9@pathlabs.test', 'phone' => '9999992010', 'doctor_type' => 'specialist', 'specialization' => 'General Physician', 'can_approve_reports' => false, 'consultation_fee' => 500],
+        ];
+
+        foreach ($doctors as $doctorData) {
+            $doctor = Doctor::query()->updateOrCreate(
+                ['lab_id' => $lab->id, 'email' => $doctorData['email']],
+                [
+                    'name' => $doctorData['name'],
+                    'phone' => $doctorData['phone'],
+                    'doctor_type' => $doctorData['doctor_type'],
+                    'specialization' => $doctorData['specialization'],
+                    'can_approve_reports' => $doctorData['can_approve_reports'],
+                    'consultation_fee' => $doctorData['consultation_fee'],
+                    'commission_type' => 'percent',
+                    'commission_value' => 10,
+                    'is_active' => true,
+                ],
+            );
+
+            Wallet::query()->updateOrCreate(
+                ['walletable_type' => Doctor::class, 'walletable_id' => $doctor->id],
+                ['lab_id' => $lab->id, 'currency' => 'INR', 'balance' => 0],
+            );
+
+            $user = User::query()->updateOrCreate(
+                ['email' => $doctorData['email']],
+                [
+                    'lab_id' => $lab->id,
+                    'name' => $doctorData['name'],
+                    'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
+                ],
+            );
+
+            $doctorRole = $rolesBySlug['doctor'] ?? null;
+            if ($doctorRole !== null) {
+                $user->roles()->sync([$doctorRole->id]);
+            }
+        }
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, LabTest>  $tests
      */
     private function seedTestParameters(\Illuminate\Support\Collection $tests): void
     {

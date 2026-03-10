@@ -1,14 +1,18 @@
 <?php
 
+use App\Http\Controllers\Admin\DoctorManagementController as AdminDoctorManagementController;
 use App\Http\Controllers\Admin\LabFeatureController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DoctorController;
-use App\Http\Controllers\Lab\WalletController;
+use App\Http\Controllers\DoctorPortalController;
 use App\Http\Controllers\Lab\StaffController;
+use App\Http\Controllers\Lab\WalletController;
 use App\Http\Controllers\PatientController;
-use App\Http\Controllers\TestReportController;
+use App\Http\Controllers\PublicDoctorAppointmentController;
 use App\Http\Controllers\TestParameterController;
+use App\Http\Controllers\TestReportController;
 use App\Http\Middleware\EnsureLabContext;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -16,12 +20,47 @@ Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
+Route::prefix('public')->name('public.')->group(function (): void {
+    Route::get('doctors', [PublicDoctorAppointmentController::class, 'index'])->name('doctors.index');
+    Route::get('doctors/{doctor}/book', [PublicDoctorAppointmentController::class, 'book'])->name('doctors.book');
+    Route::post('appointments', [PublicDoctorAppointmentController::class, 'store'])->name('appointments.store');
+    Route::get('appointments/{token}/success', [PublicDoctorAppointmentController::class, 'success'])->name('appointments.success');
+    Route::get('appointments/{token}/failed', [PublicDoctorAppointmentController::class, 'failed'])->name('appointments.failed');
+    Route::get('appointments/{token}/receipt', [PublicDoctorAppointmentController::class, 'receipt'])->name('appointments.receipt');
+    Route::post('appointments/{token}/cancel', [PublicDoctorAppointmentController::class, 'cancel'])->name('appointments.cancel');
+});
+
+Route::middleware(['auth', 'verified'])->group(function (): void {
+    Route::get('dashboard', function (Request $request) {
+        $user = $request->user();
+
+        if ($user?->hasRole('admin') || $user?->hasRole('super_admin') || $user?->hasRole('bde')) {
+            if ($request->session()->has('switched_lab_id')) {
+                return to_route('lab.dashboard');
+            }
+
+            return to_route('admin.dashboard');
+        }
+
+        if ($user?->hasRole('doctor')) {
+            return to_route('doctor.dashboard');
+        }
+
+        if ((int) ($user?->lab_id ?? 0) > 0) {
+            return to_route('lab.dashboard');
+        }
+
+        return to_route('home');
+    })->name('dashboard');
+});
+
 Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function (): void {
-    Route::get('dashboard', [BillingController::class, 'dashboard'])
-        ->middleware('feature:dashboard.view')
-        ->name('dashboard');
 
     Route::prefix('lab')->name('lab.')->group(function (): void {
+        Route::get('dashboard', [BillingController::class, 'dashboard'])
+            ->middleware('feature:dashboard.view')
+            ->name('dashboard');
+
         Route::get('search', [\App\Http\Controllers\SearchController::class, 'globalSearch'])->name('search');
 
         Route::get('coming-soon', function () {
@@ -180,6 +219,8 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
     });
 
     Route::prefix('admin')->name('admin.')->middleware('ensure.admin')->group(function (): void {
+        Route::get('dashboard', fn () => to_route('admin.labs.index'))->name('dashboard');
+
         Route::get('labs/features', [LabFeatureController::class, 'index'])->name('labs.features');
         Route::get('labs', [\App\Http\Controllers\Admin\LabController::class, 'index'])->name('labs.index');
         Route::post('labs', [\App\Http\Controllers\Admin\LabController::class, 'store'])->name('labs.store');
@@ -199,7 +240,47 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
         Route::post('plans', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'store'])->name('plans.store');
         Route::put('plans/{plan}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'update'])->name('plans.update');
         Route::delete('plans/{plan}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'destroy'])->name('plans.destroy');
+
+        Route::get('doctors', [AdminDoctorManagementController::class, 'index'])->name('doctors.index');
+        Route::get('doctors/{doctor}/edit', [AdminDoctorManagementController::class, 'edit'])->name('doctors.edit');
+        Route::put('doctors/{doctor}', [AdminDoctorManagementController::class, 'update'])->name('doctors.update');
     });
+
+    Route::prefix('doctor')->name('doctor.')->group(function (): void {
+        Route::get('/', fn () => to_route('doctor.dashboard'))->name('index');
+
+        Route::get('dashboard', [DoctorPortalController::class, 'dashboard'])
+            ->middleware('feature:doctor_portal.access')
+            ->name('dashboard');
+        Route::get('referred-patients', [DoctorPortalController::class, 'referredPatients'])
+            ->middleware('feature:doctor_portal.referred_patients')
+            ->name('referred-patients');
+        Route::get('appointments', [DoctorPortalController::class, 'appointments'])
+            ->middleware('feature:doctor_portal.appointments')
+            ->name('appointments');
+        Route::post('appointments', [DoctorPortalController::class, 'storeAppointment'])
+            ->middleware('feature:doctor_portal.appointments')
+            ->name('appointments.store');
+        Route::put('appointments/{appointment}', [DoctorPortalController::class, 'updateAppointment'])
+            ->middleware('feature:doctor_portal.appointments')
+            ->name('appointments.update');
+        Route::get('leaves', [DoctorPortalController::class, 'leaves'])
+            ->middleware('feature:doctor_portal.leave_management')
+            ->name('leaves');
+        Route::post('leaves', [DoctorPortalController::class, 'storeLeave'])
+            ->middleware('feature:doctor_portal.leave_management')
+            ->name('leaves.store');
+        Route::get('commissions', [DoctorPortalController::class, 'commissions'])
+            ->middleware('feature:doctor_portal.commissions')
+            ->name('commissions');
+        Route::get('reports', [DoctorPortalController::class, 'reports'])
+            ->middleware('feature:doctor_portal.reports')
+            ->name('reports');
+    });
+
+    Route::get('lab/doctor/{any}', function (string $any) {
+        return redirect('/doctor/'.$any);
+    })->where('any', '.*');
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';

@@ -1,120 +1,118 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { 
-    ArrowRight, 
-    FlaskConical, 
-    WalletCards, 
-    ShieldCheck, 
-    BarChart3
-} from 'lucide-react';
-import { dashboard, login } from '@/routes';
+import { ArrowRight, Building2, CalendarCheck2, FlaskConical, ShoppingBag, Stethoscope } from 'lucide-react';
 import AppLogoIcon from '@/components/app-logo-icon';
+import { dashboard, login } from '@/routes';
 
 export default function Welcome() {
-    const { auth } = usePage().props;
+    const { auth } = usePage().props as { auth: { user?: unknown } };
 
-    const features = [
+    const modules = [
         {
+            title: 'Pathlogy & Radiology Billing',
+            desc: 'Multi-tenant billing with package/test wise flow, barcode generation, and wallet-linked commissions.',
             icon: FlaskConical,
-            title: 'End-to-End Billing',
-            description: 'Streamlined test and package billing workflows.',
         },
         {
-            icon: WalletCards,
-            title: 'Wallet System',
-            description: 'Automated credit/debit trails for all users.',
+            title: 'Doctor Appointment System',
+            desc: 'Doctor schedules, reschedule/leave handling, referral tracking, and specialist listing.',
+            icon: CalendarCheck2,
         },
         {
-            icon: ShieldCheck,
-            title: 'Secure Reports',
-            description: 'Encrypted reporting and audit trails.',
+            title: 'Doctor Referral Network',
+            desc: 'Doctors can refer patients to partner labs and earn configurable gift commissions.',
+            icon: Stethoscope,
         },
         {
-            icon: BarChart3,
-            title: 'Lab Analytics',
-            description: 'Real-time revenue and patient insights.',
+            title: 'MedixMall Integration',
+            desc: 'Connected ecosystem with medixmall.com for pathology raw materials, medical devices, and medicines.',
+            icon: ShoppingBag,
         },
     ];
 
     return (
         <div className="min-h-screen bg-white text-slate-900">
-            <Head title="PathLabs - Diagnostic Cloud" />
+            <Head title="Dr Mitra - Medical Ecosystem" />
 
-            {/* Simple Header */}
-            <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 border-b border-slate-100">
-                <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center  bg-[#147da2]">
-                        <AppLogoIcon className="size-5 fill-current text-white" />
+            <header className="border-b border-slate-200 bg-white">
+                <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center bg-[#147da2]">
+                            <AppLogoIcon className="h-5 w-5 fill-white" />
+                        </div>
+                        <div>
+                            <p className="text-lg font-semibold leading-none">Dr Mitra</p>
+                            <p className="mt-0.5 text-xs text-slate-500">Pathlog + Doctor + MedixMall Ecosystem</p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xl font-bold tracking-tight text-slate-900">PathLabs</p>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#147da2]">Diagnostic Cloud</p>
-                    </div>
-                </div>
 
-                <div className="flex items-center gap-4">
                     {auth.user ? (
-                        <Link href={dashboard()} className=" bg-[#147da2] px-4 py-2 text-sm font-semibold text-white hover:bg-[#106385] transition-colors">
-                            Dashboard
+                        <Link href={dashboard()} className="border border-[#147da2] bg-[#147da2] px-4 py-2 text-sm font-medium text-white">
+                            Open Dashboard
                         </Link>
                     ) : (
-                        <Link href={login()} className=" bg-[#147da2] px-4 py-2 text-sm font-semibold text-white hover:bg-[#106385] transition-colors">
+                        <Link href={login()} className="border border-[#147da2] bg-[#147da2] px-4 py-2 text-sm font-medium text-white">
                             Login
                         </Link>
                     )}
                 </div>
             </header>
 
-            <main className="mx-auto max-w-7xl px-6 py-16 lg:py-24">
-                <div className="relative isolate overflow-hidden  border border-slate-100 bg-slate-900 px-6 py-24 shadow-2xl sm:px-24 xl:py-32">
-                    <img
-                        src="/images/hero_bg.png"
-                        alt=""
-                        className="absolute inset-0 -z-10 h-full w-full object-cover opacity-30 grayscale"
-                    />
-                    <div className="mx-auto max-w-2xl text-center">
-                        <span className="inline-flex  bg-[#147da2]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#147da2]">
-                            Professional Lab Management
-                        </span>
-                        <h1 className="mt-6 text-4xl font-bold tracking-tight text-white sm:text-6xl">
-                            Modernize your <span className="text-[#147da2]">Lab Operations</span>.
-                        </h1>
-                        <p className="mt-6 text-lg leading-8 text-slate-300">
-                            A unified platform for diagnostic billing, wallet management, and laboratory reporting. 
-                            Built for accuracy, speed, and security.
+            <main className="mx-auto w-full max-w-7xl px-6 py-10">
+                <section className="border border-slate-200 bg-slate-50 px-6 py-10">
+                    <div className="max-w-3xl">
+                        <p className="inline-flex items-center gap-2 border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium uppercase tracking-wide text-slate-600">
+                            <Building2 className="h-3.5 w-3.5" />
+                            Medical Ecosystem Platform
                         </p>
-                        <div className="mt-10 flex items-center justify-center gap-x-6">
+                        <h1 className="mt-4 text-4xl font-semibold leading-tight text-slate-900">
+                            One platform for diagnostics, doctor appointments, referrals, and healthcare commerce.
+                        </h1>
+                        <p className="mt-3 text-sm leading-6 text-slate-600">
+                            Dr Mitra powers pathology and radiology labs, specialist doctors, and medical supply operations in a connected and permission-driven workflow.
+                        </p>
+                        <div className="mt-6 flex flex-wrap gap-3">
                             <Link
                                 href={auth.user ? dashboard() : login()}
-                                className=" bg-[#147da2] px-6 py-3.5 text-sm font-bold text-white shadow-sm hover:bg-[#106385] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#147da2] transition-all"
+                                className="inline-flex items-center gap-2 border border-[#147da2] bg-[#147da2] px-4 py-2 text-sm font-medium text-white"
                             >
-                                {auth.user ? 'Go to Dashboard' : 'Get Started'}
+                                {auth.user ? 'Go to Portal' : 'Start with Login'}
+                                <ArrowRight className="h-4 w-4" />
                             </Link>
-                            <Link href="#" className="text-sm font-semibold leading-6 text-white">
-                                Learn more <span aria-hidden="true">→</span>
+                            <Link href="/public/doctors" className="inline-flex items-center gap-2 border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700">
+                                Book Doctor Appointment
+                                <ArrowRight className="h-4 w-4" />
                             </Link>
+                            <a
+                                href="https://medixmall.com"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-2 border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700"
+                            >
+                                Visit MedixMall
+                                <ArrowRight className="h-4 w-4" />
+                            </a>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                {/* Simple Stats Row */}
-                <div className="mt-24 grid grid-cols-2 gap-8 border-t border-slate-100 pt-12 text-center sm:grid-cols-4">
-                    <div className="space-y-1">
-                        <p className="text-3xl font-bold text-slate-900">48s</p>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Avg Billing Time</p>
-                    </div>
-                    <div className="space-y-1">
-                        <p className="text-3xl font-bold text-slate-900">100%</p>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Sample Tracking</p>
-                    </div>
-                    <div className="space-y-1">
-                        <p className="text-3xl font-bold text-slate-900">Realtime</p>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Wallet Sync</p>
-                    </div>
-                    <div className="space-y-1">
-                        <p className="text-3xl font-bold text-slate-900">99.9%</p>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Cloud Uptime</p>
-                    </div>
-                </div>
+                <section className="mt-6 grid gap-4 md:grid-cols-2">
+                    {modules.map((module) => {
+                        const Icon = module.icon;
+                        return (
+                            <article key={module.title} className="border border-slate-200 bg-white p-5">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex h-8 w-8 items-center justify-center border border-slate-200 bg-slate-50">
+                                        <Icon className="h-4 w-4 text-[#147da2]" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-base font-semibold text-slate-900">{module.title}</h2>
+                                        <p className="mt-1 text-sm leading-6 text-slate-600">{module.desc}</p>
+                                    </div>
+                                </div>
+                            </article>
+                        );
+                    })}
+                </section>
             </main>
         </div>
     );

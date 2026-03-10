@@ -43,6 +43,8 @@ class HandleInertiaRequests extends Middleware
         $accessPermissions = [];
         $accessRoles = [];
         $isAdmin = false;
+        $currentSubscription = null;
+        $subscriptionReminder = null;
 
         if ($user !== null) {
             $accessRoles = $user->roles()->pluck('slug')->all();
@@ -56,8 +58,7 @@ class HandleInertiaRequests extends Middleware
                     ->value('balance') ?? 0;
             }
 
-            $currentSubscription = null;
-            $subscriptionReminder = null;
+
             if ($labId > 0) {
                 $lab = Lab::find($labId);
                 if ($lab) {

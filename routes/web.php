@@ -180,6 +180,7 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
     });
 
     Route::prefix('admin')->name('admin.')->middleware('ensure.admin')->group(function (): void {
+        Route::get('labs/features', [LabFeatureController::class, 'index'])->name('labs.features');
         Route::get('labs', [\App\Http\Controllers\Admin\LabController::class, 'index'])->name('labs.index');
         Route::post('labs', [\App\Http\Controllers\Admin\LabController::class, 'store'])->name('labs.store');
         Route::get('labs/{lab}', [\App\Http\Controllers\Admin\LabController::class, 'show'])->name('labs.show');
@@ -190,7 +191,6 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
         Route::get('switch-back', [\App\Http\Controllers\Admin\LabController::class, 'backToAdmin'])->name('switch-back');
         Route::delete('labs/{lab}', [\App\Http\Controllers\Admin\LabController::class, 'destroy'])->name('labs.destroy');
 
-        Route::get('labs/features', [LabFeatureController::class, 'index'])->name('labs.features');
         Route::put('labs/{lab}/features', [LabFeatureController::class, 'updateLabPermissions'])->name('labs.features.update');
         Route::put('users/{user}/roles', [LabFeatureController::class, 'updateUserRoles'])->name('users.roles.update');
         Route::put('roles/{role}/permissions', [LabFeatureController::class, 'updateRolePermissions'])->name('roles.permissions.update');

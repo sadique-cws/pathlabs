@@ -28,6 +28,7 @@ type LabUser = {
     name: string;
     email: string;
     roles: string[];
+    permissions: string[];
 };
 
 type LabFeatureRow = {
@@ -211,6 +212,9 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
     const [userRoles, setUserRoles] = useState<Record<number, string[]>>(
         Object.fromEntries(labs.flatMap((lab) => lab.users.map((user) => [user.id, user.roles]))),
     );
+    const [userPermissions, setUserPermissions] = useState<Record<number, string[]>>(
+        Object.fromEntries(labs.flatMap((lab) => lab.users.map((user) => [user.id, user.permissions]))),
+    );
     const [rolePermissions, setRolePermissions] = useState<Record<number, string[]>>(
         Object.fromEntries(roles.map((role) => [role.id, role.permissions])),
     );
@@ -296,6 +300,19 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
     const saveUserRoles2 = (user: LabUser) => {
         router.put(`/admin/users/${user.id}/roles`, {
             role_slugs: userRoles[user.id] ?? [],
+        });
+    };
+    const toggleUserPermission = (userId: number, slug: string, checked: boolean) => {
+        setUserPermissions((c) => ({
+            ...c,
+            [userId]: checked
+                ? Array.from(new Set([...(c[userId] ?? []), slug]))
+                : (c[userId] ?? []).filter((s) => s !== slug),
+        }));
+    };
+    const saveUserPermissions = (user: LabUser) => {
+        router.put(`/admin/users/${user.id}/permissions`, {
+            permission_slugs: userPermissions[user.id] ?? [],
         });
     };
 
@@ -547,30 +564,34 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
                                     </div>
                                     <div className="divide-y divide-slate-100">
                                         {labUsers.map((user) => (
-                                            <div key={user.id} className="flex items-center justify-between gap-4 px-5 py-4">
+                                            <div key={user.id} className="space-y-3 px-5 py-4">
                                                 <div className="min-w-0">
-                                                    <p className="text-sm font-medium text-slate-800 truncate">{user.name}</p>
-                                                    <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                                                    <p className="truncate text-sm font-medium text-slate-800">{user.name}</p>
+                                                    <p className="truncate text-xs text-slate-400">{user.email}</p>
                                                 </div>
-                                                <div className="flex items-center gap-4 shrink-0">
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {roles.map((role) => (
-                                                            <label
-                                                                key={`${user.id}-${role.slug}`}
-                                                                className={`flex items-center gap-2  border px-3 py-1.5 text-sm cursor-pointer transition ${
-                                                                    (userRoles[user.id] ?? []).includes(role.slug)
-                                                                        ? 'border-[#147da2] bg-[#147da2]/5 text-[#147da2]'
-                                                                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                                                                }`}
-                                                            >
-                                                                <Checkbox
-                                                                    id={`${user.id}-${role.slug}`}
-                                                                    checked={(userRoles[user.id] ?? []).includes(role.slug)}
-                                                                    onCheckedChange={(checked) => toggleUserRole(user.id, role.slug, checked === true)}
-                                                                />
-                                                                <span>{role.name}</span>
-                                                            </label>
-                                                        ))}
+
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <div className="space-y-2">
+                                                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Roles</p>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {roles.map((role) => (
+                                                                <label
+                                                                    key={`${user.id}-${role.slug}`}
+                                                                    className={`flex cursor-pointer items-center gap-2 border px-3 py-1.5 text-sm transition ${
+                                                                        (userRoles[user.id] ?? []).includes(role.slug)
+                                                                            ? 'border-[#147da2] bg-[#147da2]/5 text-[#147da2]'
+                                                                            : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                                                                    }`}
+                                                                >
+                                                                    <Checkbox
+                                                                        id={`${user.id}-${role.slug}`}
+                                                                        checked={(userRoles[user.id] ?? []).includes(role.slug)}
+                                                                        onCheckedChange={(checked) => toggleUserRole(user.id, role.slug, checked === true)}
+                                                                    />
+                                                                    <span>{role.name}</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
                                                     </div>
                                                     <Button
                                                         type="button"
@@ -579,7 +600,42 @@ export default function AdminLabFeatures({ labs, permissionGroups, roles }: Prop
                                                         className="h-8 text-xs"
                                                         onClick={() => saveUserRoles2(user)}
                                                     >
-                                                        Save
+                                                        Save Roles
+                                                    </Button>
+                                                </div>
+
+                                                <div className="flex items-start justify-between gap-4 border-t border-slate-100 pt-3">
+                                                    <div className="space-y-2">
+                                                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Direct Permissions (Flexible)</p>
+                                                        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                                            {Object.entries(permissionGroups).map(([groupKey, perms]) => (
+                                                                <div key={`${user.id}-${groupKey}`} className="space-y-1 border border-slate-100 bg-slate-50/40 p-2">
+                                                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{toLabel(groupKey)}</p>
+                                                                    <div className="space-y-1">
+                                                                        {perms.map((permission) => (
+                                                                            <label key={`${user.id}-${permission.slug}`} className="flex items-center gap-2 text-xs text-slate-600">
+                                                                                <Checkbox
+                                                                                    checked={(userPermissions[user.id] ?? []).includes(permission.slug)}
+                                                                                    onCheckedChange={(checked) =>
+                                                                                        toggleUserPermission(user.id, permission.slug, checked === true)
+                                                                                    }
+                                                                                />
+                                                                                <span>{permission.name}</span>
+                                                                            </label>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="h-8 text-xs"
+                                                        onClick={() => saveUserPermissions(user)}
+                                                    >
+                                                        Save Permissions
                                                     </Button>
                                                 </div>
                                             </div>

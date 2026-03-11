@@ -8,7 +8,10 @@ class UpdateRolePermissionsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        $user = $this->user();
+
+        return $user !== null &&
+            ($user->hasRole('admin') || $user->hasRole('super_admin') || $user->hasRole('bde'));
     }
 
     /**

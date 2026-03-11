@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateLabPermissionsRequest;
 use App\Http\Requests\UpdateRolePermissionsRequest;
+use App\Http\Requests\UpdateUserPermissionsRequest;
 use App\Http\Requests\UpdateUserRolesRequest;
 use App\Models\Lab;
 use App\Models\Permission;
@@ -48,6 +49,7 @@ class LabFeatureController extends Controller
             ->with([
                 'permissions' => fn ($query) => $query->select('permissions.id', 'permissions.slug'),
                 'users.roles' => fn ($query) => $query->select('roles.id', 'roles.slug'),
+                'users.permissions' => fn ($query) => $query->select('permissions.id', 'permissions.slug'),
             ])
             ->orderBy('name')
             ->get()
@@ -66,6 +68,7 @@ class LabFeatureController extends Controller
                         'name' => $user->name,
                         'email' => $user->email,
                         'roles' => $user->roles->pluck('slug')->values()->all(),
+                        'permissions' => $user->permissions->pluck('slug')->values()->all(),
                     ])->values()->all(),
                 ];
             })
@@ -98,11 +101,20 @@ class LabFeatureController extends Controller
 
     public function updateUserRoles(UpdateUserRolesRequest $request, User $user): RedirectResponse
     {
-        $roleSlugs = $request->validated('role_slugs');
+        $roleSlugs = $request->validated('role_slugs', []);
         $roleIds = Role::query()->whereIn('slug', $roleSlugs)->pluck('id');
         $user->roles()->sync($roleIds);
 
         return back()->with('success', "Updated roles for {$user->name}.");
+    }
+
+    public function updateUserPermissions(UpdateUserPermissionsRequest $request, User $user): RedirectResponse
+    {
+        $permissionSlugs = $request->validated('permission_slugs', []);
+        $permissionIds = Permission::query()->whereIn('slug', $permissionSlugs)->pluck('id');
+        $user->permissions()->sync($permissionIds);
+
+        return back()->with('success', "Updated direct permissions for {$user->name}.");
     }
 
     public function updateRolePermissions(UpdateRolePermissionsRequest $request, Role $role): RedirectResponse

@@ -24,20 +24,12 @@ class EnsureLabContext
             return $next($request);
         }
 
-        // Check session first (for impersonation)
-        $switchedLabId = session('switched_lab_id');
+        $labId = (int) (session('switched_lab_id') ?? $user?->lab_id ?? 0);
 
-        $labId = $switchedLabId ?? $user?->lab_id;
-
-        if ($labId === null || (int) $labId <= 0) {
-            $labId = $request->integer('lab_id');
-        }
-
-        if ((int) $labId <= 0) {
-            $labId = (int) $request->header('X-Lab-Id', 0);
-        }
-
-        if ((int) $labId <= 0 && $user?->hasRole('admin')) {
+        if (
+            (int) $labId <= 0 &&
+            ($user?->hasRole('admin') || $user?->hasRole('super_admin') || $user?->hasRole('bde'))
+        ) {
             $labId = (int) Lab::query()->value('id');
         }
 

@@ -252,6 +252,7 @@ class PanelDemoSeeder extends Seeder
             ['slug' => 'doctor_portal.reports', 'name' => 'Doctor Portal - Reports', 'group' => 'doctor_portal'],
             ['slug' => 'wallet.view', 'name' => 'Wallet - View Balance', 'group' => 'billing'],
             ['slug' => 'wallet.topup', 'name' => 'Wallet - Add Funds', 'group' => 'billing'],
+            ['slug' => 'staff.manage', 'name' => 'Staff - Manage Members', 'group' => 'front_desk'],
             ['slug' => 'admin.labs.features', 'name' => 'Admin Lab Features', 'group' => 'admin'],
         ];
 
@@ -304,6 +305,7 @@ class PanelDemoSeeder extends Seeder
                 'reports.result_entry',
                 'wallet.view',
                 'wallet.topup',
+                'staff.manage',
                 'clinical_master.manage_tests',
                 'clinical_master.manage_packages',
             ],
@@ -346,6 +348,7 @@ class PanelDemoSeeder extends Seeder
                 'reports.test_methods',
                 'reports.sample_management',
                 'reports.result_entry',
+                'staff.manage',
                 'clinical_master.manage_tests',
                 'clinical_master.manage_packages',
             ],
@@ -427,6 +430,7 @@ class PanelDemoSeeder extends Seeder
             'reports.result_entry',
             'wallet.view',
             'wallet.topup',
+            'staff.manage',
             'clinical_master.manage_tests',
             'clinical_master.manage_packages',
             'clinical_master.manage_groups',

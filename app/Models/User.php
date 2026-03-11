@@ -67,6 +67,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class)->withTimestamps();
     }
 
+    public function permissions(): BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class)->withTimestamps();
+    }
+
     public function hasRole(string $roleSlug): bool
     {
         return $this->roles()
@@ -108,15 +113,21 @@ class User extends Authenticatable
             ->pluck('slug')
             ->all();
 
-        if ($rolePermissionSlugs === []) {
-            return Permission::query()
-                ->where('slug', '!=', 'admin.labs.features')
-                ->pluck('slug')
-                ->all();
+        $directPermissionSlugs = $this->permissions()
+            ->pluck('slug')
+            ->all();
+
+        $assignedPermissionSlugs = array_values(array_unique([
+            ...$rolePermissionSlugs,
+            ...$directPermissionSlugs,
+        ]));
+
+        if ($assignedPermissionSlugs === []) {
+            return [];
         }
 
         if ($labId === null || $labId <= 0) {
-            return array_values(array_unique($rolePermissionSlugs));
+            return $assignedPermissionSlugs;
         }
 
         $enabledLabSlugs = Permission::query()
@@ -128,7 +139,7 @@ class User extends Authenticatable
             ->pluck('slug')
             ->all();
 
-        return array_values(array_unique(array_values(array_intersect($rolePermissionSlugs, $enabledLabSlugs))));
+        return array_values(array_unique(array_values(array_intersect($assignedPermissionSlugs, $enabledLabSlugs))));
     }
 
     public function wallet(): \Illuminate\Database\Eloquent\Relations\MorphOne
@@ -175,6 +186,7 @@ class User extends Authenticatable
             'doctor_portal.reports',
             'wallet.view',
             'wallet.topup',
+            'staff.manage',
             'clinical_master.manage_tests',
             'clinical_master.manage_packages',
             'admin.labs.features',

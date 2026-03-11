@@ -28,4 +28,9 @@ class Permission extends Model
             ->withPivot('is_enabled')
             ->withTimestamps();
     }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)->withTimestamps();
+    }
 }

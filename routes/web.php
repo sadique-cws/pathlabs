@@ -214,8 +214,12 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
         Route::get('configuration', [\App\Http\Controllers\Lab\LabConfigurationController::class, 'show'])->name('configuration.show');
         Route::post('configuration', [\App\Http\Controllers\Lab\LabConfigurationController::class, 'update'])->name('configuration.update');
 
-        Route::get('staff', [StaffController::class, 'index'])->name('staff.index');
-        Route::post('staff/{staffMember}', [StaffController::class, 'update'])->name('staff.update');
+        Route::get('staff', [StaffController::class, 'index'])
+            ->middleware('feature:staff.manage')
+            ->name('staff.index');
+        Route::post('staff/{staffMember}', [StaffController::class, 'update'])
+            ->middleware('feature:staff.manage')
+            ->name('staff.update');
     });
 
     Route::prefix('admin')->name('admin.')->middleware('ensure.admin')->group(function (): void {
@@ -234,6 +238,7 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
 
         Route::put('labs/{lab}/features', [LabFeatureController::class, 'updateLabPermissions'])->name('labs.features.update');
         Route::put('users/{user}/roles', [LabFeatureController::class, 'updateUserRoles'])->name('users.roles.update');
+        Route::put('users/{user}/permissions', [LabFeatureController::class, 'updateUserPermissions'])->name('users.permissions.update');
         Route::put('roles/{role}/permissions', [LabFeatureController::class, 'updateRolePermissions'])->name('roles.permissions.update');
 
         Route::get('plans', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'index'])->name('plans.index');

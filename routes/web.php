@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DoctorManagementController as AdminDoctorManagementController;
 use App\Http\Controllers\Admin\LabFeatureController;
+use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\DoctorPortalController;
@@ -226,6 +227,7 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
         Route::get('dashboard', fn () => to_route('admin.labs.index'))->name('dashboard');
 
         Route::get('labs/features', [LabFeatureController::class, 'index'])->name('labs.features');
+        Route::get('users/manage', [UserManagementController::class, 'index'])->name('users.manage');
         Route::get('labs', [\App\Http\Controllers\Admin\LabController::class, 'index'])->name('labs.index');
         Route::post('labs', [\App\Http\Controllers\Admin\LabController::class, 'store'])->name('labs.store');
         Route::get('labs/{lab}', [\App\Http\Controllers\Admin\LabController::class, 'show'])->name('labs.show');

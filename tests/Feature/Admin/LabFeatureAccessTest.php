@@ -24,6 +24,24 @@ it('allows admin to view lab feature control panel', function () {
         ->assertOk();
 });
 
+it('allows admin to view manage users page', function () {
+    $lab = Lab::factory()->create();
+    $adminRole = Role::query()->create([
+        'name' => 'Admin',
+        'slug' => 'admin',
+        'is_system' => true,
+    ]);
+
+    Permission::query()->create(['name' => 'Admin Lab Features', 'slug' => 'admin.labs.features', 'group' => 'admin']);
+
+    $admin = User::factory()->create(['lab_id' => $lab->id]);
+    $admin->roles()->attach($adminRole);
+
+    $this->actingAs($admin)
+        ->get('/admin/users/manage')
+        ->assertOk();
+});
+
 it('blocks non admin from lab feature control panel', function () {
     $lab = Lab::factory()->create();
     Permission::query()->create(['name' => 'Admin Lab Features', 'slug' => 'admin.labs.features', 'group' => 'admin']);
@@ -31,6 +49,15 @@ it('blocks non admin from lab feature control panel', function () {
 
     $this->actingAs($user)
         ->get('/admin/labs/features')
+        ->assertForbidden();
+});
+
+it('blocks non admin from manage users page', function () {
+    $lab = Lab::factory()->create();
+    $user = User::factory()->create(['lab_id' => $lab->id]);
+
+    $this->actingAs($user)
+        ->get('/admin/users/manage')
         ->assertForbidden();
 });
 

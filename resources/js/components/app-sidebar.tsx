@@ -332,6 +332,20 @@ export function AppSidebar() {
                         </Link>
 
                         <Link
+                            href="/admin/users/manage"
+                            className={cn(
+                                'flex items-center justify-between border border-transparent px-2.5 py-2 text-[13px] font-medium text-slate-600 transition-colors',
+                                currentUrl.startsWith('/admin/users/manage') ? 'bg-slate-100 text-slate-900' : 'hover:bg-slate-50',
+                            )}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Users className="h-4 w-4 text-slate-400" />
+                                <span>Manage Users</span>
+                            </div>
+                            <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                        </Link>
+
+                        <Link
                             href="/admin/plans"
                             className={cn(
                                 'flex items-center justify-between border border-transparent px-2.5 py-2 text-[13px] font-medium text-slate-600 transition-colors',

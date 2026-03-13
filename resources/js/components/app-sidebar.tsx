@@ -151,6 +151,47 @@ const doctorPortalSections: MenuSection[] = [
     },
 ];
 
+const collectionCenterSections: MenuSection[] = [
+    {
+        key: 'cc-dashboard',
+        title: 'Collection Center',
+        icon: Building2,
+        items: [
+            { title: 'Dashboard', href: '/cc/dashboard', permission: 'dashboard.view', matchPrefix: '/cc/dashboard' },
+            { title: 'Price List', href: '/cc/price-list', permission: 'billing.create', matchPrefix: '/cc/price-list' },
+            { title: 'Wallet & Earnings', href: '/cc/wallet', permission: 'wallet.view', matchPrefix: '/cc/wallet' },
+        ],
+    },
+    {
+        key: 'cc-billing',
+        title: 'Billing',
+        icon: CreditCard,
+        items: [
+            { title: 'New Bill', href: '/cc/billing/create', permission: 'billing.create', matchPrefix: '/cc/billing/create' },
+            { title: 'Manage Bills', href: '/cc/billing/manage', permission: 'billing.manage', matchPrefix: '/cc/billing/manage' },
+            { title: 'Manage Samples', href: '/cc/billing/samples', permission: 'samples.manage', matchPrefix: '/cc/billing/samples' },
+        ],
+    },
+    {
+        key: 'cc-patients',
+        title: 'Patients',
+        icon: Users,
+        items: [
+            { title: 'Add Patient', href: '/cc/patients/add', permission: 'patients.add', matchPrefix: '/cc/patients/add' },
+            { title: 'Manage Patients', href: '/cc/patients/manage', permission: 'patients.manage', matchPrefix: '/cc/patients/manage' },
+        ],
+    },
+    {
+        key: 'cc-doctors',
+        title: 'Referral Doctors',
+        icon: Stethoscope,
+        items: [
+            { title: 'Add Referral Doctor', href: '/cc/doctors/add', permission: 'doctors.add', matchPrefix: '/cc/doctors/add' },
+            { title: 'Manage Referral Doctors', href: '/cc/doctors/manage', permission: 'doctors.manage', matchPrefix: '/cc/doctors/manage' },
+        ],
+    },
+];
+
 function SidebarLogo({ currentLabName }: { currentLabName?: string | null }) {
     return (
         <div className="flex items-center gap-3 px-3 py-3">
@@ -264,8 +305,12 @@ export function AppSidebar() {
     const page = usePage();
     const { currentUrl } = useCurrentUrl();
     const access = page.props.access as { permissions?: string[]; is_admin?: boolean } | undefined;
+    const currentPanel = page.props.currentPanel as { key?: string } | undefined;
     const permissions = access?.permissions ?? [];
     const isAdmin = access?.is_admin ?? false;
+    const isCollectionCenterPanel = currentPanel?.key === 'collection_center';
+    const isDoctorPanel = currentPanel?.key === 'doctor';
+    const isAdminPanel = currentPanel?.key === 'admin';
 
     const canAccessAdmin = permissions.includes('admin.labs.features') || isAdmin;
     const canAccessFrontDesk =
@@ -274,31 +319,43 @@ export function AppSidebar() {
     const canAccessDoctorPortal =
         permissions.includes('doctor_portal.access') ||
         doctorPortalSections.some((section) => section.items.some((item) => permissions.includes(item.permission)));
+    const canAccessCollectionCenter = collectionCenterSections.some((section) => section.items.some((item) => permissions.includes(item.permission)));
 
     const currentLab = page.props.currentLab as { id: number; name: string | null } | undefined;
+    const currentCollectionCenter = page.props.currentCollectionCenter as { name?: string | null } | undefined;
 
     return (
         <Sidebar collapsible="offcanvas" variant="sidebar" className="top-14 h-[calc(100svh-3.5rem)] border-r border-slate-200 bg-white">
             <SidebarHeader className="border-b border-slate-200 bg-white pb-2">
-                <SidebarLogo currentLabName={currentLab?.name} />
+                <SidebarLogo currentLabName={isCollectionCenterPanel ? currentCollectionCenter?.name ?? currentLab?.name : currentLab?.name} />
                 <div className="px-3 pb-1">
                     <div className="inline-flex items-center gap-2 border border-slate-200 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#147da2]">
                         <Building2 className="h-3 w-3" />
-                        {canAccessDoctorPortal && !canAccessFrontDesk ? 'Doctor Desk' : 'Front Desk'}
+                        {isCollectionCenterPanel
+                            ? 'Partner CC'
+                            : isDoctorPanel
+                              ? 'Doctor Desk'
+                              : isAdminPanel
+                                ? 'Admin Desk'
+                                : 'Front Desk'}
                     </div>
                 </div>
             </SidebarHeader>
 
             <SidebarContent className="space-y-1 py-2">
-                {canAccessFrontDesk && frontDeskSections.map((section) => (
+                {isCollectionCenterPanel && canAccessCollectionCenter && collectionCenterSections.map((section) => (
                     <PermissionMenuSection key={section.key} section={section} permissions={permissions} isAdmin={isAdmin} />
                 ))}
 
-                {canAccessDoctorPortal && doctorPortalSections.map((section) => (
+                {!isCollectionCenterPanel && canAccessFrontDesk && frontDeskSections.map((section) => (
                     <PermissionMenuSection key={section.key} section={section} permissions={permissions} isAdmin={isAdmin} />
                 ))}
 
-                {canAccessAdmin && (
+                {!isCollectionCenterPanel && canAccessDoctorPortal && doctorPortalSections.map((section) => (
+                    <PermissionMenuSection key={section.key} section={section} permissions={permissions} isAdmin={isAdmin} />
+                ))}
+
+                {!isCollectionCenterPanel && canAccessAdmin && (
                     <div className="mt-3 px-2.5">
                         <div className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Admin</div>
                         <Link

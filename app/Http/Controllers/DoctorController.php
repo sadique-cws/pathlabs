@@ -15,10 +15,14 @@ class DoctorController extends Controller
     public function manage(Request $request): Response
     {
         $labId = (int) $request->attributes->get('lab_id');
+        $routePrefix = $this->routePrefix($request);
+        $collectionCenterId = $this->currentCollectionCenterId($request);
+        $doctorType = $collectionCenterId > 0 ? 'referral' : 'lab_doctor';
 
         $doctors = Doctor::query()
             ->where('lab_id', $labId)
-            ->where('doctor_type', 'lab_doctor')
+            ->where('doctor_type', $doctorType)
+            ->when($collectionCenterId > 0, fn ($query) => $query->where('collection_center_id', $collectionCenterId))
             ->withSum('commissions as gifts_total', 'amount')
             ->latest('id')
             ->get()
@@ -44,21 +48,29 @@ class DoctorController extends Controller
         return Inertia::render('doctors/manage', [
             'doctors' => $doctors,
             'stats' => $stats,
+            'routePrefix' => $routePrefix,
+            'doctorTitle' => $collectionCenterId > 0 ? 'Referral Doctors' : 'Lab Doctors',
         ]);
     }
 
     public function add(Request $request): Response
     {
         $labId = (int) $request->attributes->get('lab_id');
+        $collectionCenterId = $this->currentCollectionCenterId($request);
+        $doctorType = $collectionCenterId > 0 ? 'referral' : 'lab_doctor';
+
         $existingDoctors = Doctor::query()
             ->where('lab_id', $labId)
-            ->where('doctor_type', 'lab_doctor')
+            ->where('doctor_type', $doctorType)
+            ->when($collectionCenterId > 0, fn ($query) => $query->where('collection_center_id', $collectionCenterId))
             ->orderBy('name')
             ->get(['id', 'name', 'phone', 'email'])
             ->values();
 
         return Inertia::render('doctors/add', [
             'existingDoctors' => $existingDoctors,
+            'routePrefix' => $this->routePrefix($request),
+            'doctorTitle' => $collectionCenterId > 0 ? 'Referral Doctor' : 'Lab Doctor',
         ]);
     }
 
@@ -66,6 +78,8 @@ class DoctorController extends Controller
     {
         $labId = (int) $request->attributes->get('lab_id');
         $data = $request->validated();
+        $collectionCenterId = $this->currentCollectionCenterId($request);
+        $doctorType = $collectionCenterId > 0 ? 'referral' : 'lab_doctor';
 
         $name = trim((string) $data['name']);
         $phone = trim((string) ($data['phone'] ?? ''));
@@ -73,22 +87,24 @@ class DoctorController extends Controller
 
         $existingDoctor = Doctor::query()
             ->where('lab_id', $labId)
-            ->where('doctor_type', 'lab_doctor')
+            ->where('doctor_type', $doctorType)
+            ->when($collectionCenterId > 0, fn ($query) => $query->where('collection_center_id', $collectionCenterId))
             ->whereRaw('LOWER(name) = ?', [mb_strtolower($name)])
             ->when($phone !== '', fn ($query) => $query->where('phone', $phone))
             ->first();
 
         if ($existingDoctor !== null) {
-            return to_route('lab.doctors.edit', ['doctor' => $existingDoctor->id])
+            return to_route($this->routePrefix($request).'.doctors.edit', ['doctor' => $existingDoctor->id])
                 ->with('success', 'Doctor already exists. You can edit details.');
         }
 
         Doctor::query()->create([
             'lab_id' => $labId,
+            'collection_center_id' => $collectionCenterId > 0 ? $collectionCenterId : null,
             'name' => $name,
             'phone' => $phone !== '' ? $phone : null,
             'email' => $email !== '' ? $email : null,
-            'doctor_type' => 'lab_doctor',
+            'doctor_type' => $doctorType,
             'specialization' => $data['specialization'] ?? null,
             'can_approve_reports' => (bool) ($data['can_approve_reports'] ?? true),
             'consultation_fee' => (float) ($data['consultation_fee'] ?? 500),
@@ -97,7 +113,7 @@ class DoctorController extends Controller
             'is_active' => (bool) ($data['is_active'] ?? true),
         ]);
 
-        return to_route('lab.doctors.manage')
+        return to_route($this->routePrefix($request).'.doctors.manage')
             ->with('success', 'Doctor created successfully.');
     }
 
@@ -105,7 +121,8 @@ class DoctorController extends Controller
     {
         $labId = (int) $request->attributes->get('lab_id');
         abort_if($doctor->lab_id !== $labId, 404);
-        abort_if($doctor->doctor_type !== 'lab_doctor', 404);
+        abort_if($doctor->doctor_type !== ($this->currentCollectionCenterId($request) > 0 ? 'referral' : 'lab_doctor'), 404);
+        abort_if($this->currentCollectionCenterId($request) > 0 && (int) $doctor->collection_center_id !== $this->currentCollectionCenterId($request), 404);
 
         $doctor->loadSum('commissions as gifts_total', 'amount');
 
@@ -123,6 +140,8 @@ class DoctorController extends Controller
                 'is_active' => (bool) $doctor->is_active,
                 'gift_total' => round((float) ($doctor->gifts_total ?? 0), 2),
             ],
+            'routePrefix' => $this->routePrefix($request),
+            'doctorTitle' => $this->currentCollectionCenterId($request) > 0 ? 'Referral Doctor' : 'Lab Doctor',
         ]);
     }
 
@@ -130,7 +149,8 @@ class DoctorController extends Controller
     {
         $labId = (int) $request->attributes->get('lab_id');
         abort_if($doctor->lab_id !== $labId, 404);
-        abort_if($doctor->doctor_type !== 'lab_doctor', 404);
+        abort_if($doctor->doctor_type !== ($this->currentCollectionCenterId($request) > 0 ? 'referral' : 'lab_doctor'), 404);
+        abort_if($this->currentCollectionCenterId($request) > 0 && (int) $doctor->collection_center_id !== $this->currentCollectionCenterId($request), 404);
 
         $data = $request->validated();
 
@@ -146,7 +166,21 @@ class DoctorController extends Controller
             'is_active' => (bool) ($data['is_active'] ?? true),
         ]);
 
-        return to_route('lab.doctors.manage')
+        return to_route($this->routePrefix($request).'.doctors.manage')
             ->with('success', 'Doctor updated successfully.');
+    }
+
+    private function routePrefix(Request $request): string
+    {
+        return $request->routeIs('cc.*') ? 'cc' : 'lab';
+    }
+
+    private function currentCollectionCenterId(Request $request): int
+    {
+        if (! $request->routeIs('cc.*')) {
+            return 0;
+        }
+
+        return (int) ($request->user()?->collection_center_id ?? 0);
     }
 }

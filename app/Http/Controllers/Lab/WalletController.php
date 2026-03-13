@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Lab;
 
 use App\Http\Controllers\Controller;
+use App\Models\CollectionCenter;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
@@ -16,18 +17,37 @@ class WalletController extends Controller
     {
         $labId = (int) $request->attributes->get('lab_id');
         $user = $request->user();
+        $collectionCenterId = $request->routeIs('cc.*') ? (int) ($user?->collection_center_id ?? 0) : 0;
 
-        $wallet = Wallet::firstOrCreate(
-            [
-                'lab_id' => $labId,
-                'walletable_type' => \App\Models\User::class,
-                'walletable_id' => $user->id,
-            ],
-            [
-                'balance' => 0,
-                'currency' => 'INR',
-            ]
-        );
+        if ($collectionCenterId > 0) {
+            $collectionCenter = CollectionCenter::query()
+                ->where('lab_id', $labId)
+                ->findOrFail($collectionCenterId);
+
+            $wallet = Wallet::firstOrCreate(
+                [
+                    'lab_id' => $labId,
+                    'walletable_type' => CollectionCenter::class,
+                    'walletable_id' => $collectionCenter->id,
+                ],
+                [
+                    'balance' => 0,
+                    'currency' => 'INR',
+                ]
+            );
+        } else {
+            $wallet = Wallet::firstOrCreate(
+                [
+                    'lab_id' => $labId,
+                    'walletable_type' => \App\Models\User::class,
+                    'walletable_id' => $user->id,
+                ],
+                [
+                    'balance' => 0,
+                    'currency' => 'INR',
+                ]
+            );
+        }
 
         $transactions = WalletTransaction::query()
             ->where('wallet_id', $wallet->id)
@@ -38,6 +58,7 @@ class WalletController extends Controller
             'wallet' => $wallet,
             'transactions' => $transactions,
             'razorpayKey' => config('services.razorpay.key_id'),
+            'routePrefix' => $request->routeIs('cc.*') ? 'cc' : 'lab',
         ]);
     }
 

@@ -13,12 +13,14 @@ type ExistingDoctor = {
 
 type Props = {
     existingDoctors: ExistingDoctor[];
+    routePrefix?: string;
+    doctorTitle?: string;
 };
 
-export default function AddDoctor({ existingDoctors }: Props) {
+export default function AddDoctor({ existingDoctors, routePrefix = 'lab', doctorTitle = 'Lab Doctor' }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Lab Doctors', href: '/lab/doctors/manage' },
-        { title: 'Add Lab Doctor', href: '/lab/doctors/add' },
+        { title: `${doctorTitle}s`, href: `/${routePrefix}/doctors/manage` },
+        { title: `Add ${doctorTitle}`, href: `/${routePrefix}/doctors/add` },
     ];
 
     const [searchName, setSearchName] = useState('');
@@ -57,12 +59,12 @@ export default function AddDoctor({ existingDoctors }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Add Lab Doctor" />
+            <Head title={`Add ${doctorTitle}`} />
 
             <div className="min-h-full bg-slate-50/80 p-0">
                 <div className="sawtooth border-b border-slate-200 bg-white p-6">
-                    <h1 className="border-b border-slate-100 pb-3 text-lg font-semibold text-slate-800">Add Lab Doctor</h1>
-                    <p className="mt-3 text-sm text-slate-500">First search by name and mobile. If lab doctor not found, then create new.</p>
+                    <h1 className="border-b border-slate-100 pb-3 text-lg font-semibold text-slate-800">Add {doctorTitle}</h1>
+                    <p className="mt-3 text-sm text-slate-500">First search by name and mobile. If doctor is not found, then create new.</p>
 
                     <div className="mt-4 grid gap-3 md:grid-cols-2">
                         <label className="relative">
@@ -93,7 +95,7 @@ export default function AddDoctor({ existingDoctors }: Props) {
 
                     {selectedDoctorId !== null && (
                         <div className="mt-3  border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-                            Lab doctor already exists. <Link href={`/lab/doctors/${selectedDoctorId}/edit`} className="font-semibold underline">Open edit lab doctor</Link>
+                            Doctor already exists. <Link href={`/${routePrefix}/doctors/${selectedDoctorId}/edit`} className="font-semibold underline">Open edit doctor</Link>
                         </div>
                     )}
 
@@ -101,7 +103,7 @@ export default function AddDoctor({ existingDoctors }: Props) {
                         className="mt-6 grid gap-4 border-t border-slate-100 pt-5 md:grid-cols-2"
                         onSubmit={(event) => {
                             event.preventDefault();
-                            form.post('/lab/doctors');
+                            form.post(`/${routePrefix}/doctors`);
                         }}
                     >
                         <input className="h-9 w-full  border border-slate-200 px-3 py-1.5 text-sm outline-none transition focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" placeholder="Doctor Name" value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} />
@@ -122,7 +124,7 @@ export default function AddDoctor({ existingDoctors }: Props) {
                         <div className="md:col-span-2 flex justify-end gap-3 border-t border-slate-100 pt-5">
                             <button type="button" onClick={() => history.back()} className=" border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Cancel</button>
                             <button type="submit" className=" bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
-                                Create Lab Doctor
+                                Create {doctorTitle}
                             </button>
                         </div>
                     </form>

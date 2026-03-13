@@ -6,9 +6,9 @@ use App\Http\Requests\CompleteBillingRequest;
 use App\Http\Requests\StoreBillRequest;
 use App\Http\Requests\UpdateBillRequest;
 use App\Models\Bill;
-use App\Models\Lab;
 use App\Models\CollectionCenter;
 use App\Models\Doctor;
+use App\Models\Lab;
 use App\Models\LabTest;
 use App\Models\Patient;
 use App\Models\Sample;
@@ -51,13 +51,45 @@ class BillingController extends Controller
     {
         $labId = (int) $request->attributes->get('lab_id');
         $generatedBillId = $request->integer('bill_id');
+        $collectionCenter = $this->currentCollectionCenter($request);
+        $routePrefix = $this->routePrefix($request);
+
+        $tests = LabTest::query()
+            ->where('lab_id', $labId)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get()
+            ->map(function (LabTest $test) use ($collectionCenter): LabTest {
+                if ($collectionCenter !== null) {
+                    $basePrice = $test->b2b_price !== null ? (float) $test->b2b_price : (float) $test->price;
+                    $test->price = (string) $collectionCenter->sellingPrice($basePrice);
+                }
+
+                return $test;
+            });
+
+        $packages = TestPackage::query()
+            ->where('lab_id', $labId)
+            ->where('is_active', true)
+            ->with('tests')
+            ->orderBy('name')
+            ->get()
+            ->map(function (TestPackage $package) use ($collectionCenter): TestPackage {
+                if ($collectionCenter !== null) {
+                    $basePrice = $package->b2b_price !== null ? (float) $package->b2b_price : (float) $package->price;
+                    $package->price = (string) $collectionCenter->sellingPrice($basePrice);
+                }
+
+                return $package;
+            });
 
         return Inertia::render('billing/create', [
-            'tests' => LabTest::query()->where('lab_id', $labId)->where('is_active', true)->orderBy('name')->get(),
-            'packages' => TestPackage::query()->where('lab_id', $labId)->where('is_active', true)->with('tests')->orderBy('name')->get(),
-            'doctors' => Doctor::query()->where('lab_id', $labId)->where('is_active', true)->orderBy('name')->get(),
+            'tests' => $tests,
+            'packages' => $packages,
+            'doctors' => $this->doctorQuery($request)->where('is_active', true)->orderBy('name')->get(),
             'patients' => Patient::query()
                 ->where('lab_id', $labId)
+                ->when($collectionCenter !== null, fn ($query) => $query->where('collection_center_id', $collectionCenter->id))
                 ->select([
                     'id',
                     'title',
@@ -81,20 +113,29 @@ class BillingController extends Controller
                 ->orderBy('name')
                 ->limit(300)
                 ->get(),
-            'collectionCenters' => CollectionCenter::query()->where('lab_id', $labId)->where('is_active', true)->orderBy('name')->get(),
+            'collectionCenters' => CollectionCenter::query()
+                ->where('lab_id', $labId)
+                ->when($collectionCenter !== null, fn ($query) => $query->whereKey($collectionCenter->id))
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(),
             'sampleCollectionSources' => SampleCollectionSource::query()->where('lab_id', $labId)->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'serviceChargeMasters' => ServiceCharge::query()->where('lab_id', $labId)->where('is_active', true)->orderBy('name')->get(['id', 'name', 'amount']),
             'generatedBillId' => $generatedBillId > 0 ? $generatedBillId : null,
             'serviceCharge' => 15,
+            'routePrefix' => $routePrefix,
+            'panelTitle' => $collectionCenter !== null ? 'Collection Center Billing' : 'Lab Billing',
+            'lockedCollectionCenterId' => $collectionCenter?->id,
         ]);
     }
 
     public function manage(Request $request): Response
     {
         $labId = (int) $request->attributes->get('lab_id');
+        $collectionCenter = $this->currentCollectionCenter($request);
+        $routePrefix = $this->routePrefix($request);
 
-        $bills = Bill::query()
-            ->where('lab_id', $labId)
+        $bills = $this->billQuery($request)
             ->with(['patient:id,name,phone', 'doctor:id,name'])
             ->latest('billing_at')
             ->limit(1500)
@@ -124,17 +165,23 @@ class BillingController extends Controller
 
         return Inertia::render('billing/manage', [
             'bills' => $bills,
+            'routePrefix' => $routePrefix,
+            'panelTitle' => $collectionCenter !== null ? 'Manage Collection Center Bills' : 'Manage Patient Bills',
         ]);
     }
 
     public function manageSamples(Request $request): Response
     {
         $labId = (int) $request->attributes->get('lab_id');
+        $collectionCenter = $this->currentCollectionCenter($request);
         $search = $request->input('search', '');
         $dateFilter = $request->input('date', '');
 
         $query = Sample::query()
             ->where('lab_id', $labId)
+            ->when($collectionCenter !== null, function ($builder) use ($collectionCenter): void {
+                $builder->whereHas('bill', fn ($billQuery) => $billQuery->where('collection_center_id', $collectionCenter->id));
+            })
             ->with([
                 'bill:id,bill_number,billing_at,patient_id',
                 'bill.patient:id,name',
@@ -154,9 +201,9 @@ class BillingController extends Controller
         }
 
         if ($dateFilter === 'today') {
-            $query->whereHas('bill', fn($q) => $q->whereDate('billing_at', now()->toDateString()));
+            $query->whereHas('bill', fn ($q) => $q->whereDate('billing_at', now()->toDateString()));
         } elseif ($dateFilter === 'yesterday') {
-            $query->whereHas('bill', fn($q) => $q->whereDate('billing_at', now()->subDay()->toDateString()));
+            $query->whereHas('bill', fn ($q) => $q->whereDate('billing_at', now()->subDay()->toDateString()));
         }
 
         $samples = $query
@@ -195,13 +242,14 @@ class BillingController extends Controller
                 'search' => $search,
                 'date' => $dateFilter,
             ],
+            'routePrefix' => $this->routePrefix($request),
         ]);
     }
 
     public function view(Request $request, Bill $bill): Response
     {
         $labId = (int) $request->attributes->get('lab_id');
-        abort_if($bill->lab_id !== $labId, 404);
+        abort_if(! $this->canAccessBill($request, $bill), 404);
 
         $lab = Lab::query()->find($labId);
 
@@ -251,7 +299,7 @@ class BillingController extends Controller
                     ];
                 })->values()->all(),
                 'barcodes' => $bill->samples
-                    ->map(fn(Sample $sample): array => [
+                    ->map(fn (Sample $sample): array => [
                         'sample_id' => $sample->id,
                         'barcode' => $sample->barcode ?? '',
                         'test_name' => $sample->test?->name ?? '-',
@@ -282,13 +330,14 @@ class BillingController extends Controller
                 'technician_qualification' => $lab->technician_qualification,
                 'technician_signature_url' => $lab->technician_signature_path ? \Illuminate\Support\Facades\Storage::url($lab->technician_signature_path) : null,
             ] : null,
+            'routePrefix' => $this->routePrefix($request),
         ]);
     }
 
     public function edit(Request $request, Bill $bill): Response
     {
         $labId = (int) $request->attributes->get('lab_id');
-        abort_if($bill->lab_id !== $labId, 404);
+        abort_if(! $this->canAccessBill($request, $bill), 404);
         $bill->load('patient');
 
         return Inertia::render('billing/edit', [
@@ -321,13 +370,14 @@ class BillingController extends Controller
                     'pin_code' => $bill->patient?->pin_code,
                 ],
             ],
+            'routePrefix' => $this->routePrefix($request),
         ]);
     }
 
     public function update(UpdateBillRequest $request, Bill $bill): RedirectResponse
     {
         $labId = (int) $request->attributes->get('lab_id');
-        abort_if($bill->lab_id !== $labId, 404);
+        abort_if(! $this->canAccessBill($request, $bill), 404);
 
         $data = $request->validated();
         $patientData = $data['patient'];
@@ -339,13 +389,13 @@ class BillingController extends Controller
 
         $bill->update($data);
 
-        return to_route('lab.billing.view', ['bill' => $bill->id])->with('success', 'Bill and patient details updated.');
+        return to_route($this->routePrefix($request).'.billing.view', ['bill' => $bill->id])->with('success', 'Bill and patient details updated.');
     }
 
     public function barcodes(Request $request, Bill $bill): Response
     {
         $labId = (int) $request->attributes->get('lab_id');
-        abort_if($bill->lab_id !== $labId, 404);
+        abort_if(! $this->canAccessBill($request, $bill), 404);
 
         $bill->load([
             'patient:id,name',
@@ -361,7 +411,7 @@ class BillingController extends Controller
                 'billing_at' => $bill->billing_at?->format('d M Y h:i A'),
                 'auto_print' => $request->boolean('print'),
                 'barcodes' => $bill->samples
-                    ->map(fn(Sample $sample): array => [
+                    ->map(fn (Sample $sample): array => [
                         'sample_id' => $sample->id,
                         'barcode' => $sample->barcode ?? '',
                         'test_name' => $sample->test?->name ?? '-',
@@ -369,24 +419,99 @@ class BillingController extends Controller
                     ->values()
                     ->all(),
             ],
+            'routePrefix' => $this->routePrefix($request),
         ]);
     }
 
     public function generateBarcode(StoreBillRequest $request, BillingService $billingService): RedirectResponse
     {
         $labId = (int) $request->attributes->get('lab_id');
-        $bill = $billingService->createBill($labId, $request->validated(), $request->user());
+        $payload = $request->validated();
+        $collectionCenter = $this->currentCollectionCenter($request);
 
-        return to_route('lab.billing.create', ['bill_id' => $bill->id])
+        if ($collectionCenter !== null) {
+            $payload['collection_center_id'] = $collectionCenter->id;
+        }
+
+        $bill = $billingService->createBill($labId, $payload, $request->user());
+
+        return to_route($this->routePrefix($request).'.billing.create', ['bill_id' => $bill->id])
             ->with('success', "Barcodes generated for bill {$bill->bill_number}. Now complete billing.");
     }
 
     public function complete(CompleteBillingRequest $request, BillingService $billingService): RedirectResponse
     {
         $labId = (int) $request->attributes->get('lab_id');
-        $bill = $billingService->completeBill($labId, (int) $request->validated('bill_id'));
+        $billId = (int) $request->validated('bill_id');
+        $bill = Bill::query()->findOrFail($billId);
+        abort_if(! $this->canAccessBill($request, $bill), 404);
+        $bill = $billingService->completeBill($labId, $billId);
 
-        return to_route('lab.billing.manage')
+        return to_route($this->routePrefix($request).'.billing.manage')
             ->with('success', "Billing completed for {$bill->bill_number}.");
+    }
+
+    private function routePrefix(Request $request): string
+    {
+        return $this->isCollectionCenterPanel($request) ? 'cc' : 'lab';
+    }
+
+    private function isCollectionCenterPanel(Request $request): bool
+    {
+        return $request->routeIs('cc.*');
+    }
+
+    private function currentCollectionCenter(Request $request): ?CollectionCenter
+    {
+        if (! $this->isCollectionCenterPanel($request)) {
+            return null;
+        }
+
+        $labId = (int) $request->attributes->get('lab_id');
+        $collectionCenterId = (int) ($request->user()?->collection_center_id ?? 0);
+        abort_if($collectionCenterId <= 0, 403);
+
+        return CollectionCenter::query()
+            ->where('lab_id', $labId)
+            ->findOrFail($collectionCenterId);
+    }
+
+    private function billQuery(Request $request)
+    {
+        $labId = (int) $request->attributes->get('lab_id');
+        $collectionCenter = $this->currentCollectionCenter($request);
+
+        return Bill::query()
+            ->where('lab_id', $labId)
+            ->when($collectionCenter !== null, fn ($query) => $query->where('collection_center_id', $collectionCenter->id));
+    }
+
+    private function canAccessBill(Request $request, Bill $bill): bool
+    {
+        if ($bill->lab_id !== (int) $request->attributes->get('lab_id')) {
+            return false;
+        }
+
+        $collectionCenter = $this->currentCollectionCenter($request);
+
+        if ($collectionCenter === null) {
+            return true;
+        }
+
+        return (int) $bill->collection_center_id === $collectionCenter->id;
+    }
+
+    private function doctorQuery(Request $request)
+    {
+        $labId = (int) $request->attributes->get('lab_id');
+        $collectionCenter = $this->currentCollectionCenter($request);
+
+        return Doctor::query()
+            ->where('lab_id', $labId)
+            ->when($collectionCenter !== null, function ($query) use ($collectionCenter): void {
+                $query
+                    ->where('doctor_type', 'referral')
+                    ->where('collection_center_id', $collectionCenter->id);
+            });
     }
 }

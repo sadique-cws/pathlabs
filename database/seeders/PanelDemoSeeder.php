@@ -79,9 +79,15 @@ class PanelDemoSeeder extends Seeder
                 'address' => 'Sector 21, Main Road',
                 'commission_type' => 'percent',
                 'commission_value' => 5,
+                'price_margin_type' => 'percent',
+                'price_margin_value' => 18,
                 'is_active' => true,
             ],
         );
+
+        User::query()
+            ->where('email', 'cc@pathlabs.test')
+            ->update(['collection_center_id' => $collectionCenter->id]);
 
         $tests = collect([
             ['code' => 'CBC', 'name' => 'Complete Blood Count (CBC)', 'price' => 350, 'department' => 'pathology', 'sample_type' => 'blood'],
@@ -98,6 +104,7 @@ class PanelDemoSeeder extends Seeder
                     'sample_type' => $testData['sample_type'],
                     'department' => $testData['department'],
                     'price' => $testData['price'],
+                    'b2b_price' => round($testData['price'] * 0.78, 2),
                     'referral_commission_value' => 10,
                     'referral_commission_type' => 'percent',
                     'collection_center_commission_value' => 5,
@@ -114,6 +121,7 @@ class PanelDemoSeeder extends Seeder
             [
                 'name' => 'Executive Health Package',
                 'price' => 1800,
+                'b2b_price' => 1440,
                 'is_active' => true,
             ],
         );
@@ -123,6 +131,7 @@ class PanelDemoSeeder extends Seeder
             [
                 'name' => 'Radiology Basic Package',
                 'price' => 2000,
+                'b2b_price' => 1620,
                 'is_active' => true,
             ],
         );
@@ -309,7 +318,24 @@ class PanelDemoSeeder extends Seeder
                 'clinical_master.manage_tests',
                 'clinical_master.manage_packages',
             ],
-            'collection_center' => ['dashboard.view', 'front_desk.access', 'billing.create', 'billing.view', 'billing.manage'],
+            'collection_center' => [
+                'dashboard.view',
+                'front_desk.access',
+                'billing.create',
+                'billing.view',
+                'billing.edit',
+                'billing.manage',
+                'samples.manage',
+                'patients.add',
+                'patients.view',
+                'patients.edit',
+                'patients.manage',
+                'doctors.add',
+                'doctors.view',
+                'doctors.edit',
+                'doctors.manage',
+                'wallet.view',
+            ],
             'doctor' => [
                 'dashboard.view',
                 'billing.view',

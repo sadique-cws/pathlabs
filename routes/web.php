@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DoctorManagementController as AdminDoctorManageme
 use App\Http\Controllers\Admin\LabFeatureController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\CollectionCenterPortalController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\DoctorPortalController;
 use App\Http\Controllers\Lab\StaffController;
@@ -47,6 +48,10 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             return to_route('doctor.dashboard');
         }
 
+        if ($user?->hasRole('collection_center') || (int) ($user?->collection_center_id ?? 0) > 0) {
+            return to_route('cc.dashboard');
+        }
+
         if ((int) ($user?->lab_id ?? 0) > 0) {
             return to_route('lab.dashboard');
         }
@@ -57,7 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
 Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function (): void {
 
-    Route::prefix('lab')->name('lab.')->group(function (): void {
+    Route::prefix('lab')->name('lab.')->middleware('panel.access:lab')->group(function (): void {
         Route::get('dashboard', [BillingController::class, 'dashboard'])
             ->middleware('feature:dashboard.view')
             ->name('dashboard');
@@ -221,6 +226,80 @@ Route::middleware(['auth', 'verified', EnsureLabContext::class])->group(function
         Route::post('staff/{staffMember}', [StaffController::class, 'update'])
             ->middleware('feature:staff.manage')
             ->name('staff.update');
+    });
+
+    Route::prefix('cc')->name('cc.')->middleware('panel.access:cc')->group(function (): void {
+        Route::get('dashboard', [CollectionCenterPortalController::class, 'dashboard'])
+            ->middleware('feature:dashboard.view')
+            ->name('dashboard');
+
+        Route::get('billing/create', [BillingController::class, 'create'])
+            ->middleware('feature:billing.create')
+            ->name('billing.create');
+        Route::get('billing/manage', [BillingController::class, 'manage'])
+            ->middleware('feature:billing.manage')
+            ->name('billing.manage');
+        Route::get('billing/{bill}/view', [BillingController::class, 'view'])
+            ->middleware('feature:billing.view')
+            ->name('billing.view');
+        Route::get('billing/{bill}/barcodes', [BillingController::class, 'barcodes'])
+            ->middleware('feature:billing.view')
+            ->name('billing.barcodes');
+        Route::get('billing/{bill}/edit', [BillingController::class, 'edit'])
+            ->middleware('feature:billing.edit')
+            ->name('billing.edit');
+        Route::put('billing/{bill}', [BillingController::class, 'update'])
+            ->middleware('feature:billing.edit')
+            ->name('billing.update');
+        Route::get('billing/samples', [BillingController::class, 'manageSamples'])
+            ->middleware('feature:samples.manage')
+            ->name('billing.samples');
+        Route::post('billing/generate-barcode', [BillingController::class, 'generateBarcode'])
+            ->middleware('feature:billing.create')
+            ->name('billing.generate-barcode');
+        Route::post('billing/complete', [BillingController::class, 'complete'])
+            ->middleware('feature:billing.create')
+            ->name('billing.complete');
+
+        Route::get('patients/manage', [PatientController::class, 'manage'])
+            ->middleware('feature:patients.manage')
+            ->name('patients.manage');
+        Route::get('patients/add', [PatientController::class, 'add'])
+            ->middleware('feature:patients.add')
+            ->name('patients.add');
+        Route::post('patients', [PatientController::class, 'store'])
+            ->middleware('feature:patients.add')
+            ->name('patients.store');
+        Route::get('patients/{patient}/edit', [PatientController::class, 'edit'])
+            ->middleware('feature:patients.edit')
+            ->name('patients.edit');
+        Route::put('patients/{patient}', [PatientController::class, 'update'])
+            ->middleware('feature:patients.edit')
+            ->name('patients.update');
+
+        Route::get('doctors/manage', [DoctorController::class, 'manage'])
+            ->middleware('feature:doctors.manage')
+            ->name('doctors.manage');
+        Route::get('doctors/add', [DoctorController::class, 'add'])
+            ->middleware('feature:doctors.add')
+            ->name('doctors.add');
+        Route::post('doctors', [DoctorController::class, 'store'])
+            ->middleware('feature:doctors.add')
+            ->name('doctors.store');
+        Route::get('doctors/{doctor}/edit', [DoctorController::class, 'edit'])
+            ->middleware('feature:doctors.edit')
+            ->name('doctors.edit');
+        Route::put('doctors/{doctor}', [DoctorController::class, 'update'])
+            ->middleware('feature:doctors.edit')
+            ->name('doctors.update');
+
+        Route::get('wallet', [WalletController::class, 'index'])
+            ->middleware('feature:wallet.view')
+            ->name('wallet.index');
+
+        Route::get('price-list', [CollectionCenterPortalController::class, 'priceList'])
+            ->middleware('feature:billing.create')
+            ->name('price-list');
     });
 
     Route::prefix('admin')->name('admin.')->middleware('ensure.admin')->group(function (): void {

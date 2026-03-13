@@ -18,9 +18,10 @@ type Props = {
         auto_print: boolean;
         barcodes: BarcodeRow[];
     };
+    routePrefix?: string;
 };
 
-export default function BillBarcodeSheet({ bill }: Props) {
+export default function BillBarcodeSheet({ bill, routePrefix = 'lab' }: Props) {
     useEffect(() => {
         if (bill.auto_print) {
             window.setTimeout(() => window.print(), 250);
@@ -55,7 +56,7 @@ export default function BillBarcodeSheet({ bill }: Props) {
             <div className="min-h-screen bg-slate-100 p-4 md:p-6">
                 <div className="no-print mx-auto mb-4 flex max-w-5xl flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                        <Link href="/lab/billing/manage" className="inline-flex items-center gap-2  border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">
+                        <Link href={`/${routePrefix}/billing/manage`} className="inline-flex items-center gap-2  border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">
                             <ArrowLeft className="h-4 w-4" />
                             Back
                         </Link>

@@ -36,17 +36,18 @@ class BillingService
         return DB::transaction(function () use ($labId, $payload, $user): Bill {
             $tests = $this->fetchTests($labId, $payload['test_ids'] ?? []);
             $packages = $this->fetchPackages($labId, $payload['package_ids'] ?? []);
-            $patient = $this->resolvePatient($labId, $payload);
-            $doctorId = $this->resolveDoctorId($labId, $payload);
-            $collectionCenterId = $this->resolveCollectionCenterId($labId, $payload);
+            $currentCollectionCenterId = (int) ($user->collection_center_id ?? 0);
+            $patient = $this->resolvePatient($labId, $payload, $currentCollectionCenterId);
+            $doctorId = $this->resolveDoctorId($labId, $payload, $currentCollectionCenterId);
+            $collectionCenter = $this->resolveCollectionCenter($labId, $payload);
 
             $serviceOtherCharges = $this->resolveServiceOtherCharges($labId, $payload);
             $serviceOtherChargeAmount = round($serviceOtherCharges->sum('amount'), 2);
             $baseServiceCharge = self::SERVICE_CHARGE;
             $finalServiceCharge = round($baseServiceCharge + $serviceOtherChargeAmount, 2);
 
-            $testTotal = round($tests->sum(fn(LabTest $test): float => (float) $test->price), 2);
-            $packageTotal = round($packages->sum(fn(TestPackage $package): float => (float) $package->price), 2);
+            $testTotal = round($tests->sum(fn (LabTest $test): float => $this->resolveTestSellingPrice($test, $collectionCenter)), 2);
+            $packageTotal = round($packages->sum(fn (TestPackage $package): float => $this->resolvePackageSellingPrice($package, $collectionCenter)), 2);
             $grossTotal = round($testTotal + $packageTotal, 2);
             $baseDiscount = round((float) ($payload['discount_amount'] ?? 0), 2);
             $doctorDiscountType = (string) ($payload['doctor_discount_type'] ?? 'fixed');
@@ -64,7 +65,7 @@ class BillingService
                 'lab_id' => $labId,
                 'patient_id' => $patient->id,
                 'doctor_id' => $doctorId,
-                'collection_center_id' => $collectionCenterId,
+                'collection_center_id' => $collectionCenter?->id,
                 'bill_number' => $this->generateBillNumber($labId),
                 'billing_at' => $payload['billing_at'] ?? now(),
                 'sample_collected_from' => $payload['sample_collected_from'] ?? null,
@@ -94,7 +95,7 @@ class BillingService
 
             $this->processSubscriptionUsage($labId, $bill, $user);
 
-            $directTestItems = $this->createBillItems($bill, $tests, $packages);
+            $directTestItems = $this->createBillItems($bill, $tests, $packages, $collectionCenter);
             $expandedTests = $this->expandPackageTests($tests, $packages);
             $sampleQuantity = max(1, min(20, (int) ($payload['sample_quantity'] ?? 1)));
             $this->createSamples($bill, $expandedTests, $directTestItems, $sampleQuantity);
@@ -117,8 +118,8 @@ class BillingService
         $lab = Lab::findOrFail($labId);
         $sub = $lab->currentSubscription;
 
-        if (!$sub) {
-            throw new \Exception("Lab does not have an active subscription plan. Please subscribe to continue.");
+        if (! $sub) {
+            throw new \Exception('Lab does not have an active subscription plan. Please subscribe to continue.');
         }
 
         $plan = $sub->plan;
@@ -126,24 +127,24 @@ class BillingService
         if ($plan->type === 'pay_as_you_go') {
             // Deduct per bill price from user's wallet
             $userWallet = $this->walletService->ensureWallet($user, $labId);
-            $this->walletService->debit($userWallet, (float)$plan->price, $bill, "Usage fee for plan: {$plan->name}");
+            $this->walletService->debit($userWallet, (float) $plan->price, $bill, "Usage fee for plan: {$plan->name}");
 
             $sub->increment('bills_used');
         } else {
             // Subscription based plan
             if ($sub->ends_at && $sub->ends_at->isPast()) {
                 $sub->update(['status' => 'expired', 'is_current' => false]);
-                throw new \Exception("Subscription plan has expired. Please renew to continue.");
+                throw new \Exception('Subscription plan has expired. Please renew to continue.');
             }
 
             if ($sub->bill_limit !== null && $sub->bills_used >= $sub->bill_limit) {
-                throw new \Exception("Bill limit reached for current subscription. Please upgrade your plan.");
+                throw new \Exception('Bill limit reached for current subscription. Please upgrade your plan.');
             }
 
             $sub->increment('bills_used');
 
             // Optional: Also debit something if the plan has additional per-bill costs
-            if ((float)$plan->price > 0 && $plan->type === 'subscription') {
+            if ((float) $plan->price > 0 && $plan->type === 'subscription') {
                 // Some subscription plans might have a monthly fee + small per bill fee?
                 // For now assuming subscription price is purely for the limit.
             }
@@ -171,13 +172,17 @@ class BillingService
     /**
      * @param  array<string, mixed>  $payload
      */
-    private function resolveDoctorId(int $labId, array $payload): ?int
+    private function resolveDoctorId(int $labId, array $payload, int $currentCollectionCenterId = 0): ?int
     {
         $doctorId = $payload['doctor_id'] ?? null;
 
         if ($doctorId !== null && $doctorId !== '') {
             return Doctor::query()
                 ->where('lab_id', $labId)
+                ->when(
+                    $currentCollectionCenterId > 0,
+                    fn ($query) => $query->where('collection_center_id', $currentCollectionCenterId)
+                )
                 ->findOrFail((int) $doctorId)
                 ->id;
         }
@@ -189,9 +194,11 @@ class BillingService
         }
 
         $doctorPhone = trim((string) ($payload['doctor_phone'] ?? ''));
+        $collectionCenterId = $currentCollectionCenterId > 0 ? $currentCollectionCenterId : ($payload['collection_center_id'] ?? null);
 
         return Doctor::query()->create([
             'lab_id' => $labId,
+            'collection_center_id' => $collectionCenterId !== null && $collectionCenterId !== '' ? (int) $collectionCenterId : null,
             'name' => $doctorName,
             'phone' => $doctorPhone !== '' ? $doctorPhone : null,
             'commission_type' => 'percent',
@@ -203,7 +210,7 @@ class BillingService
     /**
      * @param  array<string, mixed>  $payload
      */
-    private function resolveCollectionCenterId(int $labId, array $payload): ?int
+    private function resolveCollectionCenter(int $labId, array $payload): ?CollectionCenter
     {
         $collectionCenterId = $payload['collection_center_id'] ?? null;
 
@@ -213,8 +220,7 @@ class BillingService
 
         return CollectionCenter::query()
             ->where('lab_id', $labId)
-            ->findOrFail((int) $collectionCenterId)
-            ->id;
+            ->findOrFail((int) $collectionCenterId);
     }
 
     /**
@@ -253,19 +259,27 @@ class BillingService
     /**
      * @param  array<string, mixed>  $payload
      */
-    private function resolvePatient(int $labId, array $payload): Patient
+    private function resolvePatient(int $labId, array $payload, int $currentCollectionCenterId = 0): Patient
     {
         if (isset($payload['patient_id']) && $payload['patient_id'] !== '' && $payload['patient_id'] !== null) {
             return Patient::query()
                 ->where('lab_id', $labId)
+                ->when(
+                    $currentCollectionCenterId > 0,
+                    fn ($query) => $query->where('collection_center_id', $currentCollectionCenterId)
+                )
                 ->findOrFail($payload['patient_id']);
         }
 
         /** @var array<string, mixed> $patientPayload */
         $patientPayload = $payload['patient'];
+        $collectionCenterId = $currentCollectionCenterId > 0
+            ? $currentCollectionCenterId
+            : ((isset($payload['collection_center_id']) && $payload['collection_center_id'] !== '') ? (int) $payload['collection_center_id'] : null);
 
         return Patient::query()->create([
             'lab_id' => $labId,
+            'collection_center_id' => $collectionCenterId,
             'title' => $patientPayload['title'] ?? null,
             'uhid' => $patientPayload['uhid'] ?? null,
             'name' => $patientPayload['name'],
@@ -291,11 +305,17 @@ class BillingService
      * @param  Collection<int, TestPackage>  $packages
      * @return Collection<int, BillItem>
      */
-    private function createBillItems(Bill $bill, Collection $tests, Collection $packages): Collection
-    {
+    private function createBillItems(
+        Bill $bill,
+        Collection $tests,
+        Collection $packages,
+        ?CollectionCenter $collectionCenter
+    ): Collection {
         $directTestItems = collect();
 
         foreach ($tests as $test) {
+            $sellingPrice = $this->resolveTestSellingPrice($test, $collectionCenter);
+
             $item = BillItem::query()->create([
                 'lab_id' => $bill->lab_id,
                 'bill_id' => $bill->id,
@@ -304,14 +324,16 @@ class BillingService
                 'test_id' => $test->id,
                 'name' => $test->name,
                 'quantity' => 1,
-                'unit_price' => (float) $test->price,
-                'total_price' => (float) $test->price,
+                'unit_price' => $sellingPrice,
+                'total_price' => $sellingPrice,
             ]);
 
             $directTestItems->put($test->id, $item);
         }
 
         foreach ($packages as $package) {
+            $sellingPrice = $this->resolvePackageSellingPrice($package, $collectionCenter);
+
             BillItem::query()->create([
                 'lab_id' => $bill->lab_id,
                 'bill_id' => $bill->id,
@@ -320,8 +342,8 @@ class BillingService
                 'package_id' => $package->id,
                 'name' => $package->name,
                 'quantity' => 1,
-                'unit_price' => (float) $package->price,
-                'total_price' => (float) $package->price,
+                'unit_price' => $sellingPrice,
+                'total_price' => $sellingPrice,
             ]);
         }
 
@@ -357,7 +379,7 @@ class BillingService
 
             $sampleType = strtolower(trim((string) $test->sample_type));
             $nonPhysicalSamples = ['none', 'imaging', 'radiology', 'x-ray', 'xray', 'ultrasound', 'mri', 'ct scan'];
-            $requiresPhysicalSample = $sampleType !== '' && !in_array($sampleType, $nonPhysicalSamples, true);
+            $requiresPhysicalSample = $sampleType !== '' && ! in_array($sampleType, $nonPhysicalSamples, true);
 
             for ($index = 0; $index < $sampleQuantity; $index++) {
                 $status = $requiresPhysicalSample ? 'pending' : 'collected';
@@ -413,6 +435,32 @@ class BillingService
         return round($value, 2);
     }
 
+    private function resolveTestSellingPrice(LabTest $test, ?CollectionCenter $collectionCenter): float
+    {
+        $basePrice = $collectionCenter !== null && $test->b2b_price !== null
+            ? (float) $test->b2b_price
+            : (float) $test->price;
+
+        if ($collectionCenter === null) {
+            return round($basePrice, 2);
+        }
+
+        return $collectionCenter->sellingPrice($basePrice);
+    }
+
+    private function resolvePackageSellingPrice(TestPackage $package, ?CollectionCenter $collectionCenter): float
+    {
+        $basePrice = $collectionCenter !== null && $package->b2b_price !== null
+            ? (float) $package->b2b_price
+            : (float) $package->price;
+
+        if ($collectionCenter === null) {
+            return round($basePrice, 2);
+        }
+
+        return $collectionCenter->sellingPrice($basePrice);
+    }
+
     /**
      * @param  array<string, mixed>  $payload
      * @param  Collection<int, array{name: string, amount: float}>  $serviceOtherCharges
@@ -445,7 +493,7 @@ class BillingService
     private function resolveServiceOtherCharges(int $labId, array $payload): Collection
     {
         $charges = collect($payload['service_other_charges'] ?? [])
-            ->filter(fn(mixed $charge): bool => is_array($charge) && isset($charge['name']))
+            ->filter(fn (mixed $charge): bool => is_array($charge) && isset($charge['name']))
             ->map(function (array $charge) use ($labId): array {
                 $name = trim((string) $charge['name']);
                 $amount = round((float) ($charge['amount'] ?? 0), 2);
@@ -467,7 +515,7 @@ class BillingService
                     'amount' => $amount,
                 ];
             })
-            ->filter(fn(array $charge): bool => $charge['name'] !== '' && $charge['amount'] > 0)
+            ->filter(fn (array $charge): bool => $charge['name'] !== '' && $charge['amount'] > 0)
             ->values();
 
         return $charges;

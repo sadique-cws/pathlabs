@@ -24,12 +24,13 @@ type PatientEdit = {
 
 type Props = {
     patient: PatientEdit;
+    routePrefix?: string;
 };
 
-export default function EditPatient({ patient }: Props) {
+export default function EditPatient({ patient, routePrefix = 'lab' }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Manage Patients', href: '/lab/patients/manage' },
-        { title: `Edit #${patient.id}`, href: `/lab/patients/${patient.id}/edit` },
+        { title: 'Manage Patients', href: `/${routePrefix}/patients/manage` },
+        { title: `Edit #${patient.id}`, href: `/${routePrefix}/patients/${patient.id}/edit` },
     ];
 
     const form = useForm({
@@ -59,7 +60,7 @@ export default function EditPatient({ patient }: Props) {
                 <form
                     onSubmit={(event) => {
                         event.preventDefault();
-                        form.put(`/lab/patients/${patient.id}`);
+                        form.put(`/${routePrefix}/patients/${patient.id}`);
                     }}
                     className="space-y-4  border border-slate-200 bg-white p-6"
                 >

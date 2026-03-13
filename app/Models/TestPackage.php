@@ -20,6 +20,7 @@ class TestPackage extends Model
         'name',
         'code',
         'price',
+        'b2b_price',
         'is_active',
         'is_system',
     ];
@@ -31,6 +32,7 @@ class TestPackage extends Model
     {
         return [
             'price' => 'decimal:2',
+            'b2b_price' => 'decimal:2',
             'is_active' => 'boolean',
             'is_system' => 'boolean',
         ];

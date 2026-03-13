@@ -23,14 +23,9 @@ type BillRow = {
 
 type Props = {
     bills: BillRow[];
+    routePrefix?: string;
+    panelTitle?: string;
 };
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Manage Patient Bills',
-        href: '/lab/billing/manage',
-    },
-];
 
 const columns: Array<{ key: string; label: string }> = [
     { key: 'bill', label: 'Bill#' },
@@ -46,7 +41,7 @@ const columns: Array<{ key: string; label: string }> = [
     { key: 'status', label: 'Status' },
 ];
 
-export default function ManageBills({ bills }: Props) {
+export default function ManageBills({ bills, routePrefix = 'lab', panelTitle = 'Manage Patient Bills' }: Props) {
     const [search, setSearch] = useState('');
     const [dateRange, setDateRange] = useState('');
     const [paymentStatus, setPaymentStatus] = useState<'' | 'Complete' | 'Partial'>('');
@@ -106,7 +101,7 @@ export default function ManageBills({ bills }: Props) {
                                 <FileSpreadsheet className="h-4 w-4" />
                                 <span className="hidden xs:inline">Export</span>
                             </button>
-                            <Link href="/lab/billing/create" className="flex-[2] sm:flex-none text-center  bg-[#147da2] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
+                            <Link href={`/${routePrefix}/billing/create`} className="flex-[2] sm:flex-none text-center  bg-[#147da2] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#106385]">
                                 + New Bill
                             </Link>
                         </div>
@@ -181,13 +176,13 @@ export default function ManageBills({ bills }: Props) {
                                         </td>
                                         <td className="px-3 py-3 whitespace-nowrap">
                                             <div className="flex items-center gap-1">
-                                                <Link href={`/lab/billing/${bill.id}/view`} className="p-1 text-blue-500 hover:bg-blue-50">
+                                                <Link href={`/${routePrefix}/billing/${bill.id}/view`} className="p-1 text-blue-500 hover:bg-blue-50">
                                                     <Eye className="h-4 w-4" />
                                                 </Link>
-                                                <a href={`/lab/billing/${bill.id}/barcodes`} className="p-1 text-emerald-600 hover:bg-emerald-50" title="View / Print Barcodes">
+                                                <a href={`/${routePrefix}/billing/${bill.id}/barcodes`} className="p-1 text-emerald-600 hover:bg-emerald-50" title="View / Print Barcodes">
                                                     <Printer className="h-4 w-4" />
                                                 </a>
-                                                <Link href={`/lab/billing/${bill.id}/edit`} className="p-1 text-slate-500 hover:bg-slate-100">
+                                                <Link href={`/${routePrefix}/billing/${bill.id}/edit`} className="p-1 text-slate-500 hover:bg-slate-100">
                                                     <Pencil className="h-4 w-4" />
                                                 </Link>
                                             </div>
@@ -221,3 +216,9 @@ export default function ManageBills({ bills }: Props) {
         </AppLayout>
     );
 }
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: panelTitle,
+            href: `/${routePrefix}/billing/manage`,
+        },
+    ];

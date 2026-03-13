@@ -23,11 +23,13 @@ type Props = {
         accepted: number;
         with_gifts: number;
     };
+    routePrefix?: string;
+    doctorTitle?: string;
 };
 
-export default function ManageDoctors({ doctors, stats }: Props) {
+export default function ManageDoctors({ doctors, stats, routePrefix = 'lab', doctorTitle = 'Lab Doctors' }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Lab Doctors', href: '/lab/doctors/manage' },
+        { title: doctorTitle, href: `/${routePrefix}/doctors/manage` },
     ];
     const [search, setSearch] = useState('');
 
@@ -44,7 +46,7 @@ export default function ManageDoctors({ doctors, stats }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Lab Doctors List" />
+            <Head title={`${doctorTitle} List`} />
 
             <div className="min-h-full bg-slate-50/80 p-0">
                 <div className="sawtooth flex justify-between border-b-0 border-slate-200 bg-white p-3 sm:p-4 border-b">
@@ -53,20 +55,20 @@ export default function ManageDoctors({ doctors, stats }: Props) {
                         <input 
                             value={search} 
                             onChange={(e) => setSearch(e.target.value)} 
-                            placeholder="Search lab doctors by name, email, or phone..." 
+                            placeholder={`Search ${doctorTitle.toLowerCase()} by name, email, or phone...`} 
                             className="h-10 w-full  border border-slate-200 bg-slate-50/20 pl-10 pr-3 text-sm outline-none transition focus:bg-white focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20" 
                         />
                     </label>
 
                     {/* add doctor */}
-                    <Link href="/lab/doctors/add" className="inline-flex items-center justify-center  bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385] w-full sm:w-auto">
-                        + Add Lab Doctor
+                    <Link href={`/${routePrefix}/doctors/add`} className="inline-flex items-center justify-center  bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385] w-full sm:w-auto">
+                        + Add {doctorTitle.endsWith('s') ? doctorTitle.slice(0, -1) : doctorTitle}
                     </Link>
                 </div>
 
                 <div className="sawtooth grid grid-cols-2 sm:grid-cols-3">
                     <div className="sawtooth border-r border-t border-slate-200 bg-white p-3 sm:p-4">
-                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">Total Lab Doctors</p>
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-500">Total {doctorTitle}</p>
                         <p className="mt-1 text-xl sm:text-2xl font-bold text-slate-800">{stats.total}</p>
                     </div>
                     <div className="sawtooth border-r border-t border-slate-200 bg-white p-3 sm:p-4">
@@ -111,7 +113,7 @@ export default function ManageDoctors({ doctors, stats }: Props) {
                                         </td>
                                         <td className="px-3 py-3 text-slate-500 text-xs">{doctor.created_date ?? '-'}</td>
                                         <td className="px-3 py-3 text-right">
-                                            <Link href={`/lab/doctors/${doctor.id}/edit`} className="inline-flex h-8 items-center border border-slate-200 bg-white px-3 text-xs font-bold uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-colors">
+                                            <Link href={`/${routePrefix}/doctors/${doctor.id}/edit`} className="inline-flex h-8 items-center border border-slate-200 bg-white px-3 text-xs font-bold uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-colors">
                                                 Edit
                                             </Link>
                                         </td>
@@ -120,7 +122,7 @@ export default function ManageDoctors({ doctors, stats }: Props) {
                                 {filtered.length === 0 && (
                                     <tr>
                                         <td colSpan={9} className="px-3 py-8 text-center text-sm text-slate-500">
-                                            No lab doctors found.
+                                            No {doctorTitle.toLowerCase()} found.
                                         </td>
                                     </tr>
                                 )}

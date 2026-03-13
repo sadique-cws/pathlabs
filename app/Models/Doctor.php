@@ -18,6 +18,7 @@ class Doctor extends Model
      */
     protected $fillable = [
         'lab_id',
+        'collection_center_id',
         'name',
         'phone',
         'email',
@@ -46,6 +47,11 @@ class Doctor extends Model
     public function lab(): BelongsTo
     {
         return $this->belongsTo(Lab::class);
+    }
+
+    public function collectionCenter(): BelongsTo
+    {
+        return $this->belongsTo(CollectionCenter::class);
     }
 
     public function wallet(): MorphOne

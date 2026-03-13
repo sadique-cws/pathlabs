@@ -37,11 +37,15 @@ interface Props {
 export function AppHeader({ withSidebarToggle = false }: Props) {
     const { connectivity } = useConnectivity();
     const props = usePage().props as any;
-    
-    // Support both structures just in case
     const walletBalance = props.wallet?.balance ?? props.wallet_balance ?? 0;
     const permissions = props.access?.permissions ?? [];
     const auth = props.auth as { user: User };
+    const currentPanel = props.currentPanel as { key?: string; route_prefix?: string } | undefined;
+    const routePrefix = currentPanel?.route_prefix ?? '/lab';
+    const isCollectionCenterPanel = currentPanel?.key === 'collection_center';
+    const showSearch = currentPanel?.key === 'lab';
+    const searchEndpoint = '/lab/search';
+    const panelUserLabel = isCollectionCenterPanel ? 'B2B Partner' : currentPanel?.key === 'doctor' ? 'Doctor Portal' : 'Lab Executive';
     
     const [scrolled, setScrolled] = useState(false);
 
@@ -70,7 +74,7 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
         const delayDebounceFn = setTimeout(async () => {
             setIsSearching(true);
             try {
-                const response = await fetch(`/lab/search?query=${encodeURIComponent(searchQuery)}`);
+                const response = await fetch(`${searchEndpoint}?query=${encodeURIComponent(searchQuery)}`);
                 const data = await response.json();
                 setSearchResults(data);
                 setShowResults(true);
@@ -82,7 +86,7 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
         }, 500);
 
         return () => clearTimeout(delayDebounceFn);
-    }, [searchQuery]);
+    }, [searchEndpoint, searchQuery]);
 
     // Handle outside click
     useEffect(() => {
@@ -124,7 +128,7 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
             scrolled ? "h-12 shadow-md" : "h-14"
         )}>
             {/* Mobile Search Overlay */}
-            {isMobileSearchOpen && (
+            {showSearch && isMobileSearchOpen && (
                 <div className="absolute inset-0 z-[100] bg-[#147da2] flex items-center px-4 gap-3 animate-in fade-in slide-in-from-top duration-200">
                     <div className="flex-1 flex items-center bg-white/10 border border-white/20 px-3 py-2">
                         <Search className={cn("h-4 w-4 text-white/60", isSearching && "animate-pulse")} />
@@ -168,13 +172,13 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
                         </Link>
                     )}
                     {permissions?.includes('billing.create') && (
-                        <Link href="/lab/billing/create" className="flex items-center gap-2 text-sm font-medium hover:text-white/80 transition-colors">
+                        <Link href={`${routePrefix}/billing/create`} className="flex items-center gap-2 text-sm font-medium hover:text-white/80 transition-colors">
                             <PlusCircle className="h-4 w-4" />
-                            <span>New Lab Bill</span>
+                            <span>{isCollectionCenterPanel ? 'New CC Bill' : 'New Lab Bill'}</span>
                         </Link>
                     )}
                     {permissions?.includes('billing.manage') && (
-                        <Link href="/lab/billing/manage" className="flex items-center gap-2 text-sm font-medium hover:text-white/80 transition-colors">
+                        <Link href={`${routePrefix}/billing/manage`} className="flex items-center gap-2 text-sm font-medium hover:text-white/80 transition-colors">
                             <LayoutDashboard className="h-4 w-4" />
                             <span>Manage Bills</span>
                         </Link>
@@ -195,7 +199,7 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
             </div>
 
             <div className="flex items-center gap-2 md:gap-5 lg:flex-1 justify-end lg:justify-center">
-                <div className="search-container relative hidden lg:flex w-full max-w-[400px]">
+                {showSearch && <div className="search-container relative hidden lg:flex w-full max-w-[400px]">
                     <div className="flex items-center bg-white/10 hover:bg-white/20 transition-all border border-white/20 px-3 py-1.5 group w-full">
                         <Search className={cn("h-4 w-4 text-white/60 group-hover:text-white/80 transition-colors", isSearching && "animate-pulse")} />
                         <input
@@ -215,19 +219,19 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
                             </div>
                         </div>
                     )}
-                </div>
+                </div>}
 
                 <div className="flex items-center gap-1.5 md:gap-3">
-                    <button 
+                    {showSearch && <button 
                         onClick={() => setIsMobileSearchOpen(true)}
                         className="p-2 hover:bg-white/10 transition-colors lg:hidden"
                     >
                         <Search className="h-5 w-5" />
-                    </button>
+                    </button>}
 
                     {permissions?.includes('wallet.view') && (
                         <Link 
-                            href="/lab/wallet" 
+                            href={`${routePrefix}/wallet`} 
                             className="flex items-center gap-1.5 md:gap-2 bg-white/10 hover:bg-white/20 transition-all border border-white/10 px-2 md:px-3 py-1 text-xs md:text-sm font-semibold"
                         >
                             <div className="p-1 bg-emerald-500 ">
@@ -252,7 +256,7 @@ export function AppHeader({ withSidebarToggle = false }: Props) {
                             <button className="flex items-center gap-2 p-1 pl-2  hover:bg-white/10 transition-all outline-none">
                                 <div className="hidden md:block text-right mr-1">
                                     <p className="text-[12px] font-bold leading-tight truncate max-w-[120px]">{auth?.user?.name}</p>
-                                    <p className="text-[10px] text-white/70 leading-tight">Lab Executive</p>
+                                    <p className="text-[10px] text-white/70 leading-tight">{panelUserLabel}</p>
                                 </div>
                                 <div className="w-8 h-8  bg-white/20 flex items-center justify-center border border-white/30 text-white font-bold shrink-0">
                                     {auth?.user?.name?.charAt(0)}

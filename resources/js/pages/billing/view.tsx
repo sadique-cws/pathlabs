@@ -64,9 +64,10 @@ type BillViewProps = {
 type Props = {
     bill: BillViewProps;
     labConfig: LabConfig | null;
+    routePrefix?: string;
 };
 
-export default function BillView({ bill, labConfig }: Props) {
+export default function BillView({ bill, labConfig, routePrefix = 'lab' }: Props) {
     useEffect(() => {
         if (bill.auto_print_barcodes) {
             window.setTimeout(() => window.print(), 200);
@@ -74,8 +75,8 @@ export default function BillView({ bill, labConfig }: Props) {
     }, [bill.auto_print_barcodes]);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Manage Patient Bills', href: '/lab/billing/manage' },
-        { title: `Invoice ${bill.bill_number}`, href: `/lab/billing/${bill.id}/view` },
+        { title: 'Manage Patient Bills', href: `/${routePrefix}/billing/manage` },
+        { title: `Invoice ${bill.bill_number}`, href: `/${routePrefix}/billing/${bill.id}/view` },
     ];
 
     const labName = labConfig?.name || 'PathLab';
@@ -120,13 +121,13 @@ export default function BillView({ bill, labConfig }: Props) {
             <div className="min-h-full bg-slate-50/80 p-0 lg:p-8">
                 <div className="no-print mb-6 flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <Link href="/lab/billing/manage" className="inline-flex h-9 w-9 items-center justify-center  border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900">
+                        <Link href={`/${routePrefix}/billing/manage`} className="inline-flex h-9 w-9 items-center justify-center  border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900">
                             <ArrowLeft className="h-4 w-4" />
                         </Link>
                         <h1 className="text-xl font-semibold text-slate-800">Invoice #{bill.bill_number}</h1>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                        <Link href={`/lab/billing/${bill.id}/edit`} className="inline-flex items-center gap-2  border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                        <Link href={`/${routePrefix}/billing/${bill.id}/edit`} className="inline-flex items-center gap-2  border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                             <Pencil className="h-4 w-4" />
                             Edit Bill
                         </Link>
@@ -146,7 +147,7 @@ export default function BillView({ bill, labConfig }: Props) {
                             <Printer className="h-4 w-4" />
                             Print
                         </button>
-                        <a href={`/lab/billing/${bill.id}/barcodes`} className="inline-flex items-center gap-2  border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100">
+                        <a href={`/${routePrefix}/billing/${bill.id}/barcodes`} className="inline-flex items-center gap-2  border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100">
                             <Printer className="h-4 w-4" />
                             Barcode Preview
                         </a>

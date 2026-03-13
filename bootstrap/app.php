@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureAdminRole;
 use App\Http\Middleware\EnsureFeaturePermission;
+use App\Http\Middleware\EnsureUserPanelAccess;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'ensure.admin' => EnsureAdminRole::class,
             'feature' => EnsureFeaturePermission::class,
+            'panel.access' => EnsureUserPanelAccess::class,
         ]);
 
         $middleware->web(append: [

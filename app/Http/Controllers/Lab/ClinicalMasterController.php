@@ -19,7 +19,7 @@ class ClinicalMasterController extends Controller
         $search = $request->input('search');
 
         $query = LabTest::query()
-            ->with('testGroup:id,name')
+            ->with('test_group:id,name')
             ->where(function ($q) use ($labId): void {
                 $q->where('lab_id', $labId)
                     ->orWhere('is_system', true);
@@ -38,17 +38,17 @@ class ClinicalMasterController extends Controller
             ->withQueryString();
 
         return Inertia::render('lab/clinical-master/tests', [
-            'tests' => collect($tests->items())->map(fn(LabTest $t): array => [
+            'tests' => collect($tests->items())->map(fn (LabTest $t): array => [
                 'id' => $t->id,
                 'name' => $t->name,
                 'code' => $t->code,
                 'sample_type' => $t->sample_type ?? '-',
-                'department' => $t->testGroup?->name ?? $t->department ?? '-',
+                'department' => $t->test_group?->name ?? $t->department ?? '-',
                 'test_group_id' => $t->test_group_id,
                 'price' => (float) $t->price,
                 'is_system' => $t->is_system,
                 'is_active' => $t->is_active,
-                'can_edit' => !$t->is_system || $request->user()->hasRole('admin'),
+                'can_edit' => ! $t->is_system || $request->user()->hasRole('admin'),
             ])->all(),
             'pagination' => [
                 'current_page' => $tests->currentPage(),
@@ -99,11 +99,11 @@ class ClinicalMasterController extends Controller
         $labId = (int) $request->attributes->get('lab_id');
         $isAdmin = $request->user()->hasRole('admin') || $request->user()->hasRole('super_admin');
 
-        if ($test->is_system && !$isAdmin) {
+        if ($test->is_system && ! $isAdmin) {
             abort(403, 'You cannot modify system tests.');
         }
 
-        if (!$test->is_system && $test->lab_id !== $labId && !$isAdmin) {
+        if (! $test->is_system && $test->lab_id !== $labId && ! $isAdmin) {
             abort(403);
         }
 
@@ -126,11 +126,11 @@ class ClinicalMasterController extends Controller
         $labId = (int) $request->attributes->get('lab_id');
         $isAdmin = $request->user()->hasRole('admin') || $request->user()->hasRole('super_admin');
 
-        if ($test->is_system && !$isAdmin) {
+        if ($test->is_system && ! $isAdmin) {
             abort(403, 'You cannot delete system tests.');
         }
 
-        if (!$test->is_system && $test->lab_id !== $labId && !$isAdmin) {
+        if (! $test->is_system && $test->lab_id !== $labId && ! $isAdmin) {
             abort(403);
         }
 
@@ -160,13 +160,13 @@ class ClinicalMasterController extends Controller
             ->withQueryString();
 
         return Inertia::render('lab/clinical-master/test-groups', [
-            'testGroups' => collect($testGroups->items())->map(fn(TestGroup $g): array => [
+            'testGroups' => collect($testGroups->items())->map(fn (TestGroup $g): array => [
                 'id' => $g->id,
                 'name' => $g->name,
                 'is_system' => $g->is_system,
                 'is_active' => $g->is_active,
                 'created_at' => $g->created_at?->format('M d, Y'),
-                'can_edit' => !$g->is_system || $request->user()->hasRole('admin'),
+                'can_edit' => ! $g->is_system || $request->user()->hasRole('admin'),
             ])->all(),
             'pagination' => [
                 'current_page' => $testGroups->currentPage(),
@@ -207,11 +207,11 @@ class ClinicalMasterController extends Controller
         $labId = (int) $request->attributes->get('lab_id');
         $isAdmin = $request->user()->hasRole('admin') || $request->user()->hasRole('super_admin');
 
-        if ($testGroup->is_system && !$isAdmin) {
+        if ($testGroup->is_system && ! $isAdmin) {
             abort(403, 'You cannot modify system test groups.');
         }
 
-        if (!$testGroup->is_system && $testGroup->lab_id !== $labId && !$isAdmin) {
+        if (! $testGroup->is_system && $testGroup->lab_id !== $labId && ! $isAdmin) {
             abort(403);
         }
 
@@ -230,11 +230,11 @@ class ClinicalMasterController extends Controller
         $labId = (int) $request->attributes->get('lab_id');
         $isAdmin = $request->user()->hasRole('admin') || $request->user()->hasRole('super_admin');
 
-        if ($testGroup->is_system && !$isAdmin) {
+        if ($testGroup->is_system && ! $isAdmin) {
             abort(403, 'You cannot delete system test groups.');
         }
 
-        if (!$testGroup->is_system && $testGroup->lab_id !== $labId && !$isAdmin) {
+        if (! $testGroup->is_system && $testGroup->lab_id !== $labId && ! $isAdmin) {
             abort(403);
         }
 
@@ -279,7 +279,7 @@ class ClinicalMasterController extends Controller
             ->get(['id', 'name', 'price']);
 
         return Inertia::render('lab/clinical-master/packages', [
-            'packages' => collect($packages->items())->map(fn(TestPackage $p): array => [
+            'packages' => collect($packages->items())->map(fn (TestPackage $p): array => [
                 'id' => $p->id,
                 'name' => $p->name,
                 'code' => $p->code,
@@ -288,7 +288,7 @@ class ClinicalMasterController extends Controller
                 'is_active' => $p->is_active,
                 'test_ids' => $p->tests->pluck('id')->all(),
                 'test_names' => $p->tests->pluck('name')->all(),
-                'can_edit' => !$p->is_system || $request->user()->hasRole('admin'),
+                'can_edit' => ! $p->is_system || $request->user()->hasRole('admin'),
             ])->all(),
             'availableTests' => $availableTests,
             'pagination' => [
@@ -340,11 +340,11 @@ class ClinicalMasterController extends Controller
         $labId = (int) $request->attributes->get('lab_id');
         $isAdmin = $request->user()->hasRole('admin') || $request->user()->hasRole('super_admin');
 
-        if ($package->is_system && !$isAdmin) {
+        if ($package->is_system && ! $isAdmin) {
             abort(403, 'You cannot modify system packages.');
         }
 
-        if (!$package->is_system && $package->lab_id !== $labId && !$isAdmin) {
+        if (! $package->is_system && $package->lab_id !== $labId && ! $isAdmin) {
             abort(403);
         }
 
@@ -372,11 +372,11 @@ class ClinicalMasterController extends Controller
         $labId = (int) $request->attributes->get('lab_id');
         $isAdmin = $request->user()->hasRole('admin') || $request->user()->hasRole('super_admin');
 
-        if ($package->is_system && !$isAdmin) {
+        if ($package->is_system && ! $isAdmin) {
             abort(403, 'You cannot delete system packages.');
         }
 
-        if (!$package->is_system && $package->lab_id !== $labId && !$isAdmin) {
+        if (! $package->is_system && $package->lab_id !== $labId && ! $isAdmin) {
             abort(403);
         }
 

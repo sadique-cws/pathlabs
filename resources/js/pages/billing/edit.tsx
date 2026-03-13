@@ -35,6 +35,7 @@ type BillEditData = {
 
 type Props = {
     bill: BillEditData;
+    routePrefix?: string;
 };
 
 /* ─── Reusable tiny form-field label ─── */
@@ -50,10 +51,10 @@ function FieldLabel({ children, htmlFor, required }: { children: React.ReactNode
 const inputClasses =
     'h-9 w-full  border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#147da2] focus:ring-1 focus:ring-[#147da2]/20';
 
-export default function EditBill({ bill }: Props) {
+export default function EditBill({ bill, routePrefix = 'lab' }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Manage Patient Bills', href: '/lab/billing/manage' },
-        { title: `Edit ${bill.bill_number}`, href: `/lab/billing/${bill.id}/edit` },
+        { title: 'Manage Patient Bills', href: `/${routePrefix}/billing/manage` },
+        { title: `Edit ${bill.bill_number}`, href: `/${routePrefix}/billing/${bill.id}/edit` },
     ];
 
     const form = useForm({
@@ -92,7 +93,7 @@ export default function EditBill({ bill }: Props) {
                 <form
                     onSubmit={(event) => {
                         event.preventDefault();
-                        form.put(`/lab/billing/${bill.id}`);
+                        form.put(`/${routePrefix}/billing/${bill.id}`);
                     }}
                     className="space-y-12"
                 >

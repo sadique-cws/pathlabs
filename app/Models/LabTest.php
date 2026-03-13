@@ -25,6 +25,7 @@ class LabTest extends Model
         'sample_type',
         'department',
         'price',
+        'b2b_price',
         'referral_commission_value',
         'referral_commission_type',
         'collection_center_commission_value',
@@ -40,6 +41,7 @@ class LabTest extends Model
     {
         return [
             'price' => 'decimal:2',
+            'b2b_price' => 'decimal:2',
             'referral_commission_value' => 'decimal:2',
             'collection_center_commission_value' => 'decimal:2',
             'is_active' => 'boolean',
@@ -63,7 +65,7 @@ class LabTest extends Model
         return $this->hasMany(TestParameter::class, 'test_id');
     }
 
-    public function testGroup(): BelongsTo
+    public function test_group(): BelongsTo
     {
         return $this->belongsTo(TestGroup::class, 'test_group_id');
     }

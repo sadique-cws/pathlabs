@@ -19,18 +19,18 @@ type PatientRow = {
 
 type Props = {
     patients: PatientRow[];
+    routePrefix?: string;
 };
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Manage Patients',
-        href: '/lab/patients/manage',
-    },
-];
 
 const pageSizeOptions = [10, 20, 50];
 
-export default function ManagePatients({ patients }: Props) {
+export default function ManagePatients({ patients, routePrefix = 'lab' }: Props) {
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Manage Patients',
+            href: `/${routePrefix}/patients/manage`,
+        },
+    ];
     const [search, setSearch] = useState('');
     const [pageSize, setPageSize] = useState(10);
     const [page, setPage] = useState(1);
@@ -81,7 +81,7 @@ export default function ManagePatients({ patients }: Props) {
                             />
                         </label>
 
-                        <Link href="/lab/patients/add" className="inline-flex items-center justify-center  bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385] w-full sm:w-auto">
+                        <Link href={`/${routePrefix}/patients/add`} className="inline-flex items-center justify-center  bg-[#147da2] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#106385] w-full sm:w-auto">
                             + Add Patient
                         </Link>
                     </div>
@@ -117,7 +117,7 @@ export default function ManagePatients({ patients }: Props) {
                                         <td className="px-3 py-3">
                                             <div className="flex items-center gap-2">
                                                 <button type="button" className="p-1 text-slate-400 hover:bg-slate-100"><Eye className="h-4 w-4" /></button>
-                                                <Link href={`/lab/patients/${patient.id}/edit`} className="p-1 text-slate-400 hover:bg-slate-100"><Pencil className="h-4 w-4" /></Link>
+                                                <Link href={`/${routePrefix}/patients/${patient.id}/edit`} className="p-1 text-slate-400 hover:bg-slate-100"><Pencil className="h-4 w-4" /></Link>
                                             </div>
                                         </td>
                                     </tr>

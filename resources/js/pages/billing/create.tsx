@@ -58,6 +58,9 @@ type Props = {
     serviceChargeMasters: ServiceMaster[];
     generatedBillId?: number | null;
     serviceCharge: number;
+    routePrefix?: string;
+    panelTitle?: string;
+    lockedCollectionCenterId?: number | null;
     subscription: {
         plan_name: string;
         plan_type: 'pay_as_you_go' | 'subscription';
@@ -67,8 +70,6 @@ type Props = {
         ends_at: string | null;
     } | null;
 };
-
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'New Billing', href: '/lab/billing/create' }];
 
 /* ─── Reusable tiny form-field label ─── */
 function FieldLabel({ children, htmlFor, required }: { children: React.ReactNode; htmlFor?: string; required?: boolean }) {
@@ -195,6 +196,9 @@ export default function BillingCreate({
     serviceChargeMasters,
     generatedBillId,
     serviceCharge,
+    routePrefix = 'lab',
+    panelTitle = 'New Billing',
+    lockedCollectionCenterId = null,
     subscription,
 }: Props) {
     const { wallet } = usePage<any>().props;
@@ -270,10 +274,17 @@ export default function BillingCreate({
     });
 
     const completeForm = useForm({ bill_id: generatedBillId ?? 0 });
+    const breadcrumbs: BreadcrumbItem[] = [{ title: panelTitle, href: `/${routePrefix}/billing/create` }];
 
     useEffect(() => {
         completeForm.setData('bill_id', generatedBillId ?? 0);
     }, [generatedBillId]);
+
+    useEffect(() => {
+        if (lockedCollectionCenterId !== null && lockedCollectionCenterId > 0) {
+            form.setData('collection_center_id', String(lockedCollectionCenterId));
+        }
+    }, [form, lockedCollectionCenterId]);
 
     useEffect(() => {
         if (dobYear === '' || dobMonth === '' || dobDay === '') {
@@ -326,9 +337,9 @@ export default function BillingCreate({
         ...doctors.map((d) => ({ value: String(d.id), label: d.name })),
     ], [doctors]);
     const collectionCenterOptions: SearchableSelectOption[] = useMemo(() => [
-        { value: '', label: 'Select center' },
+        ...(lockedCollectionCenterId !== null ? [] : [{ value: '', label: 'Select center' }]),
         ...collectionCenters.map((c) => ({ value: String(c.id), label: c.name })),
-    ], [collectionCenters]);
+    ], [collectionCenters, lockedCollectionCenterId]);
     const serviceChargeOptions: SearchableSelectOption[] = useMemo(() => [
         { value: '', label: 'Select service charge' },
         ...serviceChargeMasters.map((s) => ({ value: String(s.id), label: `${s.name} (₹${s.amount})` })),
@@ -529,16 +540,16 @@ export default function BillingCreate({
 
     function generateBarcode(event: React.FormEvent<HTMLFormElement>): void {
         event.preventDefault();
-        form.post('/lab/billing/generate-barcode');
+        form.post(`/${routePrefix}/billing/generate-barcode`);
     }
 
     function completeBilling(): void {
-        completeForm.post('/lab/billing/complete');
+        completeForm.post(`/${routePrefix}/billing/complete`);
     }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create Bill" />
+            <Head title={panelTitle} />
 
             <div className="min-h-full bg-slate-50/80 p-0">
                 {flash?.success && (

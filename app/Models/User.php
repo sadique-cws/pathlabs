@@ -22,6 +22,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'lab_id',
+        'collection_center_id',
         'name',
         'email',
         'password',
@@ -60,6 +61,11 @@ class User extends Authenticatable
     public function lab(): BelongsTo
     {
         return $this->belongsTo(Lab::class);
+    }
+
+    public function collectionCenter(): BelongsTo
+    {
+        return $this->belongsTo(CollectionCenter::class);
     }
 
     public function roles(): BelongsToMany

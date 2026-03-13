@@ -4,10 +4,10 @@ import type { BreadcrumbItem } from '@/types';
 
 const discountPackages = ['No Offer', 'Silver Package', 'Gold Package', 'Corporate Plan'];
 
-export default function AddPatient() {
+export default function AddPatient({ routePrefix = 'lab' }: { routePrefix?: string }) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Manage Patients', href: '/lab/patients/manage' },
-        { title: 'Add Patient', href: '/lab/patients/add' },
+        { title: 'Manage Patients', href: `/${routePrefix}/patients/manage` },
+        { title: 'Add Patient', href: `/${routePrefix}/patients/add` },
     ];
 
     const form = useForm({
@@ -36,7 +36,7 @@ export default function AddPatient() {
                         className="grid gap-6 p-6 lg:grid-cols-2"
                         onSubmit={(event) => {
                             event.preventDefault();
-                            form.post('/lab/patients');
+                            form.post(`/${routePrefix}/patients`);
                         }}
                     >
                         <div className="space-y-4">
